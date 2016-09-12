@@ -1,0 +1,41 @@
+\documentclass[12pt]{article}
+ 
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{framed}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+ 
+\newenvironment{theorem}[2][Theorem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{lemma}[2][Lemma]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{exercise}[2][Exercise]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{problem}[2][Problem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{question}[2][Question]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{corollary}[2][Corollary]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+ 
+\begin{document}
+ 
+\title{Lab 1: C System Programming Review}
+\author{ 
+CS536 \\ Duc Viet Le}
+\maketitle
+\begin{problem}{1}\
+	\begin{enumerate} 
+		\item What happens if the return value of \texttt{execlp()} is not checked and you give an invalid command, say, \texttt{lssss}, as input to the shell?\\ 
+		\textbf{Ans.} if \texttt{execlp()} is not checked,  if an invalid command is passed to the shell, the child process will not be terminated, and the code will create a new child process to handle next user input.
+		\item What happens if the parent process does not perform \texttt{waitpid()} and immediately returns to the beginning of the \texttt{while-loop}? \\ 
+		\textbf{Ans.} It doesn't wait for the child process to change state.
+		\item 
+		\item 
+	\end{enumerate}
+\end{problem}
+\end{document}
