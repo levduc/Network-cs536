@@ -44,6 +44,7 @@ uint64_t checksum(unsigned char *ptr)
 	{
 		//fail to open		
 	}
+	close(file1);
 	return csum;
 }
 
