@@ -39,12 +39,6 @@ int main(void)
 		len = strlen(clientBuf);
 		clientBuf[len-1] = '\0';
 		char * IDRequest = concatString(clientRequest,clientBuf);
-		//create client FIFO cmdfifo request
-		
-		if (mkfifo(cmdfifo,0666) == -1){
-			fprintf(stderr, "Couldn’t create %s FIFO.\n", cmdfifo);
-        	exit(1);
-		}
 
 		clientFd = open(cmdfifo, O_WRONLY, 0666);
 		write(clientFd, IDRequest, strlen(IDRequest));
@@ -73,7 +67,7 @@ int main(void)
 		    close(serverFd);
 			//unlink fifo after server responed
 			unlink(cfifopid);
-			exit(1);
+			//exit(1);
 		}
 		else{
 		    fprintf(stderr, "Error openning to FIFO %s !", cfifopid);

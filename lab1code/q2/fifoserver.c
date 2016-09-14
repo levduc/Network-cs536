@@ -24,6 +24,11 @@ int main()
 	const char s[2] = "$";
 	int status;
 	while(1){
+		//create client FIFO cmdfifo request
+		if (mkfifo(cmdfifo,0666) == -1){
+			fprintf(stderr, "Couldn’t create %s FIFO.\n", cmdfifo);
+        	exit(1);
+		}
 		//open client request
 		clientRequestFD = open(cmdfifo, O_RDONLY,0666);
 		// there is a client request
@@ -33,7 +38,6 @@ int main()
 			//read client request
 		    read(clientRequestFD, buf, CLIENT_MAX_BUF);
 		    close(clientRequestFD);
-		    unlink(cmdfifo);
 		    //delimiter
 		    //get the first token
 		    char *token;
@@ -53,7 +57,7 @@ int main()
 		    memset(buf,0, CLIENT_MAX_BUF);
 		    //open client cfifoPID
 			sprintf(cfifopid,"cfifo%s", pid);
-			printf("%s\n", cfifopid);
+			// printf("%s\n", cfifopid);
 			//try open with write permission
 			int count = 0;
 			while(count <10)
@@ -61,9 +65,13 @@ int main()
 				serverFDPID = open(cfifopid, O_RDWR, 0666);
 				if(serverFDPID >= 0) //success
 				{
-				    count = 11; 
+				    count = 11; //escape while loop
 				    //fork a child request
 				    k = fork(); 
+					if(k < 0){
+						// fork failed
+        				printf("fork() failed!\n");
+					}
 					if (k==0) //return 0 when called in the child process
 					{ 
 				  		// child code
@@ -77,13 +85,15 @@ int main()
 						}
 				    	close(serverFDPID);   
 					}
-				  	else 
+				  	if(k>0) 
 				  	{	
 						// parent code 
 					    //terminate child process
 				    	close(serverFDPID);
-				     	if(waitpid(k, &status, WNOHANG) != 0) {
-				     		//
+				     	w = waitpid(k, &status, WNOHANG);
+				     	if(w == -1) {
+				     		//fail
+				     		printf("wait fails\n");
 						} 
 						else {
 						 
@@ -96,11 +106,11 @@ int main()
 				}
 				count++;
 			}
-
 		    memset(pid,0, CLIENT_MAX_BUF);
 		    memset(command,0, CLIENT_MAX_BUF);
 		    memset(cfifopid,0, CLIENT_MAX_BUF);
 		}
 	}
+	unlink(cmdfifo);
     return 0;
 }
