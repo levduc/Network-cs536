@@ -6,51 +6,93 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
-#include <stdlib.h>
 
 #define CLIENT_MAX_BUF 150
 
 
 int main()
 {
-    int clientRequestDF;
-    char * cmdfifo = "cmdfifo";
+    int clientRequestFD;
+    int serverFDPID;
+    char cmdfifo[50] = "cmdfifo";
+    pid_t k;
     /* open, read, and display the message from the FIFO */
     char buf[CLIENT_MAX_BUF];
-	char pid[31];
-	char command[31];
+	char pid[CLIENT_MAX_BUF+1];
+	char command[CLIENT_MAX_BUF+1];
+    char cfifopid[CLIENT_MAX_BUF];
+	const char s[2] = "$";
+	int status;
 	while(1){
-		clientRequestDF = open(cmdfifo, O_RDONLY);
-		if(clientRequestDF > 0) // there is request
+		//open client request
+		clientRequestFD = open(cmdfifo, O_RDONLY,0666);
+		// there is a client request
+		if(clientRequestFD >= 0) 
 		{
-		    read(clientRequestDF, buf, CLIENT_MAX_BUF);
-		    int lens = strlen(buf);
-		    printf("%d\n", lens);		    
+			//read client request
+		    read(clientRequestFD, buf, CLIENT_MAX_BUF);
+		    close(clientRequestFD);
+		    unlink(cmdfifo);
+		    int lens = strlen(buf);		    
 		    //delimiter
-		    const char s[2] = "$";
 		    //get the first token
 		    char *token;
 		    token = strtok(buf, s); 
-			strncpy(pid, token, 30);
-			pid[30] = '\0';
+			//get client id
+			strncpy(pid, token, CLIENT_MAX_BUF);
+			pid[CLIENT_MAX_BUF] = '\0';
 		    token = strtok(NULL, s);
-			strncpy(command, token, 30);
-			pid[30] = '\0';
+			strncpy(command, token, CLIENT_MAX_BUF);
+			command[CLIENT_MAX_BUF] = '\0';
 			while(token != NULL)
 			{
 				token = strtok(NULL, s);
 			}
-		    printf("Received From: %s\n", buf);
-		    printf("Received From: %s\n", pid);
-		    printf("Received From: %s\n", command);
-		    close(clientRequestDF);
+		    printf("Received Request From: %s\n", pid);
+			//clear buffer
 		    memset(buf,0, CLIENT_MAX_BUF);
+		    //open client cfifoPID
+			sprintf(cfifopid,"cfifo%s", pid);
+			printf("%s\n", cfifopid);
+			//try open with write permission
+			serverFDPID = open(cfifopid, O_RDWR, 0666);
+			if(serverFDPID >= 0) //success
+			{
+			    //fork a child request
+			    k = fork(); 
+				if (k==0) //return 0 when called in the child process
+				{ 
+			  		// child code
+			  		// use dup2 stdout to file
+					dup2(serverFDPID, 1); //stdout
+					dup2(serverFDPID, 2); //stderr for error message of execl
+				    if(execlp(command,command,NULL) == -1)	// if execution failed, terminate child
+					{
+						perror("execlp");
+					   	exit(1);
+					}
+			    	close(serverFDPID);   
+				}
+			  	else 
+			  	{	
+					// parent code 
+				    //terminate child process
+			    	close(serverFDPID);
+			     	if(waitpid(k, &status, 1) != 0) {
+
+					} 
+					else {
+					 
+					}
+			  	}
+			    printf("Server Responded To: %s\n", pid);
+			} else {
+				printf("fail to open\n");
+			}
+
 		    memset(pid,0, CLIENT_MAX_BUF);
 		    memset(command,0, CLIENT_MAX_BUF);
 		}
-		else{
-			continue;
-		}
 	}
-    //return 0;
+    return 0;
 }
