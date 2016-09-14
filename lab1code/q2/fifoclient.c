@@ -62,17 +62,22 @@ int main(void)
 		}
 
 		serverFd = open(cfifopid, O_RDWR, 0666);
-		if(serverFd > 0)
+		if(serverFd >= 0)
 		{
+			//clear weird character
+	    	memset(serverBuf,0, CLIENT_MAX_BUF);
+	    	//read
 		    read(serverFd, serverBuf, MAX_BUF);
 			printf("Server Responded: \n"); 
 		    fprintf(stdout, "%s", serverBuf);
 		    close(serverFd);
 			//unlink fifo after server responed
 			unlink(cfifopid);
+			exit(1);
 		}
 		else{
-		    printf("Fail to open fifo\n");
+		    fprintf(stderr, "Error openning to FIFO %s !", cfifopid);
+		    exit(1); 
 			//fail
 		}
 		//unlink fifo
