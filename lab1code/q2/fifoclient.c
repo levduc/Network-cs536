@@ -1,45 +1,41 @@
 // simple shell example using fork() and execlp()
-
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/wait.h>
+#include <stdlib.h>
+
+char* concatenation(char *s1, char *s2)
+{
+    char *result = malloc(strlen(s1)+strlen(s2)+1);//+1 for the zero-terminator
+    //in real code you would check for errors in malloc here
+    strcpy(result, s1);
+    strcat(result, s2);
+    return result;
+}
 
 int main(void)
 {
-pid_t k;
-char buf[100];
-int status;
-int len;
-  while(1) {
-
-	// print prompt
-  	// print the process ID of the calling process
-	fprintf(stdout,"[%d]$ ",getpid());
-
-	// read command from stdin
-	fgets(buf, 100, stdin);
-	len = strlen(buf);
-	if(len == 1) 				// only return key pressed
-	  continue;
-	buf[len-1] = '\0';
-	//create a new separate process
-  	k = fork();
-	if (k==0) { //return 0 when called in the child process
-  	// child code
-	    if(execlp(buf,buf,NULL) == -1)	// if execution failed, terminate child
-		{
-			perror("execlp");
-		   	exit(1);
-		}   
-		// fprintf(stdout,"hello");
+	pid_t k;
+	int serverFd, clientFd;
+	char * cmdfifo = "cmdfifo";
+	//get client pid
+	//get client command
+	int status;
+	int len;
+	char clientRequest[100];
+	char clientBuf[100];
+	while(1){
+		fprintf(stdout,"[%d]$ ",getpid());
+		sprintf(clientRequest,"$%d$", getpid());
+		fgets(clientBuf, 100, stdin);
+		len = strlen(clientBuf);
+		clientBuf[len-1] = '\0';
+		char * IDRequest = concatenation(clientRequest,clientBuf);
+		fprintf(stderr, "%s\n", IDRequest);
+		clientFd = open(cmdfifo, IDRequest, sizeof(IDRequest));
+		free(IDRequest);
+		unlink(fifo);
 	}
-  	else {	
-	// parent code 
-	    // fprintf(stdout, "[%d]",k);
-	    //terminate child process
-     	waitpid(k, &status, 0);
-  	}
-  }
 }

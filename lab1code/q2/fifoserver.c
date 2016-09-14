@@ -1,45 +1,24 @@
-// simple shell example using fork() and execlp()
-
+#include <fcntl.h>
 #include <stdio.h>
+#include <sys/stat.h>
 #include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/wait.h>
 
-int main(void)
+#define MAX_BUF 1024
+
+int main()
 {
-pid_t k;
-char buf[100];
-int status;
-int len;
-  while(1) {
-
-	// print prompt
-  	// print the process ID of the calling process
-	fprintf(stdout,"[%d]$ ",getpid());
-
-	// read command from stdin
-	fgets(buf, 100, stdin);
-	len = strlen(buf);
-	if(len == 1) 				// only return key pressed
-	  continue;
-	buf[len-1] = '\0';
-	//create a new separate process
-  	k = fork();
-	if (k==0) { //return 0 when called in the child process
-  	// child code
-	    if(execlp(buf,buf,NULL) == -1)	// if execution failed, terminate child
-		{
-			perror("execlp");
-		   	exit(1);
-		}   
-		// fprintf(stdout,"hello");
+    int fd;
+    char * cmdfifo = "cmdfifo";
+    char buf[MAX_BUF];
+    /* open, read, and display the message from the FIFO */
+	while(1){
+		fd = open(cmdfifo, O_RDONLY);
+		if(fd >= 0)
+			read(fd, buf, MAX_BUF);
+			printf("Received: %s\n", buf);
+			close(fd);
+		else
+			continue;
 	}
-  	else {	
-	// parent code 
-	    // fprintf(stdout, "[%d]",k);
-	    //terminate child process
-     	waitpid(k, &status, 0);
-  	}
-  }
+    //return 0;
 }
