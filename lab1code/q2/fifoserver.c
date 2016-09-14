@@ -14,9 +14,11 @@ int main()
 	while(1){
 		fd = open(cmdfifo, O_RDONLY);
 		if(fd >= 0)
+		{
 			read(fd, buf, MAX_BUF);
 			printf("Received: %s\n", buf);
 			close(fd);
+		}
 		else
 			continue;
 	}

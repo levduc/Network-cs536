@@ -27,6 +27,7 @@ int main(void)
 	char clientRequest[100];
 	char clientBuf[100];
 	while(1){
+		mkfifo(myfifo,0666);
 		fprintf(stdout,"[%d]$ ",getpid());
 		sprintf(clientRequest,"$%d$", getpid());
 		fgets(clientBuf, 100, stdin);
