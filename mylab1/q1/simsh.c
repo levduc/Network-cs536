@@ -17,7 +17,6 @@ int len;
 	// print prompt
   	// print the process ID of the calling process
 	fprintf(stdout,"[%d]$ ",getpid());
-
 	// read command from stdin
 	fgets(buf, 100, stdin);
 	len = strlen(buf);
@@ -33,12 +32,10 @@ int len;
 			perror("execlp");
 		   	exit(1);
 		}   
-		// fprintf(stdout,"hello");
 	}
   	else {	
 	// parent code 
-	    // fprintf(stdout, "[%d]",k);
-	    //terminate child process
+	// terminate child process
      	waitpid(k, &status, 0);
   	}
   }

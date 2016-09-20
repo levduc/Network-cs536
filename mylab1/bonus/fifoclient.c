@@ -40,7 +40,7 @@ int main(void)
 		clientBuf[len-1] = '\0';
 		char * IDRequest = concatString(clientRequest,clientBuf);
 
-		clientFd = open(cmdfifo, O_WRONLY, 0666);
+		clientFd = open(cmdfifo, O_RDWR, 0666);
 		write(clientFd, IDRequest, strlen(IDRequest));
 		fprintf(stdout,"[%s] is sent to server \n", IDRequest);
 		printf("============================\n");
@@ -63,11 +63,11 @@ int main(void)
 	    	//read
 		    read(serverFd, serverBuf, MAX_BUF);
 			printf("Server Responded: \n"); 
-		    fprintf(stdout, "%s", serverBuf);
+		    fprintf(stdout, "%s \n", serverBuf);
 		    close(serverFd);
 			//unlink fifo after server responed
 			unlink(cfifopid);
-			//exit(1);
+			exit(1);
 		}
 		else{
 		    fprintf(stderr, "Error openning to FIFO %s !", cfifopid);
