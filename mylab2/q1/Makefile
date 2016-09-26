@@ -1,9 +1,9 @@
 CC=gcc
-CFLAGS = -c#-Wall
+CFLAGS = -o#-Wall
 
 all:
-	$(CC) $(CFLAGS) -o sclient client.c
-	$(CC) $(CFLAGS) -o sserver server.c
+	$(CC) $(CFLAGS) sclient tcpclient.c
+	$(CC) $(CFLAGS) sserver tcpserver.c
 clean:
 	rm sclient
 	rm sserver
