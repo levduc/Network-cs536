@@ -2,12 +2,8 @@ CC=gcc
 CFLAGS = -c#-Wall
 
 all:
-	$(CC) $(CFLAGS) -o fclient fifoclient.c
-	$(CC) $(CFLAGS) -o fserver fifoserver.c
+	$(CC) $(CFLAGS) -o sclient client.c
+	$(CC) $(CFLAGS) -o sserver server.c
 clean:
-	rm fclient
-	rm fserver
-
-
-
-
+	rm sclient
+	rm sserver
