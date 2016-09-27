@@ -151,8 +151,8 @@ int main(int argc, char *argv[])
     	//Received
     	gettimeofday(&end, NULL);
     	printf("Server Response: %s\n", serverBuf);
-    	fprintf(stdout,"Time Elapsed: %f seconds\n", (end.tv_sec - start.tv_sec) + 
-              ((end.tv_usec - start.tv_usec)/1000000.0));
+    	fprintf(stdout,"Time Elapsed: %f ms\n", (end.tv_sec - start.tv_sec)*1000 + 
+              ((end.tv_usec - start.tv_usec)/1000.0));
     	fprintf(stdout,"Server's Port Number: %d\n", ntohs(ssin.sin_port));
     	//convert ip to string
     	char str[INET_ADDRSTRLEN];

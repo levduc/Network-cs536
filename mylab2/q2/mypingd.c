@@ -73,6 +73,7 @@ int main(int argc, char *argv[])
    	}
    	// listen(s, 10);
 	printf("Start listening ... \n");
+	int count = 0;
 	while(1) //listening
 	{
 		//clear buffer
@@ -84,7 +85,14 @@ int main(int argc, char *argv[])
 			// exit(1);
 			//continue;
 		}
-    	buf[numBytesRcvd] = '\0';		
+    	buf[numBytesRcvd] = '\0';
+    	//
+    	count++;
+    	if(count%4 == 0)
+    	{
+    		printf("Ignore this request\n");
+    		continue;
+    	}		
 		// there is a client request
 	    //get the first token
 	    char *token;
@@ -123,9 +131,8 @@ int main(int argc, char *argv[])
 	    	if (sendto(s,payload,strlen(payload),0, (struct sockaddr*)&csin, sizeof(csin)) < 0){
 				printf("Fail to send\n");
 			}
-			// free(payload);
-			printf("%lu\n", strlen(command));
-			printf("%lu\n", strlen(c_secret_key));
+			// printf("%lu\n", strlen(command));
+			// printf("%lu\n", strlen(c_secret_key));
 		   	// exit(1);
 		}
 	    memset(c_secret_key,0, CLIENT_MAX_BUF);
