@@ -85,8 +85,33 @@ If a  law  mandated  that  AM  radio  become  digital  by  transmitting compress
 Finally, about the audio quality, I think it will increase the audio quality the reason is that digital signal can be recovered after each hop if there is corrupted while analog signal need to reamplified many times. Therefore, I think digital signal is better than analog signal and will improve audio quality.\\\\
 \Large{\textbf{Programming Part}}
 \normalsize
-\begin{problem}{Bonus}
-	
+\begin{problem}{1}
 \end{problem}
+I think interleaving will not be problem in this case because now each processes handle each client's request on serperate tcp socket directly.   
+\begin{problem}{Bonus}
+\end{problem}
+\textbf{Using OS X} \\
+I tried to run client code on iMac (OS X El Capital) in Hick Undergraduate library. However, the client code does not work using \texttt{SendTo()} function. I changed it to \texttt{Write()} to write to socket, it works on IMac Machine (It doesn't work the same on linux machine). Here are 4 ping results received using IMac:
+\begin{verbatim}
+	Request Sent ...
+	Server Response: terve
+	Time Elapsed: 1.580000 ms
+	Server's Port: 10000
+	Server's IP Address: 125.10.25.101
+	Request Sent ...
+	Server Response: terve
+	Time Elapsed: 1.314000 ms
+	Server's Port: 10000
+	Server's IP Address: 125.10.25.101
+	Request Sent ...
+	Server Response: terve
+	Time Elapsed: 1.803000 ms
+	Server's Port: 10000
+	Server's IP Address: 125.10.25.101
+	Server Response: terve
+	Time Elapsed: 1.203000 ms
+	Server's Port: 10000
+	Server's IP Address: 125.10.25.101
+\end{verbatim}
 
 \end{document}
