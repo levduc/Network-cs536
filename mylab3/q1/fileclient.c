@@ -34,7 +34,6 @@ int main(int argc, char *argv[])
 	char clientRequest[CLIENT_MAX_BUF];
 	int s;
 	int len;
-	// char *host; 
 	// struct hostent *hp;
 	struct sockaddr_in sin;
 	/*Client secret key*/ 
@@ -183,7 +182,6 @@ int main(int argc, char *argv[])
     	fprintf(stdout,"Time Elapsed: %f ms\n", (end.tv_sec - start.tv_sec)*1000 + 
               									((end.tv_usec - start.tv_usec)/1000.0));
     	float t = (end.tv_sec - start.tv_sec)*1000 + ((end.tv_usec - start.tv_usec)/1000.0);
-
     	printf("Reliable Throughput: %f bps\n", total*8*1000/t);
     	// serverBuf[numBytesRcvd] = '\0';
     	exit(0);

@@ -158,7 +158,6 @@ int main(int argc, char *argv[])
 		    if(strcmp(s_secret_key, c_secret_key) != 0) 
 		    {
 				printf("Keys don't match\n");
-				dup2(new_s, 1);
 				printf("Cannot open file. File may not exist.");		    	
 				close(new_s);
 		    	exit(1);
@@ -167,7 +166,6 @@ int main(int argc, char *argv[])
 		    if ((fd = open(fileAddress,O_RDWR)) <= 0)
 		    {
 	  			//Use dup2 stdout to file
-				dup2(new_s, 1);
 				printf("Cannot open file. File may not exist.");
 				close(new_s);
 				exit(1);		    	

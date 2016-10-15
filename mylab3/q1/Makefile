@@ -6,5 +6,5 @@ all:
 clean:
 	rm fclient 
 	rm fserver
-	rm *.text
 	rm *.mp3
+	rm *.text
