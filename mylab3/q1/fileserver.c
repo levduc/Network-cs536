@@ -62,7 +62,9 @@ int main(int argc, char *argv[])
     	printf("Fail to open file\n");
     	exit(1);
     }
+
     char bsize[MAX_BUF];
+    memset(bsize, 0, MAX_BUF);
     if(read(fdat, bsize, MAX_BUF) < 0 )
     {
     	printf("Cannot read file\n");
@@ -70,7 +72,7 @@ int main(int argc, char *argv[])
     bsize[MAX_BUF-1] = '\0';
     close(fdat);
     //Convert to int
-    blockSize = strtol(bsize, NULL,10);
+    blockSize = strtol(bsize,NULL,10);
     printf("BlockSize: %d\n", blockSize);
 
     /*Server Port*/
@@ -158,6 +160,7 @@ int main(int argc, char *argv[])
 				printf("Keys don't match\n");
 				dup2(new_s, 1);
 				printf("Cannot open file. File may not exist.");		    	
+				close(new_s);
 		    	exit(1);
 		    }
 		    /*Key Match. Try open file*/
@@ -166,16 +169,21 @@ int main(int argc, char *argv[])
 	  			//Use dup2 stdout to file
 				dup2(new_s, 1);
 				printf("Cannot open file. File may not exist.");
+				close(new_s);
 				exit(1);		    	
 		    }
 
 		    /*start writing*/
 		    unsigned char writeBuf[blockSize];
-		 	while(read(fd, writeBuf, blockSize) > 0)
+		 	int i = 0;
+	    	memset(writeBuf, 0, blockSize);
+		 	while((i = read(fd, writeBuf, blockSize)) > 0)
 		 	{
-		 		write(new_s, writeBuf, blockSize);
+		 		write(new_s, writeBuf, i);
 	    		memset(writeBuf,0, blockSize);
+		 		// printf("%d\n", i);
 		 	}
+		 	
 			//close connection
 		    close(fd);
 			close(new_s);

@@ -1,15 +1,17 @@
-#include <fcntl.h>
+#include <arpa/inet.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <sys/socket.h>
+#include <sys/time.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <netinet/in.h>
-#include <arpa/inet.h>
-#include <ctype.h>
 
 #define CLIENT_MAX_BUF 1024
 #define MAX_BUF 1024
@@ -32,17 +34,15 @@ int main(int argc, char *argv[])
 	char clientRequest[CLIENT_MAX_BUF];
 	int s;
 	int len;
-	ssize_t numBytesRcvd;
 	// char *host; 
 	// struct hostent *hp;
 	struct sockaddr_in sin;
 	/*Client secret key*/ 
 	char* c_secret_key; 
     /*filename*/
-    char* filename;
+    char* fileName;
 	/*Number of byte for single write*/
 	int blockSize; 
-    char serverBuf[MAX_BUF];
     /*server port*/
 	int serverPort;
 	/*Build address data structure*/
@@ -95,8 +95,8 @@ int main(int argc, char *argv[])
     		exit(1);
     	}
     }
-    filename = argv[4];
-    printf("FileName: %s\n", filename);
+    fileName = argv[4];
+    printf("FileName: %s\n", fileName);
     /*Open Configfile*/
     int fdat; 
     if ((fdat = open(argv[5],O_RDWR)) <= 0)
@@ -105,6 +105,7 @@ int main(int argc, char *argv[])
     	exit(1);
     }
     char bsize[MAX_BUF];
+    memset(bsize, 0, MAX_BUF);
     if(read(fdat, bsize, MAX_BUF) < 0 )
     {
     	printf("Cannot read file\n");
@@ -134,27 +135,60 @@ int main(int argc, char *argv[])
 	       close(s);
 	       exit(1);
 	    } 
-		fprintf(stdout,"$");
 		/*Client Request*/
 	    sprintf(clientRequest,"$%s$", c_secret_key);
 		//Concatenate with filename
-		char * fileRequest = concatString(clientRequest,filename);
+		char * fileRequest = concatString(clientRequest,fileName);
 		write(s,fileRequest,strlen(fileRequest));
 		//free request
 		free(fileRequest);
-		
-		if((numBytesRcvd = read(s, serverBuf, sizeof(serverBuf))) < 0) // recv
+    	unsigned char serverBuf[blockSize];
+	    memset(serverBuf, '\0', blockSize);
+		ssize_t numBytesRcvd;
+		int fd;
+		fd = open(fileName, O_CREAT | O_WRONLY | O_EXCL, S_IRUSR | S_IWUSR);
+		if (fd < 0) {
+		  /* failure */
+		  if (errno == EEXIST) {
+		    printf("File already existed\n");
+		    exit(1);
+		  }
+		} 
+		ssize_t total = 0;
+		//Measure Time
+		struct timeval start, end;
+		int firstRead = 1;
+		while ((numBytesRcvd = read(s, serverBuf, blockSize)) > 0) // recv
     	{
-    		perror("read()failed");
-    		exit(1);
+			//Start
+			if(firstRead == 1) // get time after first read
+			{
+				gettimeofday(&start, NULL);
+				firstRead = 0;
+			}
+    		write(fd,serverBuf,numBytesRcvd);
+	    	memset(serverBuf, '\0', blockSize);
+	    	total += numBytesRcvd;
+    		// printf("%ld\n", numBytesRcvd);
     	}
-    	serverBuf[numBytesRcvd] = '\0';
-    	printf("%s\n", serverBuf);
+    	//Time after the last read. 
+    	//NumbyteRecvd = 0 implies tcp connection is closed.
+    	gettimeofday(&end, NULL);
+    	printf("TCP connection is closed\n");
     	close(s);
+
+    	printf("===================================\n");
+    	printf("\"%s\" is downloaded.\n", fileName);
+    	printf("Number of Bytes: %ld bytes\n", total);
+    	fprintf(stdout,"Time Elapsed: %f ms\n", (end.tv_sec - start.tv_sec)*1000 + 
+              									((end.tv_usec - start.tv_usec)/1000.0));
+    	float t = (end.tv_sec - start.tv_sec)*1000 + ((end.tv_usec - start.tv_usec)/1000.0);
+
+    	printf("Reliable Throughput: %f bps\n", total*8*1000/t);
+    	// serverBuf[numBytesRcvd] = '\0';
     	exit(0);
 	    memset(clientRequest,0, CLIENT_MAX_BUF);
 	    memset(clientBuf,0, CLIENT_MAX_BUF);
-	    memset(serverBuf,0, CLIENT_MAX_BUF);
 	 }
 	return 0;
 }
