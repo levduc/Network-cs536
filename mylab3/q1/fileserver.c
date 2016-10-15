@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
 		 	int i = 0;
 		 	while((i = read(fd, writeBuf, blockSize)) > 0)
 		 	{
-		 		if(write(new_s, writeBuf, i) < 0){
+		 		if(write(new_s, writeBuf, i) == 0){
 		 			printf("TCP connection is closed by client\n");
 		 			close(new_s);
 		 			exit(1);
