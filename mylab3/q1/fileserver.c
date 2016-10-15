@@ -179,6 +179,8 @@ int main(int argc, char *argv[])
 		 	{
 		 		if(write(new_s, writeBuf, i) > 0){
 		 			printf("TCP connection is closed by client\n");
+		 			close(new_s);
+		 			exit(1);
 		 		}
 	    		memset(writeBuf,0, blockSize);
 		 		// printf("%d\n", i);
