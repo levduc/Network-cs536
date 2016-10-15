@@ -79,7 +79,6 @@ int main(int argc, char *argv[])
     	printf("FileName cannot have more than 16 characters\n");
     	exit(1);
     }
-    //
     int i;
     for (i = 0; i < strlen(argv[4]); ++i)
     {
@@ -186,9 +185,8 @@ int main(int argc, char *argv[])
     	printf("===================================\n");
     	printf("\"%s\" is downloaded.\n", fileName);
     	printf("Number of Bytes: %ld bytes\n", total);
-    	fprintf(stdout,"Time Elapsed: %f ms\n", (end.tv_sec - start.tv_sec)*1000 + 
-              									((end.tv_usec - start.tv_usec)/1000.0));
-    	float t = (end.tv_sec - start.tv_sec)*1000 + ((end.tv_usec - start.tv_usec)/1000.0);
+        float t = (end.tv_sec - start.tv_sec)*1000 + ((end.tv_usec - start.tv_usec)/1000.0);
+    	fprintf(stdout,"Time Elapsed: %f ms\n", t);
     	printf("Reliable Throughput: %f bps\n", total*8*1000/t);
     	// serverBuf[numBytesRcvd] = '\0';
     	exit(0);
