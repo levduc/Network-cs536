@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
         //Measure Time
         struct timeval start, end;
         int firstRead = 1;
-        while ((numBytesRcvd = read(s, serverBuf, blockSize)) > 0) // recv
+        while ((numBytesRcvd = read(new_s, serverBuf, blockSize)) > 0) // recv
         {
             //Start
             if(firstRead == 1) // get time after first read
