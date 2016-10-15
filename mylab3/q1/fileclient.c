@@ -141,37 +141,46 @@ int main(int argc, char *argv[])
 		write(s,fileRequest,strlen(fileRequest));
 		//free request
 		free(fileRequest);
-    	unsigned char serverBuf[blockSize];
-	    memset(serverBuf, '\0', blockSize);
-		ssize_t numBytesRcvd;
-		int fd;
-		fd = open(fileName, O_CREAT | O_WRONLY | O_EXCL, S_IRUSR | S_IWUSR);
-		if (fd < 0) {
-		  /* failure */
-		  if (errno == EEXIST) {
-		    printf("File already existed\n");
-		    exit(1);
-		  }
-		} 
-		ssize_t total = 0;
-		//Measure Time
-		struct timeval start, end;
-		int firstRead = 1;
-		while ((numBytesRcvd = read(s, serverBuf, blockSize)) > 0) // recv
-    	{
-			//Start
-			if(firstRead == 1) // get time after first read
-			{
-				gettimeofday(&start, NULL);
-				firstRead = 0;
-			}
-    		write(fd,serverBuf,numBytesRcvd);
-	    	memset(serverBuf, '\0', blockSize);
-	    	total += numBytesRcvd;
-    		// printf("%ld\n", numBytesRcvd);
-    	}
-    	//Time after the last read. 
-    	//NumbyteRecvd = 0 implies tcp connection is closed.
+        unsigned char serverBuf[blockSize];
+        memset(serverBuf, '\0', blockSize);
+        /*Check if tcp is closed*/
+    	//= 0 implies tcp connection is closed.
+        if(read(s, serverBuf, blockSize) == 0)
+        {
+            printf("TCP connection is closed by server.\n");
+            exit(1);
+        }
+        ssize_t numBytesRcvd;
+        int fd;
+        fd = open(fileName, O_CREAT | O_WRONLY | O_EXCL, S_IRUSR | S_IWUSR);
+        if (fd < 0) 
+        {
+          /* failure */
+          if (errno == EEXIST) {
+            printf("File already existed\n");
+            close(s);
+            exit(1);
+          }
+        } 
+        //total bytes
+        ssize_t total = 0;
+        //Measure Time
+        struct timeval start, end;
+        int firstRead = 1;
+        while ((numBytesRcvd = read(s, serverBuf, blockSize)) > 0) // recv
+        {
+            //Start
+            if(firstRead == 1) // get time after first read
+            {
+                gettimeofday(&start, NULL);
+                firstRead = 0;
+            }
+            write(fd,serverBuf,numBytesRcvd);
+            memset(serverBuf, '\0', blockSize);
+            total += numBytesRcvd;
+            // printf("%ld\n", numBytesRcvd);
+        }
+        //Time after the last read. 
     	gettimeofday(&end, NULL);
     	printf("TCP connection is closed\n");
     	close(s);
