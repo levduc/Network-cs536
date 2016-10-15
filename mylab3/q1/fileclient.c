@@ -172,6 +172,11 @@ int main(int argc, char *argv[])
             memset(serverBuf, '\0', blockSize);
             total += numBytesRcvd;
         }
+        if(firstRead == 1) //implies error or tcp closed
+        {
+            printf("TCP connection is closed. File may not exist\n");
+            exit(1);            
+        }
         //Time after the last read. 
         gettimeofday(&end, NULL);
         //numBytes = 0 implies tcp connection closed
