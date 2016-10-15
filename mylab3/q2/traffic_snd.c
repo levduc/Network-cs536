@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
 			usleep(packageSpacing);
 		}
 		//Sending 3 payloads of size 3 bytes to signal end of transmission
-		for (int i = 0; i < 3; i++)
+		for (i = 0; i < 3; i++)
 		{
 			unsigned char a[3] = "123"; //payload of size 3
 			if (sendto(s,a,3,0,(struct sockaddr*)&sin, sizeof(sin)) < 0){
