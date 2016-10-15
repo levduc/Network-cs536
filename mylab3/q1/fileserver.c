@@ -181,12 +181,10 @@ int main(int argc, char *argv[])
 	    		memset(writeBuf,0, blockSize);
 		 		// printf("%d\n", i);
 		 	}
-		 	
 			//close connection
-		    close(fd);
 			close(new_s);
+		    close(fd);
 	    	free(fileAddress);
-	    	// free(fileLocation);
 	    	memset(fileName,0,CLIENT_MAX_BUF);
 	    	memset(c_secret_key,0, CLIENT_MAX_BUF);
     	}
