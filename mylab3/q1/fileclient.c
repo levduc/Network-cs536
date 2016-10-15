@@ -120,7 +120,8 @@ int main(int argc, char *argv[])
   	/* Set all bits of the padding field to 0 */
   	memset(sin.sin_zero, '\0', sizeof sin.sin_zero);
     //half association
-	while(1){
+	ssize_t total;
+    while(1){
 		if((s = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	    {
 	        printf("Failed to create socket \n");
@@ -185,9 +186,9 @@ int main(int argc, char *argv[])
     	printf("===================================\n");
     	printf("\"%s\" is downloaded.\n", fileName);
     	printf("Number of Bytes: %ld bytes\n", total);
-        float t = (end.tv_sec - start.tv_sec)*1000 + ((end.tv_usec - start.tv_usec)/1000.0);
+        float t = (end.tv_sec - start.tv_sec)*1000.0 + (end.tv_usec - start.tv_usec)/1000;
     	fprintf(stdout,"Time Elapsed: %f ms\n", t);
-    	printf("Reliable Throughput: %f bps\n", total*8*1000/t);
+    	printf("Reliable Throughput: %f bps\n", (total*8*1000)/t);
     	// serverBuf[numBytesRcvd] = '\0';
     	exit(0);
 	    memset(clientRequest,0, CLIENT_MAX_BUF);
