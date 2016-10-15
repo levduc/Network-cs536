@@ -120,7 +120,6 @@ int main(int argc, char *argv[])
   	sin.sin_port = htons(serverPort);
   	/* Set all bits of the padding field to 0 */
   	memset(sin.sin_zero, '\0', sizeof sin.sin_zero);
-
     //half association
 	while(1){
 		if((s = socket(AF_INET, SOCK_STREAM, 0)) < 0)
