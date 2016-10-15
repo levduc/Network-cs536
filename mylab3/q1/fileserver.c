@@ -174,15 +174,12 @@ int main(int argc, char *argv[])
 		    unsigned char writeBuf[blockSize];
 		    /*Check if tcp connection is closed by client*/
 	    	memset(writeBuf, 0, blockSize);
-		    if(read(new_s, writeBuf, blockSize) == 0)
-	        {
-	            printf("TCP connection is closed by client.\n");
-	            exit(1);
-	        }
 		 	int i = 0;
 		 	while((i = read(fd, writeBuf, blockSize)) > 0)
 		 	{
-		 		write(new_s, writeBuf, i);
+		 		if(write(new_s, writeBuf, i) > 0){
+		 			printf("TCP connection is closed by client\n");
+		 		}
 	    		memset(writeBuf,0, blockSize);
 		 		// printf("%d\n", i);
 		 	}
