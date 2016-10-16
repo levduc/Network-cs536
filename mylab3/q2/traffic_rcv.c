@@ -69,7 +69,6 @@ int main(int argc, char *argv[])
 		
 		packageCount++;
 		totalBytes += numBytesRcvd;
-		memset(buf,0,CLIENT_MAX_BUF);
 		// printf("%ld\n", numBytesRcvd);
 		if(packageCount == 1)
 		{
@@ -85,6 +84,7 @@ int main(int argc, char *argv[])
 			printf("End of transmission\n");
 		    break;
 		}
+		memset(buf,0,CLIENT_MAX_BUF);
 	}
 	completionTime = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec)/1000000.0;
 	printf("Package Count: %d\n", packageCount);
