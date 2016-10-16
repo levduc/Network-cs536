@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
 	/*payloadSize, 8 bytes of UDP header, 20 bytes of IPv4 Header, 27 bytes of Ethernet Frames*/
 	//Assuming DIX
 	float totalBitPS = (packageCount*(8+20+27)*8+totalBytes*8)/completionTime;
-	fprintf(stdout,"Bits received: %d\n", packageCount*(8+20+24)*8+totalBytes*8);
+	fprintf(stdout,"Bits received: %d\n", packageCount*(8+20+27)*8+totalBytes*8);
     //PPS
 	fprintf(stdout,"Package Per Second (PPS): %f packages/s\n", packageCount/completionTime);
 	/*BPS*/
