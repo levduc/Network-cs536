@@ -153,6 +153,8 @@ INPUT ./7.png
 INPUT 8.png
 INPUT ./8.png
 INPUT ./8.png
+INPUT /usr/local/texlive/2016/texmf-dist/tex/latex/base/omscmr.fd
+INPUT /usr/local/texlive/2016/texmf-dist/tex/latex/base/omscmr.fd
 INPUT lab3ans.aux
 INPUT ./lab3ans.out
 INPUT ./lab3ans.out
