@@ -75,6 +75,7 @@ int main(int argc, char *argv[])
 			//1st time arrive
 			printf("First Package arrived.\n");
 			gettimeofday(&start, NULL);
+			printf("%s\n",buf);
 		}
 		if (numBytesRcvd == 3)
 		{
