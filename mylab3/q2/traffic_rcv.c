@@ -93,8 +93,9 @@ int main(int argc, char *argv[])
     /*PPS*/
 	printf("Package Per Second (PPS): %f packages/s\n", packageCount/completionTime);
     /*Calculate total bit sent*/
-	/*payloadSize, 8 bytes of UDP header, 20 bytes of IPv4 Header, 24 bytes of Ethernet Frames*/
-	float totalBitPS = (packageCount*(8+20+24)*8+totalBytes*8)/completionTime;
+	/*payloadSize, 8 bytes of UDP header, 20 bytes of IPv4 Header, 27 bytes of Ethernet Frames*/
+	//Assuming DIX
+	float totalBitPS = (packageCount*(8+20+27)*8+totalBytes*8)/completionTime;
 	printf("totalbit: %d\n", packageCount*(8+20+24)*8+totalBytes*8);
 	/*BPS*/
 	printf("Bits Per Second (BPS): %f bps\n", totalBitPS);

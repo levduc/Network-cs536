@@ -79,7 +79,7 @@ Graph: \\
 \begin{center}
 \includegraphics[scale=.6]{5.png}	
 \end{center}
-Yes, throughput numbers are approximately equal for both client and server. When package spacing reduces from 50ms to .1 ms, completion decreases, throughput increases, and pps increases. Yes, I think the observed result are consistent with what theoretically expected because by reducing the spacing time, we allow the receiver to process incoming datagram with faster rate. Hover, after reducing the time spacing to less than equal to $.1$ ms, I don't see any improvement in completion time, so I think the OS process reaches its limit to handle \texttt{recvfrom}.\\
+Yes, throughput numbers are approximately equal for both client and server. When package spacing reduces from 50ms to .1 ms, completion decreases, throughput increases, and pps increases. Yes, I think the observed result are consistent with what theoretically expected because by reducing the spacing time, we allow the receiver to process incoming datagram with faster rate. Hover, after reducing the time spacing to less than equal to $.1$ ms, there is no improvement in completion time. I think \texttt{0.1 ms} about how long it takes for the os to handle \texttt{rcvfrom}\\
 For payload-size = $10000$ bytes, packet-spacing = $1$ ms. We obtain the following result with different packet-spacing:\\
 \begin{center}
 	\begin{tabular}{|c|c|c|c|c|c|c|}
@@ -103,6 +103,51 @@ Graphs:\\
 \end{center}
 For small payload, the completion time and the PPS are consistent, and the throughput increases as payload increases. However, For payload size of $\geq$ 8000 bytes, we experience a slow down in completion time.
 \end{problem}
-\begin{problem}{3}
+\begin{problem}{3} \ \\
+For this problem, I used \texttt{borg20}.
+To generate traffic, I used: \\
+\texttt{rsh 192.168.1.2 './sender 192.168.1.1 10000 100 15 10000'}
+\\
+Below are two sample of results:
+\begin{verbatim}
+	0x0000:  3a56 8f3e 2af8 babc 4274 5230 0800 4500  :V.>*...BtR0..E.
+	0x0010:  0080 8e13 4000 4011 2906 c0a8 0102 c0a8  ....@.@.).......
+	0x0020:  0101 dbb0 2710 006c 83d1 4c4c 4c4c 4c4c  ....'..l..LLLLLL
+	0x0030:  4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c  LLLLLLLLLLLLLLLL
+	0x0040:  4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c  LLLLLLLLLLLLLLLL
+	0x0050:  4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c  LLLLLLLLLLLLLLLL
+	0x0060:  4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c  LLLLLLLLLLLLLLLL
+	0x0070:  4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c  LLLLLLLLLLLLLLLL
+	0x0080:  4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c       LLLLLLLLLLLLLL
+\end{verbatim}
+
+\begin{verbatim}
+	0x0000:  babc 4274 5230 3a56 8f3e 2af8 0800 45c0  ..BtR0:V.>*...E.
+	0x0010:  009c 6bea 0000 4001 8a63 c0a8 0101 c0a8  ..k...@..c......
+	0x0020:  0102 0303 8f17 0000 0000 4500 0080 8e13  ..........E.....
+	0x0030:  4000 4011 2906 c0a8 0102 c0a8 0101 dbb0  @.@.)...........
+	0x0040:  2710 006c 83d1 4c4c 4c4c 4c4c 4c4c 4c4c  '..l..LLLLLLLLLL
+	0x0050:  4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c  LLLLLLLLLLLLLLLL
+	0x0060:  4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c  LLLLLLLLLLLLLLLL
+	0x0070:  4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c  LLLLLLLLLLLLLLLL
+	0x0080:  4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c  LLLLLLLLLLLLLLLL
+	0x0090:  4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c  LLLLLLLLLLLLLLLL
+	0x00a0:  4c4c 4c4c 4c4c 4c4c 4c4c                 LLLLLLLLLL
+\end{verbatim}
+\textbf{48-bit MAC Address:} Inspecting first 6 bytes.
+\begin{itemize}
+	\item Source: \texttt{ba:bc:42:74:52:30} or \texttt{babc 4274 5230}
+	\item Destination: \texttt{3a:56:8f:3e:2a:f8} or \texttt{3a56 8f3e 2af8}
+\end{itemize}
+\textbf{Two bytes type/length}: IPv4 (\texttt{0800})\\
+\textbf{Identify \texttt{DIX} vs \texttt{802.3}}: Because we only use character of our first name as payload body, it's not difficult to see that the \texttt{802.03} Ethernet has longer header  because of LLC header. Thus, in our sample, the latter sample is \texttt{802.03} Ethernet frame. \\
+\textbf{Version Number:} 4 because of \texttt{4500} \\
+\textbf{Port number}: Inspect next 4 bytes after IP payload
+\begin{itemize}
+	\item Source Port: \texttt{dbb0} (i.e. in decimal 56240)
+	\item Destination Port: \texttt{2710} (i.e. in decimal 10000)
+\end{itemize} 
+\textbf{UDP Payload:} Inspecting next 2 bytes after port number which is \texttt{006c} (i.e in decimal 108) which is total of payload size and header. Thus, payload size is 100 bytes which is consistent with our input. 
 \end{problem}
+
 \end{document}
