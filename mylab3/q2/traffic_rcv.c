@@ -59,16 +59,19 @@ int main(int argc, char *argv[])
 	int endCount;
 	int packageCount;
    	int firstPackage;
+	int totalBytes;
 	memset(buf,0,CLIENT_MAX_BUF);
 	packageCount = 0;
 	endCount = 0;
 	socklen_t sendsize = sizeof(csin);
+
 	while((numBytesRcvd = recvfrom(s, buf, sizeof(buf), 0, (struct sockaddr *) &csin, &sendsize)) > 0)
 	{
 		
 		packageCount++;
+		totalBytes += numBytesRcvd;
 		memset(buf,0,CLIENT_MAX_BUF);
-		printf("%ld\n", numBytesRcvd);
+		// printf("%ld\n", numBytesRcvd);
 		if(packageCount == 1)
 		{
 			//1st time arrive
@@ -77,13 +80,20 @@ int main(int argc, char *argv[])
 		if (numBytesRcvd == 3)
 		{
 			packageCount--;
+			totalBytes -= numBytesRcvd;
 			gettimeofday(&end, NULL);
 			printf("End of transmission\n");
 		    break;
 		}
 	}
-	completionTime = (end.tv_sec - start.tv_sec)*1000 + (end.tv_usec - start.tv_usec)/1000;
+	completionTime = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec)/1000000.0;
 	printf("%d\n", packageCount);
-    fprintf(stdout,"Completion Time: %f ms\n", completionTime);
+    fprintf(stdout,"Completion Time: %f s\n", completionTime);
+    /*Calculate total bit sent*/
+	/*payloadSize, 8 bytes of UDP header, 20 bytes of IPv4 Header, 24 bytes of Ethernet Frames*/
+	float totalBitPS = (packageCount*(8+20+24)*8+totalBytes*8)/completionTime;
+	printf("totalbit: %d\n", packageCount*(8+20+24)*8+totalBytes*8);
+	/*BPS*/
+	printf("Bits Per Second (BPS): %f bps\n", totalBitPS);
     return 0;
 }

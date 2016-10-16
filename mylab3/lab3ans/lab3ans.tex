@@ -54,9 +54,25 @@ Below is plotted graph of the datas:
 \begin{center}
 	
 \end{center}
-Package size did not have large impact on throughput as the package size increases. The reliable throughput and transmission time did not change. Thus, to improve the server performance, I may choose package size to be power of two because it may be helpful for computers and kernels, not too big so that we can fit inside processor (i.e L2 cache) ... 
+While the small package size may limit reliable through put, much bigger package size did not have much impact on throughput. As the package size increases, the reliable throughput and transmission time did not change. Thus, to improve the server performance, I may choose package size to be power of two because it may be helpful for computers and kernels, not too big so that we can fit inside processor (i.e L2 cache) ... 
 \end{problem}
-\begin{problem}{2}
+\begin{problem}{2} \ \\
+For payload-size = $1000$ bytes, packet-count = $1000$. We obtain the following result with different packet-spacing:\\
+\texttt{Traffic\_rcv} was run at $sslab01$. \texttt{Traffic\_snd} was run at my home. 
+\begin{center}
+	\begin{tabular}{|c|c|c|c|c|c|c|}
+	\hline 
+	& \multicolumn{3}{|c|}{Sender} & \multicolumn{3}{|c|}{Receiver}\\ \hline
+	Packet Spacing 		   & Time& BPS& PPS& Time &BPS& BBS\\ \hline
+	50ms 		  		   & &  & 19.947 pps& 50.132s &BPS& BBS\\ \hline
+
+ 	% 50ms & 5265 ms & 4,836,939 bps \\ \hline
+	% 10ms & 590 ms & 43,152,693 bps \\ \hline
+	% 1 ms & 276 ms & 92,095,696 bps \\ \hline
+	% 0.5 ms & 274 ms & 92,382,231 bps \\ \hline
+	% .1 ms & 273 ms & 93,115,342 bps \\ \hline
+	\end{tabular}
+\end{center}
 \end{problem}
 \begin{problem}{3}
 \end{problem}

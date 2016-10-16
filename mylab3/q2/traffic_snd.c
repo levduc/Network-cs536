@@ -14,16 +14,7 @@
 
 #define CLIENT_MAX_BUF 1024
 #define MAX_BUF 1024
-
-/*concatString is to concatenate two string together*/
-char* concatString(char *s1, char *s2)
-{
-    char *result = malloc(strlen(s1)+strlen(s2)+1);//+1 for the zero-terminator
-    strcpy(result, s1);
-    strcat(result, s2);
-    return result;
-}
-//this code used to generate random bytestream
+/*File bytestream with Last Name Chacracter*/
 unsigned char *gen_bytestream (size_t num_bytes)
 {
   unsigned char *bytestream = malloc (num_bytes);
@@ -38,29 +29,26 @@ unsigned char *gen_bytestream (size_t num_bytes)
 
 int main(int argc, char *argv[])
 {
-	//socket
+	/*socket information*/
 	int s; 
 	int serverPort;
 	struct sockaddr_in sin;
 	struct sockaddr_in ssin;
-	/*Server Buffer*/
-    char serverBuf[MAX_BUF];
 	/*Payload Size*/
 	uint32_t payloadSize;
 	/*Count*/
 	uint32_t packageCount;
 	/*Spacing*/
 	uint32_t packageSpacing;
-
+	/*numbyte received*/
 	ssize_t numBytesRcvd;
-	
 	/*build address data structure*/
+	/*checking user input*/
 	if(argc != 6)
 	{
 		printf("Error: <hostname> <portnumber> <payload-size> <package-count> <package-spacing>");
 		exit(1);
 	}
-
 	/*Get IP address*/
   	if(inet_pton(AF_INET, argv[1], &sin.sin_addr)<=0)
     {
@@ -85,54 +73,53 @@ int main(int argc, char *argv[])
   	sin.sin_port = htons(serverPort);
   	/* Set all bits of the padding field to 0 */
   	memset(sin.sin_zero, '\0', sizeof sin.sin_zero);
-	
-	while(1){
-		/*Create UDP socket*/
-		if((s = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-	    {
-	        printf("Failed to create socket \n");
-	        exit(1);
-	    } 
-	    /*Payload*/ 
-		unsigned char *senderRequest;
-		//Fill Payload
-		senderRequest = gen_bytestream(payloadSize);
-		printf("%s \n", senderRequest);
-		printf("PackageSize Check: %lu\n", strlen(senderRequest));
-
-		struct timeval start, end;
-		/*Sending Payload*/
-		//Start Sending
-		int i;
-		gettimeofday(&start, NULL);
-		for (i = 0; i < packageCount; i++)
-		{
-			if (sendto(s,senderRequest,strlen(senderRequest),0,(struct sockaddr*)&sin, sizeof(sin)) < 0){
+	/*Create UDP socket*/
+	if((s = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+    {
+        printf("Failed to create socket \n");
+        exit(1);
+    } 
+    /*Payload*/ 
+	unsigned char *senderRequest;
+	//Fill Payload
+	senderRequest = gen_bytestream(payloadSize);
+	printf("%s \n", senderRequest);
+	// printf("PackageSize Check: %lu\n", strlen(senderRequest));
+	struct timeval start, end;
+	/*Sending Payload*/
+	//Start Sending
+	int i;
+	gettimeofday(&start, NULL);
+	for (i = 0; i < packageCount; i++)
+	{
+		if (sendto(s,senderRequest,strlen(senderRequest),0,(struct sockaddr*)&sin, sizeof(sin)) < 0){
+			printf("Fail to send\n");
+			exit(1);
+		}
+		//spacing between 2 package
+		usleep(packageSpacing);
+	}
+	//Done Sending
+	gettimeofday(&end, NULL);
+	/*Signal ending of transmission by sending 3 bytes*/
+	for (i = 0; i < 3; i++)
+	{
+		unsigned char a[3] = "123"; //payload of size 3
+		if (sendto(s,a,3,0,(struct sockaddr*)&sin, sizeof(sin)) < 0){
 				printf("Fail to send\n");
 				exit(1);
-			}
-			//spacing between 2 package
-			usleep(packageSpacing);
 		}
-		//Sending 3 payloads of size 3 bytes to signal end of transmission
-		for (i = 0; i < 3; i++)
-		{
-			unsigned char a[3] = "123"; //payload of size 3
-			if (sendto(s,a,3,0,(struct sockaddr*)&sin, sizeof(sin)) < 0){
-					printf("Fail to send\n");
-					exit(1);
-			}
-		}
-    	//Done Sending
-    	gettimeofday(&end, NULL);
-    	float completionTime = (end.tv_sec - start.tv_sec)*1000 + 
-               (end.tv_usec - start.tv_usec)/1000.0;
-    	fprintf(stdout,"Completion Time: %f ms\n", completionTime);
-    	//package divde by completion time
-		printf("Package Per Second (PPS): %f packages/s\n", packageCount*1000/completionTime);
-		//package count *(header + packageSize*8)
-		printf("Bits Per Second (BPS): %f bps\n", ((packageCount*(payloadSize*8+64)+3*(24+64))*1000)/completionTime);
-    	exit(0);
-	 }
-	return 0;
+	}
+	/*calculate completion time in second*/
+	float completionTime = (end.tv_sec - start.tv_sec)+(end.tv_usec - start.tv_usec)/1000000.0;
+	fprintf(stdout,"Completion Time: %f s\n", completionTime);
+	/*PPS*/
+	printf("Package Per Second (PPS): %f packages/s\n", packageCount/completionTime);
+	/*Calculate total bit sent*/
+	/*payloadSize, 8 bytes of UDP header, 20 bytes of IPv4 Header, 24 bytes of Ethernet Frames*/
+	float totalBitPS = (packageCount*(payloadSize+8+20+24)*8)/completionTime;
+	printf("%d\n", packageCount*(payloadSize+8+20+24)*8);
+	/*BPS*/
+	printf("Bits Per Second (BPS): %f bps\n", totalBitPS);
+	exit(0);
 }
