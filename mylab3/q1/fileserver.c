@@ -9,7 +9,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-#define CLIENT_MAX_BUF 1024
+#define CLIENT_MAX_BUF 4096
 #define MAX_BUF 1024
 #define SK_MAX 20
 
@@ -25,19 +25,25 @@ char* concatString(char *s1, char *s2)
 int main(int argc, char *argv[])
 {
 	int status;
-    int serverFDPID; // server file description
-	char * s_secret_key; // server secret key
-    char cfifopid[CLIENT_MAX_BUF];
-	const char d[2] = "$"; //delimiter
-  	unsigned int childCount = 0; //child count
-  	struct sockaddr_in sin;
-    char buf[CLIENT_MAX_BUF];
-    int s, new_s; //socket or fd
     int len;
+	/*Server secret key*/
+	char * s_secret_key; 
+	/*delimiter*/
+	const char d[2] = "$"; 
+  	/*child count*/
+  	unsigned int childCount = 0; //child count
+    /*client Buffer*/
+    char buf[CLIENT_MAX_BUF];
+    /*Number of bytes received*/
     ssize_t numBytesRcvd;
+    /*Socket*/
+    int s, new_s; 
+    /*Port Number*/
 	int serverPort;
     /*Number of byte for single read*/
 	int blockSize;
+  	/*address*/
+  	struct sockaddr_in sin;
 
     /*Checking user input*/
     if(argc != 4)
@@ -62,7 +68,7 @@ int main(int argc, char *argv[])
     	printf("Fail to open file\n");
     	exit(1);
     }
-
+    /*create buffer to read from file*/
     char bsize[MAX_BUF];
     memset(bsize, 0, MAX_BUF);
     if(read(fdat, bsize, MAX_BUF) < 0 )
@@ -71,14 +77,13 @@ int main(int argc, char *argv[])
     }
     bsize[MAX_BUF-1] = '\0';
     close(fdat);
-    //Convert to int
+    //Convert string to int
     blockSize = strtol(bsize,NULL,10);
     printf("BlockSize: %d\n", blockSize);
-
     /*Server Port*/
+    /*build address data structure*/
     serverPort = strtol(argv[1],NULL,10);
     printf("Server Port: %d\n", serverPort);
-    /*build address data structure*/
   	/* Address family = Internet */
     sin.sin_family = AF_INET;
   	/* Set port number, using htons function to use proper byte order */
@@ -89,10 +94,11 @@ int main(int argc, char *argv[])
   	memset(sin.sin_zero, '\0', sizeof sin.sin_zero);
   	/*half association*/
    	if ((s = socket(PF_INET,SOCK_STREAM,0)) < 0) 
-   	 {
+   	{
    	 	perror("Fail to create socket");
    	 	exit(1);
-   	 } 
+   	} 
+   	//binding
    	if ((bind(s, (struct sockaddr *)&sin, sizeof(sin))) < 0)
    	{
    		perror("Fail to bind");
@@ -103,23 +109,28 @@ int main(int argc, char *argv[])
 	printf("Listening ... \n");
 	while(1)
 	{
+		//clear buffer
 		memset(buf,0,CLIENT_MAX_BUF);
+		/*creating new socket*/
 		if((new_s = accept(s, (struct sockaddr *) &sin, &len)) < 0)
 		{
 			perror("Fail Accept");
 			exit(1);
 		}
+		/*Wait for request*/
     	if ((numBytesRcvd = read(new_s, buf, sizeof(buf))) < 0)
     	{
     		perror("read fail() failed");
     		exit(1);
     	}
+    	/*Receive a request*/
 		printf("Client Request %s\n",buf);
-		/*Fork a child to handle client requests*/
+		/*Fork a child to handle client request*/
 	    pid_t k = fork(); 
 		// fork failed		
 		if(k < 0)
 		{
+	    	close(new_s);   
 			printf("fork() failed!\n");
 		}
 		else if (k==0) //Child Code
@@ -151,21 +162,18 @@ int main(int argc, char *argv[])
 			//get filedeposite/fileName
 			char *fileLocation = "filedeposit/";
 			char * fileAddress = concatString(fileLocation,fileName);
-		    
+			/*Comparing Secret Key between clent and server*/
 		    printf("Comparing Secret Key\n");
-			/*Comparing Secret Key*/
 		    int fd; //file description
 		    if(strcmp(s_secret_key, c_secret_key) != 0) 
 		    {
 				printf("Keys don't match\n");
-				printf("Cannot open file. File may not exist.");		    	
 				close(new_s);
 		    	exit(1);
 		    }
 		    /*Key Match. Try open file*/
 		    if ((fd = open(fileAddress,O_RDWR)) <= 0)
 		    {
-	  			//Use dup2 stdout to file
 				printf("Cannot open file. File may not exist.");
 				close(new_s);
 				exit(1);		    	
@@ -174,12 +182,11 @@ int main(int argc, char *argv[])
 		    unsigned char writeBuf[blockSize];
 		    /*Check if tcp connection is closed by client*/
 	    	memset(writeBuf, 0, blockSize);
-		 	int i = 0;
-		 	while((i = read(fd, writeBuf, blockSize)) > 0)
+		 	int byteWrite = 0;
+		 	while((byteWrite = read(fd, writeBuf, blockSize)) > 0)
 		 	{
-		 		write(new_s, writeBuf, i);
+		 		write(new_s, writeBuf, byteWrite);
 	    		memset(writeBuf,0, blockSize);
-		 		// printf("%d\n", i);
 		 	}
 			//close connection
 			close(new_s);
@@ -187,6 +194,7 @@ int main(int argc, char *argv[])
 	    	free(fileAddress);
 	    	memset(fileName,0,CLIENT_MAX_BUF);
 	    	memset(c_secret_key,0, CLIENT_MAX_BUF);
+	    	exit(0);
     	}
 	  	else if(k>0) 
 	  	{	

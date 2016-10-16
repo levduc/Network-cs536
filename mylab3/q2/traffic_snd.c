@@ -83,12 +83,11 @@ int main(int argc, char *argv[])
 	unsigned char *senderRequest;
 	//Fill Payload
 	senderRequest = gen_bytestream(payloadSize);
-	printf("%s \n", senderRequest);
-	// printf("PackageSize Check: %lu\n", strlen(senderRequest));
 	struct timeval start, end;
 	/*Sending Payload*/
 	//Start Sending
 	int i;
+	//Start
 	gettimeofday(&start, NULL);
 	for (i = 0; i < packageCount; i++)
 	{
