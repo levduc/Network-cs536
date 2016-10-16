@@ -74,6 +74,7 @@ int main(int argc, char *argv[])
 	int packageCount;
 	//Total bytes received
 	int totalBytes;
+	totalBytes = 0;
 	packageCount = 0;
 	/*Clear Buffer*/
 	memset(buf,0,payloadSize*2);
