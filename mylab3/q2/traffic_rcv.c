@@ -64,7 +64,6 @@ int main(int argc, char *argv[])
 	packageCount = 0;
 	endCount = 0;
 	socklen_t sendsize = sizeof(csin);
-
 	while((numBytesRcvd = recvfrom(s, buf, sizeof(buf), 0, (struct sockaddr *) &csin, &sendsize)) > 0)
 	{
 		
@@ -75,6 +74,7 @@ int main(int argc, char *argv[])
 		if(packageCount == 1)
 		{
 			//1st time arrive
+			printf("First Package arrived.\n");
 			gettimeofday(&start, NULL);
 		}
 		if (numBytesRcvd == 3)
@@ -87,8 +87,10 @@ int main(int argc, char *argv[])
 		}
 	}
 	completionTime = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec)/1000000.0;
-	printf("%d\n", packageCount);
+	printf("Package Count: %d\n", packageCount);
     fprintf(stdout,"Completion Time: %f s\n", completionTime);
+    /*PPS*/
+	printf("Package Per Second (PPS): %f packages/s\n", packageCount/completionTime);
     /*Calculate total bit sent*/
 	/*payloadSize, 8 bytes of UDP header, 20 bytes of IPv4 Header, 24 bytes of Ethernet Frames*/
 	float totalBitPS = (packageCount*(8+20+24)*8+totalBytes*8)/completionTime;

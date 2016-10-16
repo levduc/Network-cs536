@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
 	/*Calculate total bit sent*/
 	/*payloadSize, 8 bytes of UDP header, 20 bytes of IPv4 Header, 24 bytes of Ethernet Frames*/
 	float totalBitPS = (packageCount*(payloadSize+8+20+24)*8)/completionTime;
-	printf("%d\n", packageCount*(payloadSize+8+20+24)*8);
+	printf("Bit sent: %d\n", packageCount*(payloadSize+8+20+24)*8);
 	/*BPS*/
 	printf("Bits Per Second (BPS): %f bps\n", totalBitPS);
 	exit(0);
