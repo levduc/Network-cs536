@@ -1,5 +1,5 @@
 # Fdb version 3
-["pdflatex"] 1476656160 "lab3ans.tex" "lab3ans.pdf" "lab3ans" 1476656160
+["pdflatex"] 1476662433 "lab3ans.tex" "lab3ans.pdf" "lab3ans" 1476662434
   "/usr/local/texlive/2016/texmf-dist/fonts/map/fontname/texfonts.map" 1272929888 3287 e6b82fe08f5336d4d5ebc73fb1152e87 ""
   "/usr/local/texlive/2016/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1246382020 1004 54797486969f23fa377b128694d548df ""
   "/usr/local/texlive/2016/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex8.tfm" 1246382020 988 bdf658c3bfc2d96d3c8b02cfc1c94c20 ""
@@ -79,13 +79,13 @@
   "6.png" 1476597047 24943 3b531dc1ce7c4674252c571682f85f60 ""
   "7.png" 1476597086 25087 2f2bb4174e194ca295b3e87dbc8974e4 ""
   "8.png" 1476597123 23640 9fb7438fdd8043de12844409ae5ff8ec ""
-  "lab3ans.aux" 1476656160 662 b2b94621371df8d9296b8bf5bec1b851 ""
-  "lab3ans.out" 1476656160 0 d41d8cd98f00b204e9800998ecf8427e ""
-  "lab3ans.tex" 1476656160 8379 418db4503ff9cc627a265858ec5a228d ""
+  "lab3ans.aux" 1476662434 662 b2b94621371df8d9296b8bf5bec1b851 ""
+  "lab3ans.out" 1476662434 0 d41d8cd98f00b204e9800998ecf8427e ""
+  "lab3ans.tex" 1476662433 8492 bb859f68f5dd09f5ad6e05196b8c82b2 ""
   (generated)
   "lab3ans.aux"
   "lab3ans.log"
-  "/home/diamondduck/Desktop/Networking/mylab3/lab3ans/lab3ans.pdf"
-  "/home/diamondduck/Desktop/Networking/mylab3/lab3ans/lab3ans.log"
-  "lab3ans.out"
   "lab3ans.pdf"
+  "/home/diamondduck/Desktop/Networking/mylab3/lab3ans/lab3ans.pdf"
+  "lab3ans.out"
+  "/home/diamondduck/Desktop/Networking/mylab3/lab3ans/lab3ans.log"
