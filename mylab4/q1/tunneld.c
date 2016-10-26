@@ -174,8 +174,10 @@ int main(int argc, char *argv[])
 			char snd_buf[MAX_BUF];
 			memset(snd_buf,0,MAX_BUF);
 			socklen_t send_size = sizeof(snd_in);
-			/*Block call*/
+			/*==============================================Test Lab 3===========================================================*/
 			/*This is for handle traffic generator in lab3*/
+			/*Uncomment to test lab 3 code*/
+			/*Block call*/
 			while((bytesRcvd = recvfrom(clientSock, snd_buf, sizeof(snd_buf), 0, (struct sockaddr *) &snd_in, &send_size)) > 0)
 			{
 				/*Forward to server address nsin*/
@@ -188,22 +190,38 @@ int main(int argc, char *argv[])
 				{
 				    break;
 				}
-
 				memset(snd_buf,0,MAX_BUF);
 			}
+			/*==============================================Test Lab 3===========================================================*/
 
-			/*This is for myping in lab2*/
+
+			/*==============================================Test Lab 2=========================================================*/
+			/*This is for myping/mypingd in lab2*/
+			/*Uncomment to test lab2 code and comment lab3 code*/			
 			// memset(snd_buf,0,MAX_BUF);
-			// if ((bytesRcvd = recvfrom(clientSock, snd_buf, sizeof(snd_buf), 0, (struct sockaddr *) &snd_in, &send_size)) > 0)
+			// if ((bytesRcvd = recvfrom(clientSock, snd_buf, sizeof(snd_buf), 0, (struct sockaddr *) &snd_in, &send_size)) < 0)
 			// {
 			// 	printf("Child: Cannot receive package from client\n");
 			// 	exit(1);
 			// }
-			/*Forward to server address nsin*/
-			if (sendto(serverSock,snd_buf,strlen(snd_buf),0,(struct sockaddr*)&nsin, sizeof(nsin)) < 0){
-				printf("Child: Fail to send\n");
-				exit(1);
-			}
+			// /*Forward to server address nsin*/
+			// if (sendto(serverSock,snd_buf,strlen(snd_buf),0,(struct sockaddr*)&nsin, sizeof(nsin)) < 0){
+			// 	printf("Child: Fail to send\n");
+			// 	exit(1);
+			// }
+			// memset(snd_buf,0,MAX_BUF);
+			// socklen_t sssize = sizeof(nsin);
+			// if ((bytesRcvd = recvfrom(serverSock, snd_buf, sizeof(snd_buf), 0, (struct sockaddr *) &nsin, &sssize)) < 0)
+			// {
+			// 	printf("Child: Cannot receive package from client\n");
+			// 	exit(1);
+			// }
+			// /*Forward "terve" to client address snd*/
+			// if (sendto(clientSock,snd_buf,strlen(snd_buf),0,(struct sockaddr*)&snd_in, sizeof(snd_in)) < 0){
+			// 	printf("Child: Fail to send\n");
+			// 	exit(1);
+			// }
+			/*==============================================Test Lab 2=========================================================*/
 			
 			printf("Child is done! \n");
 			/*Done sending kill child process*/
