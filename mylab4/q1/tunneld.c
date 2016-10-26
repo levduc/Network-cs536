@@ -94,15 +94,15 @@ int main(int argc, char *argv[])
 			char sPort[11];
 			//Split by delimiter
 		    token = strtok(buf, d);
-			strncpy(sIpAddress, token, 15);
-			sIpAddress[16] = '\0';
-			printf("Server Ip : %s\n", sIpAddress);
+			strncpy(sPort, token, 10);
+			sPort[11] = '\0';
+			printf("Server Port: %s \n", sPort);
 		    token = strtok(NULL, d);
 			if(token != NULL)
 			{
-				strncpy(sPort, token, 10);
-				sPort[11] = '\0';
-				printf("Server Port: %s \n", sPort);
+				strncpy(sIpAddress, token, 15);
+				sIpAddress[16] = '\0';
+				printf("Server Ip : %s\n", sIpAddress);
 			}
 			else
 			{

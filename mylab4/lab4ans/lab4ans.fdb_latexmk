@@ -1,7 +1,7 @@
 # Fdb version 3
-["pdflatex"] 1477465848 "lab4ans.tex" "/home/diamondduck/Networking/mylab4/lab4ans/lab4ans.pdf" "lab4ans" 1477465848
+["pdflatex"] 1477494769 "lab4ans.tex" "/home/diamondduck/Networking/mylab4/lab4ans/lab4ans.pdf" "lab4ans" 1477494769
   "/etc/texmf/web2c/texmf.cnf" 1470953831 475 c0e671620eb5563b2130f56340a5fde8 ""
-  "/home/diamondduck/Networking/mylab4/lab4ans/lab4ans.aux" 1477465848 662 b2b94621371df8d9296b8bf5bec1b851 ""
+  "/home/diamondduck/Networking/mylab4/lab4ans/lab4ans.aux" 1477494769 662 b2b94621371df8d9296b8bf5bec1b851 ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1272929888 3287 e6b82fe08f5336d4d5ebc73fb1152e87 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1246382020 1004 54797486969f23fa377b128694d548df ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/symbols/msam10.tfm" 1246382020 916 f87d7c45f9c908e672703b83b72241a3 ""
@@ -60,13 +60,13 @@
   "/usr/share/texmf/web2c/texmf.cnf" 1458942643 31351 b32c45dce4a01cb7b53ed90c546614ca ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1470953841 127715 132155e7ee9993e0b74e204ed9b866dc ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1470953840 718487 aa3181d0b31d02f21d9386112dc6e8c9 ""
-  "lab4ans.aux" 1477465848 662 b2b94621371df8d9296b8bf5bec1b851 ""
-  "lab4ans.out" 1477465848 0 d41d8cd98f00b204e9800998ecf8427e ""
-  "lab4ans.tex" 1477465848 1335 3b23ea354d2b1ff8576be608f7d1933d ""
+  "lab4ans.aux" 1477494769 662 b2b94621371df8d9296b8bf5bec1b851 ""
+  "lab4ans.out" 1477494769 0 d41d8cd98f00b204e9800998ecf8427e ""
+  "lab4ans.tex" 1477494769 1375 77ca97b083f47dd365714e27e8e58866 ""
   (generated)
+  "/home/diamondduck/Networking/mylab4/lab4ans/lab4ans.log"
   "lab4ans.log"
-  "/home/diamondduck/Networking/mylab4/lab4ans/lab4ans.pdf"
-  "lab4ans.aux"
   "lab4ans.pdf"
   "lab4ans.out"
-  "/home/diamondduck/Networking/mylab4/lab4ans/lab4ans.log"
+  "lab4ans.aux"
+  "/home/diamondduck/Networking/mylab4/lab4ans/lab4ans.pdf"

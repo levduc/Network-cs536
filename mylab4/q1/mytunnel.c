@@ -56,14 +56,15 @@ int main(int argc, char *argv[])
     vpn_serverPort = strtol(argv[2],NULL,10);
     printf("Portnumber: %d\n", vpn_serverPort);
   	/*Create Request $ip$serverport*/
-	char ip_request[MAX_BUF];
+	char portRequest[10];
 	//server_ip
 	char *server_ip = argv[3];
 	printf("%s\n", server_ip);
-	sprintf(ip_request,"$%s$", server_ip);
+
+	sprintf(portRequest,"$%s$", argv[4]);
 	//server_port
 	char * mytunnelRequest;
-	mytunnelRequest = concatString(ip_request,argv[4]);
+	mytunnelRequest = concatString(portRequest, server_ip);
 	printf("%s\n", mytunnelRequest);
 	
   	/* Address family = Internet */
