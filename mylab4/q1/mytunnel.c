@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
 		printf("Fail to receive\n");
 		exit(1);
 	}
-	printf("%s\n", buf);
+	printf("Use this port: %s\n", buf);
 
 	exit(0);
 }
