@@ -182,7 +182,6 @@ int main(int argc, char *argv[])
 			/*Block call*/
 			while((bytesRcvd = recvfrom(clientSock, snd_buf, sizeof(snd_buf), 0, (struct sockaddr *) &snd_in, &send_size)) > 0)
 			{
-				printf("Child is sending to server\n");
 				/*Forward to server address nsin*/
 				if (sendto(serverSock,snd_buf,strlen(snd_buf),0,(struct sockaddr*)&nsin, sizeof(nsin)) < 0){
 					printf("Fail to send\n");
@@ -193,9 +192,8 @@ int main(int argc, char *argv[])
 				    break;
 				}
 				memset(snd_buf,0,MAX_BUF);
-
 			}
-			printf("Child is done\n");
+			printf("Child is done! \n");
 			/*Done sending kill child process*/
 			exit(0);	
     	}
