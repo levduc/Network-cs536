@@ -108,8 +108,7 @@ int main(int argc, char *argv[])
 			{
 				printf("There is no port\n");
 				exit(1);
-			}			
-
+			}
 		    /*Build server address data structure*/
   			struct sockaddr_in nsin;
 			int serverSock;
@@ -135,7 +134,6 @@ int main(int argc, char *argv[])
 			 	printf("Child:Fail to create socket");
 			 	exit(1);
 			}
-
 			/*tunneld new address data structure to forward*/
   			struct sockaddr_in nssin;
 			int clientSock;
@@ -152,27 +150,24 @@ int main(int argc, char *argv[])
 		  	nssin.sin_addr.s_addr = htonl(INADDR_ANY);
 		  	/* Set all bits of the padding field to 0 */
 		  	memset(sin.sin_zero, '\0', sizeof sin.sin_zero);
-   			
    			/*Creating Socket*/
 		   	if ((clientSock = socket(AF_INET,SOCK_DGRAM,0)) < 0)
 			{
-			 	printf("Fail to create socket");
+			 	printf("Child: Fail to create socket");
 			 	exit(1);
 			}
 			//Binding 
 		   	if ((bind(clientSock, (struct sockaddr *)&nssin, sizeof(nssin))) < 0)
 		   	{
-		   		printf("Fail to bind");
+		   		printf("Child: Fail to bind");
 		   		exit(1);
 		   	}
-
 		   	/*Response Client with port number*/
 			sprintf(response,"%d", portNumber);
 			if (sendto(s,response,strlen(response),0,(struct sockaddr*)&csin, sizeof(csin)) < 0){
-				printf("Fail to send\n");
+				printf("Child: Fail to send\n");
 				exit(1);
 			}
-
 			printf("Child is waiting\n");
   			struct sockaddr_in snd_in;
 			/*buffer*/
@@ -180,29 +175,46 @@ int main(int argc, char *argv[])
 			memset(snd_buf,0,MAX_BUF);
 			socklen_t send_size = sizeof(snd_in);
 			/*Block call*/
+			/*This is for handle traffic generator in lab3*/
 			while((bytesRcvd = recvfrom(clientSock, snd_buf, sizeof(snd_buf), 0, (struct sockaddr *) &snd_in, &send_size)) > 0)
 			{
 				/*Forward to server address nsin*/
 				if (sendto(serverSock,snd_buf,strlen(snd_buf),0,(struct sockaddr*)&nsin, sizeof(nsin)) < 0){
-					printf("Fail to send\n");
+					printf("Child: Fail to send\n");
 					exit(1);
 				}
+				/*End of transmission package*/
 				if (bytesRcvd == 3)
 				{
 				    break;
 				}
+
 				memset(snd_buf,0,MAX_BUF);
 			}
+
+			/*This is for myping in lab2*/
+			// memset(snd_buf,0,MAX_BUF);
+			// if ((bytesRcvd = recvfrom(clientSock, snd_buf, sizeof(snd_buf), 0, (struct sockaddr *) &snd_in, &send_size)) > 0)
+			// {
+			// 	printf("Child: Cannot receive package from client\n");
+			// 	exit(1);
+			// }
+			/*Forward to server address nsin*/
+			if (sendto(serverSock,snd_buf,strlen(snd_buf),0,(struct sockaddr*)&nsin, sizeof(nsin)) < 0){
+				printf("Child: Fail to send\n");
+				exit(1);
+			}
+			
 			printf("Child is done! \n");
 			/*Done sending kill child process*/
 			exit(0);	
     	}
 	  	else if(k>0) 
 	  	{	
-			//parent code 
-		    //terminate child process
+			//Parent code 
+		    //Terminate child process
     		childCount++;
-	     	//clean up zombies
+	     	//Clean up zombies
 	        while (childCount)
 	        {
 	            k = waitpid((pid_t) - 1, &status, WNOHANG);
