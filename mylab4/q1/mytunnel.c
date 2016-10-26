@@ -65,6 +65,7 @@ int main(int argc, char *argv[])
 	char * mytunnelRequest;
 	mytunnelRequest = concatString(ip_request,argv[4]);
 	printf("%s\n", mytunnelRequest);
+	
   	/* Address family = Internet */
     sin.sin_family = AF_INET;
   	/* Set port number, using htons function to use proper byte order */
