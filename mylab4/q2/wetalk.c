@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <netdb.h>
 
 
 #define CLIENT_MAX_BUF 2048
@@ -27,8 +28,6 @@ int main(int argc, char *argv[])
 	int portNumber;
 	/*Number of byte received*/
     ssize_t numBytesRcvd;
-	/*delimtier*/
-	const char d[2] = "$"; 
 	/*buffer*/
     char buf[CLIENT_MAX_BUF];
     /*Child Count*/
@@ -63,14 +62,56 @@ int main(int argc, char *argv[])
    		printf("Fail to bind");
    		exit(1);
    	}
+
+   	/*Handling User Input*/
+	int len;
+	printf("Please Hostname: <hostname>\n");
+	fprintf(stdout,"?");
+    char hostName[MAX_BUF];
+	memset(hostName,0,MAX_BUF);
+	fgets(hostName, MAX_BUF, stdin);
+	len = strlen(hostName);
+	hostName[len] = '\0';
+
+    /* resolve hostname */
+ // 	struct hostent *he;
+	// if ((he = gethostbyname(hostName)) == NULL ) {
+	// 	printf("Invalid Hostname\n");
+	//     exit(1); /* error */
+	// } 
 	
+
+    /*port number*/
+	printf("Please Hostname: <portnumber>\n");
+	fprintf(stdout,"?");
+    char partnerPort[11];
+	memset(partnerPort,0,10);
+	fgets(partnerPort, 10, stdin);
+	len = strlen(partnerPort);
+	if(len == 1){
+		printf("No port\n");
+		exit(1);
+	}
+	partnerPort[len] = '\0';
+	int partnerPortNumber = strtol(partnerPort,NULL,10);    
+    
+    /* copy the network address to sockaddr_in structure */
+    // memcpy(&csin.sin_addr, he->h_addr_list[0], he->h_length);
+   
+	printf("Host Name : %s\n", hostName);
+	printf("Port Number %s\n", partnerPort);
+
+    // csin.sin_family = AF_INET;
+    // csin.sin_port = htons(partnerPort);
+
+	// if((s = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+ //    {
+ //        printf("Failed to create socket \n");
+ //        exit(1);
+ //    }
 	while(1)
 	{
 		/*Clear Buffer*/
-		memset(buf,0,MAX_BUF);
-		fprintf(stdout,"?");
-		fgets(buf, MAX_BUF, stdin);
-		printf("%s\n", buf);
 		/*Block call*/
 		// socklen_t sendsize = sizeof(csin);
 		// if((numBytesRcvd = recvfrom(s, buf, sizeof(buf), 0, (struct sockaddr *) &csin, &sendsize)) < 0)

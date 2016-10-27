@@ -60,13 +60,12 @@ int main(int argc, char *argv[])
 	//server_ip
 	char *server_ip = argv[3];
 	printf("%s\n", server_ip);
-
-	sprintf(portRequest,"$%s$", argv[4]);
 	//server_port
+	sprintf(portRequest,"$%s$", argv[4]);
+	//concatenate with ip address
 	char * mytunnelRequest;
 	mytunnelRequest = concatString(portRequest, server_ip);
 	printf("%s\n", mytunnelRequest);
-	
   	/* Address family = Internet */
     sin.sin_family = AF_INET;
   	/* Set port number, using htons function to use proper byte order */
@@ -85,8 +84,7 @@ int main(int argc, char *argv[])
 		printf("Fail to send\n");
 		exit(1);
 	}
-	
-	/*Block to wait for an ACK*/
+	/*Block to wait for an ACK from tunneling server*/
     char buf[CLIENT_MAX_BUF];
 	memset(buf,0,CLIENT_MAX_BUF);
 	socklen_t sendsize = sizeof(ssin);	
