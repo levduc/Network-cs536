@@ -170,73 +170,74 @@ int main(int argc, char *argv[])
             /*Set alarm for 7 seconds*/
             alarm(7);
         }
-        memset(buf,0,MAX_BUF);
-        socklen_t sendsize = sizeof(csin);
-        if((numBytesRcvd = recvfrom(s, buf, sizeof(buf), 0, (struct sockaddr*)&csin, &sendsize)) < 0)
-        {
-          printf("Fail to receive\n");
-          exit(1);
-        }
-        /*receive something and not in chatsession*/
-        char str[INET_ADDRSTRLEN];
-        if(chatSession == 0)
-        {
-            if(strcmp(invitation,buf) == 0)
-            {
-                inet_ntop(AF_INET, &(csin.sin_addr), str, INET_ADDRSTRLEN);
-                printf("|Chat request from %s %d\n", str, csin.sin_port);
-                printf("?[c]hat or [n]o\n");
-                char c = getchar();
-                if (c == 'c' || c == 'C')
-                {
-                  char *answer = "OK";
-                  if(sendto(s, answer, strlen(answer),0,(struct sockaddr*)&csin, sizeof(csin)) < 0){
-                    printf("Fail to send\n");
-                    exit(1);
-                  }
-                  chatSession = 1;
-                } 
-                else 
-                {
-                  char *answer = "KO";
-                  if(sendto(s, answer, strlen(answer),0,(struct sockaddr*)&csin, sizeof(csin)) < 0){
-                    printf("Fail to send\n");
-                    exit(1);
-                  }
-                }
-            } 
-            if(strcmp(accept,buf) == 0)
-            {
-                inet_ntop(AF_INET, &(csin.sin_addr), str, INET_ADDRSTRLEN);
-                printf("|Chat request is accepted %s %d\n", str, ntohs(csin.sin_port));
-                chatSession = 1;
-            } 
-            if(strcmp(deny,buf) == 0)
-            {
-                inet_ntop(AF_INET, &(csin.sin_addr), str, INET_ADDRSTRLEN);
+        
+      //   memset(buf,0,MAX_BUF);
+      //   socklen_t sendsize = sizeof(csin);
+      //   if((numBytesRcvd = recvfrom(s, buf, sizeof(buf), 0, (struct sockaddr*)&csin, &sendsize)) < 0)
+      //   {
+      //     printf("Fail to receive\n");
+      //     exit(1);
+      //   }
+      //   /*receive something and not in chatsession*/
+      //   char str[INET_ADDRSTRLEN];
+      //   if(chatSession == 0)
+      //   {
+      //       if(strcmp(invitation,buf) == 0)
+      //       {
+      //           inet_ntop(AF_INET, &(csin.sin_addr), str, INET_ADDRSTRLEN);
+      //           printf("|Chat request from %s %d\n", str, csin.sin_port);
+      //           printf("?[c]hat or [n]o\n");
+      //           char c = getchar();
+      //           if (c == 'c' || c == 'C')
+      //           {
+      //             char *answer = "OK";
+      //             if(sendto(s, answer, strlen(answer),0,(struct sockaddr*)&csin, sizeof(csin)) < 0){
+      //               printf("Fail to send\n");
+      //               exit(1);
+      //             }
+      //             chatSession = 1;
+      //           } 
+      //           else 
+      //           {
+      //             char *answer = "KO";
+      //             if(sendto(s, answer, strlen(answer),0,(struct sockaddr*)&csin, sizeof(csin)) < 0){
+      //               printf("Fail to send\n");
+      //               exit(1);
+      //             }
+      //           }
+      //       } 
+      //       if(strcmp(accept,buf) == 0)
+      //       {
+      //           inet_ntop(AF_INET, &(csin.sin_addr), str, INET_ADDRSTRLEN);
+      //           printf("|Chat request is accepted %s %d\n", str, ntohs(csin.sin_port));
+      //           chatSession = 1;
+      //       } 
+      //       if(strcmp(deny,buf) == 0)
+      //       {
+      //           inet_ntop(AF_INET, &(csin.sin_addr), str, INET_ADDRSTRLEN);
 
-                printf("|Doesn't want to chat %s %d\n", str, ntohs(csin.sin_port));
-            }
-        }
-        /*receive something and in chat session*/
-        else if(chatSession != 0)
-        {
-            printf("%s\n", buf);
-        }
-        if(chatSession != 0)
-        {
-            printf(">");
-            memset(buf,0,CLIENT_MAX_BUF);
-            fgets(buf, MAX_BUF, stdin);
-            len = strlen(buf);
-            buf[len-1] = '\0';
-            if(sendto(s, buf, strlen(buf),0,(struct sockaddr*) &csin, sizeof(csin)) < 0)
-            {
-              printf("Fail to send\n");
-              exit(1);
-            }
-        }
-      }
+      //           printf("|Doesn't want to chat %s %d\n", str, ntohs(csin.sin_port));
+      //       }
+      //   }
+      //   /*receive something and in chat session*/
+      //   else if(chatSession != 0)
+      //   {
+      //       printf("%s\n", buf);
+      //   }
+      //   if(chatSession != 0)
+      //   {
+      //       printf(">");
+      //       memset(buf,0,CLIENT_MAX_BUF);
+      //       fgets(buf, MAX_BUF, stdin);
+      //       len = strlen(buf);
+      //       buf[len-1] = '\0';
+      //       if(sendto(s, buf, strlen(buf),0,(struct sockaddr*) &csin, sizeof(csin)) < 0)
+      //       {
+      //         printf("Fail to send\n");
+      //         exit(1);
+      //       }
+      //   }
+      } //endwhile
     }
     
 void SIGIOHandler(int signalType) {
