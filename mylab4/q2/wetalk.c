@@ -48,8 +48,6 @@ void signal_handler(int sig_num)
     } 
 }
 
-
-
 /*Function to convert hostname to ip address*/
 /*Reference: http://www.binarytides.com/hostname-to-ip-address-c-sockets-linux/*/
 int hostname_to_ip(char * hostname , char* ip)
@@ -134,149 +132,135 @@ int main(int argc, char *argv[])
     
     while(1)
     {
-        pid_t k = fork(); 
-        if(k < 0) /*Fail to create a child process*/
-        {
-          printf("fork() failed!\n");
+        if(chatSession == 0)
+        { 
+            int len;
+            char hostName[CLIENT_MAX_BUF];
+            /*Get hostname*/
+            memset(buf,0,CLIENT_MAX_BUF);
+            fprintf(stdout,"?");
+            /*read user input*/
+            fgets(buf, MAX_BUF, stdin);
+            len = strlen(buf);
+            buf[len-1] = '\0';
+            /*delimiter*/
+            const char d[2] = " "; 
+            char *token;            
+            //Split by delimiter
+            token = strtok(buf, d);
+            strncpy(hostName, token, strlen(token));
+            /*port number*/
+            char partnerPort[11];
+            memset(partnerPort,0,11);
+            token = strtok(NULL, d);
+            if(token != NULL)
+            {
+              strncpy(partnerPort, token, strlen(token));
+            }
+            else
+            {
+              printf("There is no port\n");
+              exit(1);
+            }
+            /*hostname to ip*/
+            char ip[100];
+            len = strlen(hostName);
+            hostname_to_ip(hostName, ip);
+            /*port number*/
+            int partnerPortNumber = strtol(partnerPort,NULL,10);    
+            /*Build address data structure of partner*/
+            /*Address family = Internet */
+            csin.sin_family = AF_INET;
+            /* Set port number, using htons function to use proper byte order */
+            csin.sin_port = htons(partnerPortNumber);
+            /* Set IP address to localhost */
+            if(inet_pton(AF_INET, ip, &csin.sin_addr)<=0)
+            {
+                printf("\n inet_pton error occured\n");
+                exit(1);
+            }
+            /* Set all bits of the padding field to 0 */
+            memset(csin.sin_zero, '\0', sizeof csin.sin_zero);
+            printf("%s's ip: %s\n", hostName, ip);
+            printf("Portnumber: %d \n", partnerPortNumber);
+
+            /*Sending Request*/
+            //Start Sending
+            if(sendto(s, invitation, strlen(invitation),0,(struct sockaddr*)&csin, sizeof(csin)) < 0){
+              printf("Fail to send\n");
+              exit(1);
+            }
+            /*Set alarm for 7 seconds*/
+            alarm(7);
         }
-        else if (k==0) 
+        memset(buf,0,MAX_BUF);
+        socklen_t sendsize = sizeof(csin);
+        if((numBytesRcvd = recvfrom(s, buf, sizeof(buf), 0, (struct sockaddr*)&csin, &sendsize)) < 0)
         {
-          /*Child Code*/
-          memset(buf,0,MAX_BUF);
-          socklen_t sendsize = sizeof(csin);
-          if((numBytesRcvd = recvfrom(s, buf, sizeof(buf), 0, (struct sockaddr*)&csin, &sendsize)) < 0)
-          {
-            printf("Fail to receive\n");
-            exit(1);
-          }
-          /*receive something and not in chatsession*/
-          char str[INET_ADDRSTRLEN];
-          if(chatSession == 0)
-          {
-              if(strcmp(invitation,buf) == 0)
-              {
-                  inet_ntop(AF_INET, &(csin.sin_addr), str, INET_ADDRSTRLEN);
-                  printf("|Chat request from %s %d\n", str, csin.sin_port);
-                  printf("?[c]hat or [n]o\n");
-                  char c = getchar();
-                  if (c == 'c' || c == 'C')
-                  {
-                    char *answer = "OK";
-                    if(sendto(s, answer, strlen(answer),0,(struct sockaddr*)&csin, sizeof(csin)) < 0){
-                      printf("Fail to send\n");
-                      exit(1);
-                    }
-                    chatSession = 1;
-                  } 
-                  else 
-                  {
-                    char *answer = "KO";
-                    if(sendto(s, answer, strlen(answer),0,(struct sockaddr*)&csin, sizeof(csin)) < 0){
-                      printf("Fail to send\n");
-                      exit(1);
-                    }
+          printf("Fail to receive\n");
+          exit(1);
+        }
+        /*receive something and not in chatsession*/
+        char str[INET_ADDRSTRLEN];
+        if(chatSession == 0)
+        {
+            if(strcmp(invitation,buf) == 0)
+            {
+                inet_ntop(AF_INET, &(csin.sin_addr), str, INET_ADDRSTRLEN);
+                printf("|Chat request from %s %d\n", str, csin.sin_port);
+                printf("?[c]hat or [n]o\n");
+                char c = getchar();
+                if (c == 'c' || c == 'C')
+                {
+                  char *answer = "OK";
+                  if(sendto(s, answer, strlen(answer),0,(struct sockaddr*)&csin, sizeof(csin)) < 0){
+                    printf("Fail to send\n");
+                    exit(1);
                   }
-              } 
-              if(strcmp(accept,buf) == 0)
-              {
-                  inet_ntop(AF_INET, &(csin.sin_addr), str, INET_ADDRSTRLEN);
-                  printf("|Chat request is accepted %s %d\n", str, ntohs(csin.sin_port));
                   chatSession = 1;
-              } 
-              if(strcmp(deny,buf) == 0)
-              {
-                  inet_ntop(AF_INET, &(csin.sin_addr), str, INET_ADDRSTRLEN);
-                  printf("|Doesn't want to chat %s %d\n", str, ntohs(csin.sin_port));
-              }
-          }
-          /*receive something and in chat session*/
-          else if(chatSession != 0)
-          {
-              printf("%s\n", buf);
-          }
+                } 
+                else 
+                {
+                  char *answer = "KO";
+                  if(sendto(s, answer, strlen(answer),0,(struct sockaddr*)&csin, sizeof(csin)) < 0){
+                    printf("Fail to send\n");
+                    exit(1);
+                  }
+                }
+            } 
+            if(strcmp(accept,buf) == 0)
+            {
+                inet_ntop(AF_INET, &(csin.sin_addr), str, INET_ADDRSTRLEN);
+                printf("|Chat request is accepted %s %d\n", str, ntohs(csin.sin_port));
+                chatSession = 1;
+            } 
+            if(strcmp(deny,buf) == 0)
+            {
+                inet_ntop(AF_INET, &(csin.sin_addr), str, INET_ADDRSTRLEN);
+
+                printf("|Doesn't want to chat %s %d\n", str, ntohs(csin.sin_port));
+            }
         }
-        else 
+        /*receive something and in chat session*/
+        else if(chatSession != 0)
         {
-          if(chatSession == 0)
-          { 
-              int len;
-              char hostName[CLIENT_MAX_BUF];
-              /*Get hostname*/
-              memset(buf,0,CLIENT_MAX_BUF);
-              fprintf(stdout,"?");
-              /*read user input*/
-              fgets(buf, MAX_BUF, stdin);
-              len = strlen(buf);
-              buf[len-1] = '\0';
-              /*delimiter*/
-              const char d[2] = " "; 
-              char *token;            
-              //Split by delimiter
-              token = strtok(buf, d);
-              strncpy(hostName, token, strlen(token));
-              /*port number*/
-              char partnerPort[11];
-              memset(partnerPort,0,11);
-              token = strtok(NULL, d);
-              if(token != NULL)
-              {
-                strncpy(partnerPort, token, strlen(token));
-              }
-              else
-              {
-                printf("There is no port\n");
-                exit(1);
-              }
-              /*hostname to ip*/
-              char ip[100];
-              len = strlen(hostName);
-              hostname_to_ip(hostName, ip);
-              /*port number*/
-              int partnerPortNumber = strtol(partnerPort,NULL,10);    
-              /*Build address data structure of partner*/
-              /*Address family = Internet */
-              csin.sin_family = AF_INET;
-              /* Set port number, using htons function to use proper byte order */
-              csin.sin_port = htons(partnerPortNumber);
-              /* Set IP address to localhost */
-              if(inet_pton(AF_INET, ip, &csin.sin_addr)<=0)
-              {
-                  printf("\n inet_pton error occured\n");
-                  exit(1);
-              }
-              /* Set all bits of the padding field to 0 */
-              memset(csin.sin_zero, '\0', sizeof csin.sin_zero);
-              printf("%s's ip: %s\n", hostName, ip);
-              printf("Portnumber: %d \n", partnerPortNumber);
-
-              /*Sending Request*/
-              //Start Sending
-              if(sendto(s, invitation, strlen(invitation),0,(struct sockaddr*)&csin, sizeof(csin)) < 0){
-                printf("Fail to send\n");
-                exit(1);
-              }
-              /*Set alarm for 7 seconds*/
-              alarm(7);
-          }
+            printf("%s\n", buf);
         }
-          
-
-
-          if(chatSession != 0)
-          {
-              printf(">");
-              memset(buf,0,CLIENT_MAX_BUF);
-              fgets(buf, MAX_BUF, stdin);
-              len = strlen(buf);
-              buf[len-1] = '\0';
-              if(sendto(s, buf, strlen(buf),0,(struct sockaddr*) &csin, sizeof(csin)) < 0){
-                printf("Fail to send\n");
-                exit(1);
-              }
-              // exit(0);
-          }
-
+        if(chatSession != 0)
+        {
+            printf(">");
+            memset(buf,0,CLIENT_MAX_BUF);
+            fgets(buf, MAX_BUF, stdin);
+            len = strlen(buf);
+            buf[len-1] = '\0';
+            if(sendto(s, buf, strlen(buf),0,(struct sockaddr*) &csin, sizeof(csin)) < 0){
+              printf("Fail to send\n");
+              exit(1);
+            }
+            // exit(0);
+        }
       }
     }
-}
+    
+
     
