@@ -242,7 +242,7 @@ int main(int argc, char *argv[])
 void SIGIOHandler(int signalType) {
   ssize_t numBytesRcvd;
   do { // As long as there is input...
-    struct sockaddr_storage clntAddr;  // Address of datagram source
+    struct sockaddr_in clntAddr;  // Address of datagram source
     socklen_t clntLen = sizeof(clntAddr); // Address length in-out parameter
     char buffer[MAX_BUF];      // Datagram buffer
     numBytesRcvd = recvfrom(s, buffer, MAX_BUF, 0, (struct sockaddr *) &clntAddr, &clntLen);
