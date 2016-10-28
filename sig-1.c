@@ -25,6 +25,7 @@ void  main(void)
              printf("Hit Ctrl-C at anytime ... \n");
              pause();                   /* pause until Ctrl-C comes */
           }
+          printf("test");
      }
 }
 
@@ -37,7 +38,7 @@ void  INThandler(int  sig)
 {
      char  c;
 
-     //signal(sig, SIG_IGN);              /* ignore Ctrl-C for now    */
+     signal(sig, SIG_IGN);              /* ignore Ctrl-C for now    */
      printf("OUCH, did you hit Ctrl-C?\n"
             "Do you really want to quit? [y/n] ");
      c = getchar();
