@@ -25,58 +25,11 @@ int s;
 void SIGIOHandler(int signalType); // Handle SIGIO
 
 /*Alarm handler*/
-void signal_handler(int sig_num)
-{
-    if(sig_num == SIGALRM)
-    {
-        printf("No response after 7s. [q]uit or [r]estart \n");
-        fprintf(stdout,"?");
-        char c = getchar();
-        if ( c == 'R' || c == 'r')
-        { 
-            printf("Not sure how to restart\n");
-        } 
-        else if ( c == 'q' || c == 'Q')
-        {
-          printf("quitting\n");
-          exit(0);
-        } 
-        else 
-        {
-          printf("Invalid character !\n");
-          exit(1);
-        }
-    }
-
-    if(sig_num == SIGPOLL)
-    {
-        printf("ahihi\n");
-    } 
-}
+void signal_handler(int sig_num);
 
 
 /*Function to convert hostname to ip address*/
-/*Reference: http://www.binarytides.com/hostname-to-ip-address-c-sockets-linux/*/
-int hostname_to_ip(char * hostname , char* ip)
-{
-    struct hostent *he;
-    struct in_addr **addr_list;
-    int i;    
-    if ( (he = gethostbyname( hostname ) ) == NULL) 
-    {
-        // get the host info
-        herror("gethostbyname");
-        exit(1);
-    }
-    addr_list = (struct in_addr **) he->h_addr_list;
-    for(i = 0; addr_list[i] != NULL; i++) 
-    {
-        //Return the first one;
-        strcpy(ip , inet_ntoa(*addr_list[i]) );
-        return 0;
-    }    
-    exit(1);
-}
+int hostname_to_ip(char * hostname , char* ip);
 
 int main(int argc, char *argv[])
 {
@@ -117,6 +70,7 @@ int main(int argc, char *argv[])
       printf("Fail to create socket");
       exit(1);
     }
+    
     //Binding 
     if ((bind(s, (struct sockaddr *)&sin, sizeof(sin))) < 0)
     {
@@ -131,13 +85,9 @@ int main(int argc, char *argv[])
     const char *accept = "OK";
     const char *deny = "KO";
 
-    // signal(SIGPOLL, signal_handler);   
-    signal(SIGALRM, signal_handler);   
-    // printf("%d\n", SIGPOLL); 
-    printf("%d\n", SIGIO);
+    // signal(SIGALRM, signal_handler);   
 
-
-
+    /*SigIO handler*/
     struct sigaction handler;
     handler.sa_handler = SIGIOHandler; // Set signal handler for SIGIO
     // Create mask that mask all signals
@@ -154,8 +104,7 @@ int main(int argc, char *argv[])
 
     // Arrange for nonblocking I/O and SIGIO delivery
     if (fcntl(s, F_SETFL, O_NONBLOCK | FASYNC) < 0)
-      printf(
-          "Unable to put client sock into non-blocking/async mode");
+      printf("Unable to put client sock into non-blocking/async mode");
     // Go off and do real work; echoing happens in the background
  
     while(1)
@@ -286,7 +235,6 @@ int main(int argc, char *argv[])
               printf("Fail to send\n");
               exit(1);
             }
-            // exit(0);
         }
       }
     }
@@ -304,17 +252,69 @@ void SIGIOHandler(int signalType) {
         printf("recvfrom() failed");
     } else {
       fprintf(stdout, "Handling client ");
+      fprintf(stdout, "%d\n", signalType);
       // PrintSocketAddress((struct sockaddr *) &clntAddr, stdout);
-      fputc('\n', stdout);
+      // fputc('\n', stdout);
 
-      ssize_t numBytesSent = sendto(s, buffer, numBytesRcvd, 0, (struct sockaddr *) &clntAddr, sizeof(clntAddr));
-        if (numBytesSent < 0)
-          printf("sendto() failed");
-        else if (numBytesSent != numBytesRcvd)
-          printf("sendto() sent unexpected number of bytes");
+      // ssize_t numBytesSent = sendto(s, buffer, numBytesRcvd, 0, (struct sockaddr *) &clntAddr, sizeof(clntAddr));
+      //   if (numBytesSent < 0)
+      //     printf("sendto() failed");
+      //   else if (numBytesSent != numBytesRcvd)
+      //     printf("sendto() sent unexpected number of bytes");
     }
-  } while (numBytesRcvd >= 0);
+  } while (numBytesRcvd > 0);
   // Nothing left to receive
 }
 
-    
+/*alarm handler*/
+void signal_handler(int sig_num)
+{
+    if(sig_num == SIGALRM)
+    {
+        printf("No response after 7s. [q]uit or [r]estart \n");
+        fprintf(stdout,"?");
+        char c = getchar();
+        if ( c == 'R' || c == 'r')
+        { 
+            printf("Not sure how to restart\n");
+        } 
+        else if ( c == 'q' || c == 'Q')
+        {
+          printf("quitting\n");
+          exit(0);
+        } 
+        else 
+        {
+          printf("Invalid character !\n");
+          exit(1);
+        }
+    }
+
+    if(sig_num == SIGPOLL)
+    {
+        printf("ahihi\n");
+    } 
+}
+
+/*Function to convert hostname to ip address*/
+/*Reference: http://www.binarytides.com/hostname-to-ip-address-c-sockets-linux/*/
+int hostname_to_ip(char * hostname , char* ip)
+{
+    struct hostent *he;
+    struct in_addr **addr_list;
+    int i;    
+    if ( (he = gethostbyname( hostname ) ) == NULL) 
+    {
+        // get the host info
+        herror("gethostbyname");
+        exit(1);
+    }
+    addr_list = (struct in_addr **) he->h_addr_list;
+    for(i = 0; addr_list[i] != NULL; i++) 
+    {
+        //Return the first one;
+        strcpy(ip , inet_ntoa(*addr_list[i]) );
+        return 0;
+    }    
+    exit(1);
+}    
