@@ -14,10 +14,15 @@
 #include <netdb.h>
 #include <setjmp.h>
 #include <signal.h>
+#include <errno.h>
 
 
 #define CLIENT_MAX_BUF 2048
 #define MAX_BUF 4096
+
+/*socket*/
+int s;
+void SIGIOHandler(int signalType); // Handle SIGIO
 
 /*Alarm handler*/
 void signal_handler(int sig_num)
@@ -33,7 +38,7 @@ void signal_handler(int sig_num)
         } 
         else if ( c == 'q' || c == 'Q')
         {
-          printf("dcm\n");
+          printf("quitting\n");
           exit(0);
         } 
         else 
@@ -42,11 +47,13 @@ void signal_handler(int sig_num)
           exit(1);
         }
     }
+
     if(sig_num == SIGPOLL)
     {
         printf("ahihi\n");
     } 
 }
+
 
 /*Function to convert hostname to ip address*/
 /*Reference: http://www.binarytides.com/hostname-to-ip-address-c-sockets-linux/*/
@@ -77,8 +84,6 @@ int main(int argc, char *argv[])
     struct sockaddr_in sin; //self address
     struct sockaddr_in csin;//address of destination 
     struct sockaddr_in nsin;//address of incoming request
-    /*socket*/
-    int s;
     /*initator port number*/
     int portNumber;
     /*Number of byte received*/
@@ -126,10 +131,33 @@ int main(int argc, char *argv[])
     const char *accept = "OK";
     const char *deny = "KO";
 
-
-    signal(SIGPOLL, signal_handler);   
+    // signal(SIGPOLL, signal_handler);   
     signal(SIGALRM, signal_handler);   
-    
+    // printf("%d\n", SIGPOLL); 
+    printf("%d\n", SIGIO);
+
+
+
+    struct sigaction handler;
+    handler.sa_handler = SIGIOHandler; // Set signal handler for SIGIO
+    // Create mask that mask all signals
+    if (sigfillset(&handler.sa_mask) < 0)
+      printf("sigfillset() failed");
+    handler.sa_flags = 0;              // No flags
+
+    if (sigaction(SIGIO, &handler, 0) < 0)
+      printf("sigaction() failed for SIGIO");
+
+    // We must own the socket to receive the SIGIO message
+    if (fcntl(s, F_SETOWN, getpid()) < 0)
+      printf("Unable to set process owner to us");
+
+    // Arrange for nonblocking I/O and SIGIO delivery
+    if (fcntl(s, F_SETFL, O_NONBLOCK | FASYNC) < 0)
+      printf(
+          "Unable to put client sock into non-blocking/async mode");
+    // Go off and do real work; echoing happens in the background
+ 
     while(1)
     {
         if(chatSession == 0)
@@ -137,9 +165,9 @@ int main(int argc, char *argv[])
             int len;
             char hostName[CLIENT_MAX_BUF];
             /*Get hostname*/
-            memset(buf,0,CLIENT_MAX_BUF);
             fprintf(stdout,"?");
             /*read user input*/
+            memset(buf,0,CLIENT_MAX_BUF);
             fgets(buf, MAX_BUF, stdin);
             len = strlen(buf);
             buf[len-1] = '\0';
@@ -253,7 +281,8 @@ int main(int argc, char *argv[])
             fgets(buf, MAX_BUF, stdin);
             len = strlen(buf);
             buf[len-1] = '\0';
-            if(sendto(s, buf, strlen(buf),0,(struct sockaddr*) &csin, sizeof(csin)) < 0){
+            if(sendto(s, buf, strlen(buf),0,(struct sockaddr*) &csin, sizeof(csin)) < 0)
+            {
               printf("Fail to send\n");
               exit(1);
             }
@@ -262,5 +291,30 @@ int main(int argc, char *argv[])
       }
     }
     
+void SIGIOHandler(int signalType) {
+  ssize_t numBytesRcvd;
+  do { // As long as there is input...
+    struct sockaddr_storage clntAddr;  // Address of datagram source
+    socklen_t clntLen = sizeof(clntAddr); // Address length in-out parameter
+    char buffer[MAX_BUF];      // Datagram buffer
+    numBytesRcvd = recvfrom(s, buffer, MAX_BUF, 0, (struct sockaddr *) &clntAddr, &clntLen);
+    if (numBytesRcvd < 0) {
+      // Only acceptable error: recvfrom() would have blocked
+      if (errno != EWOULDBLOCK)
+        printf("recvfrom() failed");
+    } else {
+      fprintf(stdout, "Handling client ");
+      // PrintSocketAddress((struct sockaddr *) &clntAddr, stdout);
+      fputc('\n', stdout);
+
+      ssize_t numBytesSent = sendto(s, buffer, numBytesRcvd, 0, (struct sockaddr *) &clntAddr, sizeof(clntAddr));
+        if (numBytesSent < 0)
+          printf("sendto() failed");
+        else if (numBytesSent != numBytesRcvd)
+          printf("sendto() sent unexpected number of bytes");
+    }
+  } while (numBytesRcvd >= 0);
+  // Nothing left to receive
+}
 
     
