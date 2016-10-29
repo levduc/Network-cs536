@@ -16,13 +16,8 @@
 #include <signal.h>
 #include <errno.h>
 
-// jmp_buf  JumpBuffer1;
-// jmp_buf  JumpBuffer2;
-// jmp_buf  JumpBuffer3;
-
 #define CLIENT_MAX_BUF 2048
 #define MAX_BUF 4096
-
 
 /*incoming*/
 /*global socket*/
@@ -38,6 +33,7 @@ int chatSession = 0;
 
 /*Split invitation request hostname and portnumber*/
 int SplitInvitaionRequest(char *hostName, char *portNumber, char *buf);
+/*Send wannatalk to peer*/
 int SendInvitation(char* hostname, char *portnumber);
 /* Handle SIGIO*/
 void SIGIOHandler(int sig_num); 
@@ -113,7 +109,6 @@ int main(int argc, char *argv[])
     char partnerPort[MAX_BUF];
     int isInitator = 0;
     
-    //if(setjmp(JumpBuffer1));
 
     while(1)
     {
@@ -130,10 +125,10 @@ int main(int argc, char *argv[])
             char n;
             while(((n = getchar()) != '\n') && len < 50 )
             { 
-              buf[len] = n;
-              len++;
+                buf[len] = n;
+                len++;
             }
-            /*len <= 3 implies response to invitation*/
+            /*len <= 2 implies response to invitation*/
             if(strlen(buf) <= 2)
             {   
                 continue;
@@ -240,7 +235,6 @@ void SIGIOHandler(int sig_num)
     memset(buf,0,MAX_BUF);
     numBytesRcvd = recvfrom(s, buf, 51, 0, (struct sockaddr *) &csin, &sendsize);
     if (numBytesRcvd < 0) {
-      // Only acceptable error: recvfrom() would have blocked
       if (errno != EWOULDBLOCK)
         printf("recvfrom() failed");
     } 
@@ -292,7 +286,7 @@ void SIGIOHandler(int sig_num)
               peerPort = ntohs(csin.sin_port);
               // longjmp(JumpBuffer1,1);
           } 
-          /*receive deny*/
+          /*receive peer's deny*/
           if(strcmp(peerDeny,buf) == 0)
           {
               inet_ntop(AF_INET, &(csin.sin_addr), str, INET_ADDRSTRLEN);
@@ -305,7 +299,7 @@ void SIGIOHandler(int sig_num)
       {
           printf("|%s\n", &buf[1]);
       } 
-      else if (chatSession == 1 && buf[0] == 'E')
+      else if (chatSession == 1 && buf[0] == 'E') /*this is the end*/
       {
           printf("|chat terminated. Press 'r' to continue\n");
           chatSession = 0;
