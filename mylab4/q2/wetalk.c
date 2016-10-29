@@ -112,6 +112,7 @@ int main(int argc, char *argv[])
 
     while(1)
     {
+        /*While not in chatSession wait for user input or invitation*/
         while(chatSession == 0)
         { 
             int len = 0;
@@ -123,15 +124,30 @@ int main(int argc, char *argv[])
             /*read user input*/
             fflush(stdout);
             char n;
-            while(((n = getchar()) != '\n') && len < 50 )
+            while(((n = getchar()) != '\n') && n != EOF && len < 50 )
             { 
                 buf[len] = n;
                 len++;
             }
             /*len <= 2 implies response to invitation*/
-            if(strlen(buf) <= 2)
+            if(strlen(buf) < 2)
             {   
-                continue;
+                if (buf[0] == 'q' || buf[0] == 'Q')
+                {
+                  printf("You decide to quit\n");
+                  exit(0);
+                } 
+                else if (buf[0] == 'r' || buf[0] == 'R')
+                {
+                  printf("Restart\n");
+                  continue;
+                }
+                else 
+                {
+                  printf("\n");
+                  continue;
+                }
+
             } 
             else
             {
@@ -181,16 +197,16 @@ int main(int argc, char *argv[])
             memset(csin.sin_zero, '\0', sizeof csin.sin_zero);
             /*Sending Request*/
         }
-
+        /*During chat session*/
         while(chatSession)
         {
+            fflush(stdin);
             memset(buf,0,MAX_BUF);
-            fflush(stdout);
             int len = 0;
             printf(">");
             char n;
             /*block here*/
-            while((n = getchar()) != '\n')
+            while((n = getchar()) != '\n' && n != EOF)
             {
                 buf[len] = n;
                 len++;
@@ -198,27 +214,30 @@ int main(int argc, char *argv[])
             if(len == 1 && buf[0] == 'e')
             {
               char realBuf[1] = "E";
-              if(sendto(s, realBuf, 1,0,(struct sockaddr*) &csin, sizeof(csin)) < 0)
+              if(sendto(s, realBuf,1,0,(struct sockaddr*) &csin, sizeof(csin)) < 0)
               {
                 printf("Fail to send\n");
                 exit(1);
               }
+              printf("You terminate chat session\n");
               chatSession = 0;          
               break;
             }
-
-            char realBuf[52];
-            int i;
-            realBuf[0] = 'D';
-            for(i = 1; i < 52; i++)
-            { 
-              realBuf[i] = buf[i-1];
-            }
-            realBuf[52] = '\0';
-            if(sendto(s, realBuf, 51,0,(struct sockaddr*) &csin, sizeof(csin)) < 0)
+            else if(len >= 1)
             {
-              printf("Fail to send\n");
-              exit(1);
+              char realBuf[52];
+              int i;
+              realBuf[0] = 'D';
+              for(i = 1; i < 52; i++)
+              { 
+                realBuf[i] = buf[i-1];
+              }
+              realBuf[52] = '\0';
+              if(sendto(s, realBuf, 51,0,(struct sockaddr*) &csin, sizeof(csin)) < 0)
+              {
+                printf("Fail to send\n");
+                exit(1);
+              }
             }
         } //endwhile
     }
@@ -231,7 +250,7 @@ void SIGIOHandler(int sig_num)
   { 
     struct sockaddr_in csin; //self address
     socklen_t sendsize = sizeof(csin); // Address length in-out parameter
-    char buf[MAX_BUF];      // Datagram buf
+    char buf[MAX_BUF];      // buf
     memset(buf,0,MAX_BUF);
     numBytesRcvd = recvfrom(s, buf, 51, 0, (struct sockaddr *) &csin, &sendsize);
     if (numBytesRcvd < 0) {
@@ -240,7 +259,9 @@ void SIGIOHandler(int sig_num)
     } 
     else 
     {
+      /*receive something cancel alarm*/
       alarm(0);
+      /*ip*/
       char str[INET_ADDRSTRLEN];
       /*Receive something and currently not in chat session*/
       if(chatSession == 0)
@@ -259,6 +280,7 @@ void SIGIOHandler(int sig_num)
                   printf("Fail to send\n");
                   exit(1);
                 }
+                /*copy peer info to global*/
                 chatSession = 1;
                 strncpy(peerHost, str, strlen(str));
                 peerHost[strlen(str)] = '\0';
@@ -279,8 +301,9 @@ void SIGIOHandler(int sig_num)
           if(strcmp(peerAccept,buf) == 0)
           {
               inet_ntop(AF_INET, &(csin.sin_addr), str, INET_ADDRSTRLEN);
-              printf("|Chat request is accepted %s %d. Type 'c' to continue.\n", str, ntohs(csin.sin_port));
+              printf("|Chat request is accepted %s %d.\n", str, ntohs(csin.sin_port));
               chatSession = 1;
+              /*copy peer info to global*/
               strncpy(peerHost, str, strlen(str));
               peerHost[strlen(str)] = '\0';  
               peerPort = ntohs(csin.sin_port);
@@ -331,7 +354,6 @@ int hostname_to_ip(char * hostname , char* ip)
     }    
     return -1;
 } 
-
 /*send invitation to chat*/
 int SendInvitation(char* hostName, char *partnerPort)
 {
@@ -368,8 +390,6 @@ int SendInvitation(char* hostName, char *partnerPort)
     }
     return 0;
 }
-
-
 /*Splitting user input*/
 int SplitInvitaionRequest(char *hostName, char *portNumber, char *buf)
 {
@@ -404,50 +424,50 @@ void SIGALARM_handler(int sig_num)
     if(sig_num == SIGALRM)
     {
         printf("No response after 7s. [q]uit or [r]estart \n");
-        fprintf(stdout,"?");
-        char c = getchar();
-        if ( c == 'R' || c == 'r')
-        { 
-            int len=0;
-            char buf[MAX_BUF];
-            char hostName[MAX_BUF];
-            char partnerPort[MAX_BUF];
-            // /*Get hostname*/
-            printf("?");
-            /*read user input*/
-            memset(buf,0,MAX_BUF);
-            char n = getchar();
-            while(((n = getchar()) != '\n') && len < 50)
-            { 
-              buf[len] = n;
-              len++;
-            }
-            buf[len] = '\0';
-            // /*Splitting buffer*/
-            SplitInvitaionRequest(hostName, partnerPort, buf);
-            // /*Printing information to check*/
-            printf("Hostname: %s \n", hostName);
-            printf("Portnumber: %s \n", partnerPort);
-            printf("Sending Invitaion\n");
-            /*Send invitation*/
-            if (SendInvitation(hostName, partnerPort) < 0)
-            {
-              fprintf(stdout, "Fail to send invitation\n");
-            }
-            /*Set alarm for 7 seconds*/
-            alarm(7);
-            signal(SIGALRM, SIGALARM_handler);
-        } 
-        else if (c == 'q' || c == 'Q')
-        {
-          printf("Quitting\n");
-          exit(0);
-        } 
-        else 
-        {
-          printf("Invalid character !\n");
-          exit(1);
-        }
+        // char c = getchar();
+        // if ( c == 'R' || c == 'r')
+        // { 
+        //     chatSession = 0;
+        //     // int len=0;
+        //     // char buf[MAX_BUF];
+        //     // char hostName[MAX_BUF];
+        //     // char partnerPort[MAX_BUF];
+        //     // // /*Get hostname*/
+        //     // printf("?");
+        //     // /*read user input*/
+        //     // memset(buf,0,MAX_BUF);
+        //     // char n = getchar();
+        //     // while(((n = getchar()) != '\n') && n != EOF && len < 50)
+        //     // { 
+        //     //   buf[len] = n;
+        //     //   len++;
+        //     // }
+        //     // buf[len] = '\0';
+        //     // // /*Splitting buffer*/
+        //     // SplitInvitaionRequest(hostName, partnerPort, buf);
+        //     // // /*Printing information to check*/
+        //     // printf("Hostname: %s \n", hostName);
+        //     // printf("Portnumber: %s \n", partnerPort);
+        //     // printf("Sending Invitaion\n");
+        //     // /*Send invitation*/
+        //     // if (SendInvitation(hostName, partnerPort) < 0)
+        //     // {
+        //     //   fprintf(stdout, "Fail to send invitation\n");
+        //     // }
+        //     // /*Set alarm for 7 seconds*/
+        //     // alarm(7);
+        //     // signal(SIGALRM, SIGALARM_handler);
+        // } 
+        // else if (c == 'q' || c == 'Q')
+        // {
+        //   printf("Quitting\n");
+        //   exit(0);
+        // } 
+        // else 
+        // {
+        //   printf("Invalid character !\n");
+        //   exit(1);
+        // }
     }
 }
 
