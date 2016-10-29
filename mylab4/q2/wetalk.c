@@ -16,13 +16,20 @@
 #include <signal.h>
 #include <errno.h>
 
-jmp_buf  JumpBuffer;
+// jmp_buf  JumpBuffer1;
+// jmp_buf  JumpBuffer2;
+// jmp_buf  JumpBuffer3;
 
 #define CLIENT_MAX_BUF 2048
 #define MAX_BUF 4096
 
+
+/*incoming*/
 /*global socket*/
 int s;
+
+char peerHost[MAX_BUF];
+size_t peerPort;
 
 const char *invitation = "wannatalk";
 const char *peerAccept = "OK";
@@ -39,9 +46,6 @@ void SIGALARM_handler(int sig_num);
 /*Function to convert hostname to ip address*/
 int hostname_to_ip(char * hostname , char* ip);
 
-
-
-
 int main(int argc, char *argv[])
 {
     /*Address*/
@@ -51,8 +55,7 @@ int main(int argc, char *argv[])
     int portNumber;
     /*Number of byte received*/
     ssize_t numBytesRcvd;
-    /*buffer*/
-    char buf[CLIENT_MAX_BUF];
+    
     /*Check user input*/
     if(argc != 2)
     {
@@ -85,7 +88,6 @@ int main(int argc, char *argv[])
       exit(1);
     }
 
-
     /*SigIO handler*/
     struct sigaction handler;
     handler.sa_handler = SIGIOHandler; // Set signal handler for SIGIO
@@ -105,124 +107,138 @@ int main(int argc, char *argv[])
     if (fcntl(s, F_SETFL, O_NONBLOCK | FASYNC) < 0)
       printf("Unable to put client sock into non-blocking/async mode");
     // Go off and do real work; echoing happens in the background
-    if (setjmp(JumpBuffer) != 0) 
-    {
-        printf("Jumped Here\n");
-    }
-    if(chatSession == 0)
-    { 
-        int len;
-        char buf[MAX_BUF];
-        char hostName[MAX_BUF];
-        char partnerPort[MAX_BUF];
-        /*Get hostname*/
-        fprintf(stdout,"?");
-        /*read user input*/
-        memset(buf,0,MAX_BUF);
-        char n;
-        while(((n = getchar()) != '\n') && len < 50 )
-        { 
-          buf[len] = n;
-          len++;
-        }
-        buf[len] = '\0';
-        /*Splitting buffer*/
-        SplitInvitaionRequest(hostName, partnerPort, buf);
-        /*Printing information to check*/
-        // printf("%s's ip: %s\n", hostName, ip);
-        printf("Hostname: %s \n", hostName);
-        printf("Portnumber: %s \n", partnerPort);
-        printf("Sending Invitaion\n");        
-        /*Send invitation*/
-        if (SendInvitation(hostName, partnerPort) < 0)
-        {
-          fprintf(stdout, "Fail to send invitation\n");
-        }
-        /*Set alarm for 7 seconds*/
-        alarm(7);
-        signal(SIGALRM, SIGALARM_handler);
-    }
-        
-      //   memset(buf,0,MAX_BUF);
-      //   socklen_t sendsize = sizeof(csin);
-      //   if((numBytesRcvd = recvfrom(s, buf, sizeof(buf), 0, (struct sockaddr*)&csin, &sendsize)) < 0)
-      //   {
-      //     printf("Fail to receive\n");
-      //     exit(1);
-      //   }
-      //   /*receive something and not in chatsession*/
-      //   if(chatSession == 0)
-      //   {
-      //       char str[INET_ADDRSTRLEN];
-      //       if(strcmp(invitation,buf) == 0)
-      //       {
-      //           inet_ntop(AF_INET, &(csin.sin_addr), str, INET_ADDRSTRLEN);
-      //           printf("|Chat request from %s %d\n", str, csin.sin_port);
-      //           printf("?[c]hat or [n]o\n");
-      //           char c = getchar();
-      //           if (c == 'c' || c == 'C')
-      //           {
-      //             char *answer = "OK";
-      //             if(sendto(s, answer, strlen(answer),0,(struct sockaddr*)&csin, sizeof(csin)) < 0){
-      //               printf("Fail to send\n");
-      //               exit(1);
-      //             }
-      //             chatSession = 1;
-      //           } 
-      //           else 
-      //           {
-      //             char *answer = "KO";
-      //             if(sendto(s, answer, strlen(answer),0,(struct sockaddr*)&csin, sizeof(csin)) < 0){
-      //               printf("Fail to send\n");
-      //               exit(1);
-      //             }
-      //           }
-      //       } 
-      //       if(strcmp(peerAccept,buf) == 0)
-      //       {
-      //           inet_ntop(AF_INET, &(csin.sin_addr), str, INET_ADDRSTRLEN);
-      //           printf("|Chat request is accepted %s %d\n", str, ntohs(csin.sin_port));
-      //           chatSession = 1;
-      //       } 
-      //       if(strcmp(peerDeny,buf) == 0)
-      //       {
-      //           inet_ntop(AF_INET, &(csin.sin_addr), str, INET_ADDRSTRLEN);
-      //           printf("|Doesn't want to chat %s %d\n", str, ntohs(csin.sin_port));
-      //       }
-      //   }
-      //   /*receive something and in chat session*/
-      //   else if(chatSession != 0)
-      //   {
-      //       printf("%s\n", buf);
-      //   }
-      //   if(chatSession != 0)
-      //   {
-      //       printf(">");
-      //       memset(buf,0,CLIENT_MAX_BUF);
-      //       fgets(buf, MAX_BUF, stdin);
-      //       len = strlen(buf);
-      //       buf[len-1] = '\0';
-      //       if(sendto(s, buf, strlen(buf),0,(struct sockaddr*) &csin, sizeof(csin)) < 0)
-      //       {
-      //         printf("Fail to send\n");
-      //         exit(1);
-      //       }
-      //   }
+    
+    char buf[MAX_BUF];
+    char hostName[MAX_BUF];
+    char partnerPort[MAX_BUF];
+    int isInitator = 0;
+    
+    //if(setjmp(JumpBuffer1));
+
     while(1)
     {
-      
-    } //endwhile
-  }
-    
+        while(chatSession == 0)
+        { 
+            int len = 0;
+            memset(buf, 0, MAX_BUF);
+            memset(hostName, 0, MAX_BUF);
+            memset(partnerPort, 0, MAX_BUF);
+            /*Get hostname*/
+            printf("?");
+            /*read user input*/
+            fflush(stdout);
+            char n;
+            while(((n = getchar()) != '\n') && len < 50 )
+            { 
+              buf[len] = n;
+              len++;
+            }
+            /*len <= 3 implies response to invitation*/
+            if(strlen(buf) <= 2)
+            {   
+                continue;
+            } 
+            else
+            {
+                buf[len] = '\0'; //get rid of newline
+                /*Splitting buffer*/
+                SplitInvitaionRequest(hostName, partnerPort, buf);
+                /*Printing information to check*/
+                // printf("%s's ip: %s\n", hostName, ip);
+                printf("Hostname: %s \n", hostName);
+                printf("Portnumber: %s \n", partnerPort);
+                printf("Sending Invitaion\n");        
+                /*Send invitation*/
+                if (SendInvitation(hostName, partnerPort) < 0)
+                {
+                  fprintf(stdout, "Fail to send invitation\n");
+                }
+                /*Set alarm for 7 seconds*/
+                alarm(7);
+                signal(SIGALRM, SIGALARM_handler);
+            }
+        }
+        if (chatSession == 1)
+        {
+            printf("Connection is established: \n");
+            printf("peer ip: %s\n", peerHost);
+            printf("peer port: %ld\n", peerPort);
+            int len;
+            /*hostname to ip*/
+            char ip[100];
+            len = strlen(peerHost);        
+            if (hostname_to_ip(peerHost, ip) < 0)
+            {
+              printf("Fail to convert hostName to IP \n");
+            }  
+            /*Build address data structure of partner*/
+            /*Address family = Internet */
+            csin.sin_family = AF_INET;
+            /* Set port number, using htons function to use proper byte order */
+            csin.sin_port = htons(peerPort);
+            /* Set IP address to localhost */
+            if(inet_pton(AF_INET, ip, &csin.sin_addr)<=0)
+            {
+                printf("\n inet_pton error occured\n");
+                return -1;
+            }
+            /* Set all bits of the padding field to 0 */
+            memset(csin.sin_zero, '\0', sizeof csin.sin_zero);
+            /*Sending Request*/
+        }
+
+        while(chatSession)
+        {
+            memset(buf,0,MAX_BUF);
+            fflush(stdout);
+            int len = 0;
+            printf(">");
+            char n;
+            /*block here*/
+            while((n = getchar()) != '\n')
+            {
+                buf[len] = n;
+                len++;
+            }
+            if(len == 1 && buf[0] == 'e')
+            {
+              char realBuf[1] = "E";
+              if(sendto(s, realBuf, 1,0,(struct sockaddr*) &csin, sizeof(csin)) < 0)
+              {
+                printf("Fail to send\n");
+                exit(1);
+              }
+              chatSession = 0;          
+              break;
+            }
+
+            char realBuf[52];
+            int i;
+            realBuf[0] = 'D';
+            for(i = 1; i < 52; i++)
+            { 
+              realBuf[i] = buf[i-1];
+            }
+            realBuf[52] = '\0';
+            if(sendto(s, realBuf, 51,0,(struct sockaddr*) &csin, sizeof(csin)) < 0)
+            {
+              printf("Fail to send\n");
+              exit(1);
+            }
+        } //endwhile
+    }
+}
+  
 void SIGIOHandler(int sig_num) 
 {
   ssize_t numBytesRcvd;
   do 
   { 
-    struct sockaddr_in csin;  // Address of datagram source
-    socklen_t clntLen = sizeof(csin); // Address length in-out parameter
+    struct sockaddr_in csin; //self address
+    socklen_t sendsize = sizeof(csin); // Address length in-out parameter
     char buf[MAX_BUF];      // Datagram buf
-    numBytesRcvd = recvfrom(s, buf, MAX_BUF, 0, (struct sockaddr *) &csin, &clntLen);
+    memset(buf,0,MAX_BUF);
+    numBytesRcvd = recvfrom(s, buf, 51, 0, (struct sockaddr *) &csin, &sendsize);
     if (numBytesRcvd < 0) {
       // Only acceptable error: recvfrom() would have blocked
       if (errno != EWOULDBLOCK)
@@ -230,7 +246,6 @@ void SIGIOHandler(int sig_num)
     } 
     else 
     {
-      printf("We receive something :(( \n");      
       alarm(0);
       char str[INET_ADDRSTRLEN];
       /*Receive something and currently not in chat session*/
@@ -251,8 +266,9 @@ void SIGIOHandler(int sig_num)
                   exit(1);
                 }
                 chatSession = 1;
-                printf(">");
-                longjmp(JumpBuffer, 1);
+                strncpy(peerHost, str, strlen(str));
+                peerHost[strlen(str)] = '\0';
+                peerPort = ntohs(csin.sin_port);
               } 
               else 
               {
@@ -262,34 +278,39 @@ void SIGIOHandler(int sig_num)
                   printf("Fail to send\n");
                   exit(1);
                 }
-                longjmp(JumpBuffer, 1);
+                chatSession = 0; 
               }
           }
-          /*receive confirmation*/
+          /*receive peer's confirmation*/
           if(strcmp(peerAccept,buf) == 0)
           {
               inet_ntop(AF_INET, &(csin.sin_addr), str, INET_ADDRSTRLEN);
-              printf("|Chat request is accepted %s %d\n", str, ntohs(csin.sin_port));
+              printf("|Chat request is accepted %s %d. Type 'c' to continue.\n", str, ntohs(csin.sin_port));
               chatSession = 1;
-              printf(">");
-
+              strncpy(peerHost, str, strlen(str));
+              peerHost[strlen(str)] = '\0';  
+              peerPort = ntohs(csin.sin_port);
+              // longjmp(JumpBuffer1,1);
           } 
           /*receive deny*/
           if(strcmp(peerDeny,buf) == 0)
           {
               inet_ntop(AF_INET, &(csin.sin_addr), str, INET_ADDRSTRLEN);
-              printf("|Doesn't want to chat %s %d\n", str, ntohs(csin.sin_port));
+              printf("|Doesn't want to chat %s %d. Type 'r' to restart\n", str, ntohs(csin.sin_port));
+              // longjmp(JumpBuffer1,1);
           }
-      }
-      
-      // PrintSocketAddress((struct sockaddr *) &clntAddr, stdout);
-      // fputc('\n', stdout);
-
-      // ssize_t numBytesSent = sendto(s, buffer, numBytesRcvd, 0, (struct sockaddr *) &clntAddr, sizeof(clntAddr));
-      //   if (numBytesSent < 0)
-      //     printf("sendto() failed");
-      //   else if (numBytesSent != numBytesRcvd)
-      //     printf("sendto() sent unexpected number of bytes");
+      } /*end handshake*/
+      /*During chat session. */
+      else if(chatSession == 1 && buf[0] == 'D') /*this is a message*/
+      {
+          printf("|%s\n", &buf[1]);
+      } 
+      else if (chatSession == 1 && buf[0] == 'E')
+      {
+          printf("|chat terminated. Press 'r' to continue\n");
+          chatSession = 0;
+          // longjmp(JumpBuffer1,1);
+      } 
     }
   } while (numBytesRcvd >= 0);
 }
@@ -346,8 +367,7 @@ int SendInvitation(char* hostName, char *partnerPort)
     memset(csin.sin_zero, '\0', sizeof csin.sin_zero);
     /*Sending Request*/
     //Start Sending
-    // char *invite = "wannatalk";
-    if(sendto(s, invitation, strlen(invitation),0,(struct sockaddr*)&csin, sizeof(csin)) < 0)
+    if(sendto(s,invitation, strlen(invitation),0,(struct sockaddr*)&csin, sizeof(csin)) < 0)
     {
       printf("Fail to send\n");
       return -1;
@@ -369,7 +389,7 @@ int SplitInvitaionRequest(char *hostName, char *portNumber, char *buf)
     strncpy(hostName, token, len);
     hostName[len] = '\0';
     /*port umber*/
-    memset(portNumber,0,11);
+    //memset(portNumber,0,11);
     token = strtok(NULL, d);
     if(token != NULL)
     {
