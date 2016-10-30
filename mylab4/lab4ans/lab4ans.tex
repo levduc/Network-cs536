@@ -78,5 +78,74 @@ I sent 5 queries uing tunneling and not using tunneling. Below is the performanc
 	
 \end{problem}
 
+\begin{problem}{3}
+	Print and inspect all the fields of headers/trailers of the first three Ethernet frames, the headers of IP and UDP packets contained therein, and the first 10 bytes of the UDP payloads. The UDP header is very simple, containing 16-bit length and checksum fields in addition to source and destination port numbers. 
+	\\
+	Captured package: \\
+	- First Package
+	\begin{verbatim}
+	    IP (tos 0x0, ttl 64, id 52721, offset 0, flags [none], proto UDP (17), length 4028)
+	    192.168.1.2.35810 > 192.168.1.1.10000: UDP, length 4000
+	    0x0000:  3a56 8f3e 2af8 babc 4274 5230 0800 4500  :V.>*...BtR0..E.
+	    0x0010:  0fbc cdf1 0000 4011 19ec c0a8 0102 c0a8  ......@.........
+	    0x0020:  0101 8be2 2710 0fa8 930d 4c4c 4c4c 4c4c  ....'.....LLLLLL
+	    0x0030:  4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c  LLLLLLLLLLLLLLLL
+	    0x0040:  4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c  LLLLLLLLLLLLLLLL
+	\end{verbatim}
+	- Second Package
+	\begin{verbatim}
+	    IP (tos 0x0, ttl 64, id 52722, offset 0, flags [none], proto UDP (17), length 4028)
+	    192.168.1.2.35810 > 192.168.1.1.10000: UDP, length 4000
+	    0x0000:  3a56 8f3e 2af8 babc 4274 5230 0800 4500  :V.>*...BtR0..E.
+	    0x0010:  0fbc cdf2 0000 4011 19eb c0a8 0102 c0a8  ......@.........
+	    0x0020:  0101 8be2 2710 0fa8 930d 4c4c 4c4c 4c4c  ....'.....LLLLLL
+	    0x0030:  4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c  LLLLLLLLLLLLLLLL
+	    0x0040:  4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c  LLLLLLLLLLLLLLLL		
+	\end{verbatim}
+	- Third package
+	\begin{verbatim}
+	    IP (tos 0x0, ttl 64, id 52723, offset 0, flags [none], proto UDP (17), length 4028)
+	    192.168.1.2.35810 > 192.168.1.1.10000: UDP, length 4000
+	    0x0000:  3a56 8f3e 2af8 babc 4274 5230 0800 4500  :V.>*...BtR0..E.
+	    0x0010:  0fbc cdf3 0000 4011 19ea c0a8 0102 c0a8  ......@.........
+	    0x0020:  0101 8be2 2710 0fa8 930d 4c4c 4c4c 4c4c  ....'.....LLLLLL
+	    0x0030:  4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c  LLLLLLLLLLLLLLLL
+	    0x0040:  4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c 4c4c  LLLLLLLLLLLLLLLL	
+	\end{verbatim}
+	\begin{enumerate}
+		\item 
+		What is the default value of the TTL field observed?
+		\\\textbf{Ans:} The default  TTL is 64
+		\item Use the /bin/ping app to gauge the TTL values from www.purdue.edu, www.cisco.com, and another web site of your choice. 
+		\\\textbf{Ans:} Using ping app, we get: \\
+		\texttt{www.purdue.edu:} TTL = 250 
+		\begin{verbatim}
+		64 bytes from www.purdue.edu (128.210.7.200): icmp_seq=1 ttl=250 time=0.995 ms
+		64 bytes from www.purdue.edu (128.210.7.200): icmp_seq=2 ttl=250 time=0.887 ms	
+		\end{verbatim}
+		\texttt{www.cisco.com:} TTL = 55 
+		\begin{verbatim}
+		a23-79-213-27.deploy.static.akamaitechnologies.com (23.79.213.27) ... ttl=55 ...
+		a23-79-213-27.deploy.static.akamaitechnologies.com (23.79.213.27) ... ttl=55 ...
+		\end{verbatim}
+		\texttt{www.stackoverflow.com:} TTL = 57 
+		\begin{verbatim}
+		64 bytes from 151.101.129.69: icmp_seq=1 ttl=57 time=7.49 ms
+		64 bytes from 151.101.129.69: icmp_seq=2 ttl=57 time=7.10 ms
+		\end{verbatim}
+		\item Do the values equal to the TTL value you observed during sniffing? 
+		Check if TTL values can vary across operating systems and protocols. 
+		\\ \textbf{Ans.} No. TTL during sniffing is 64 while other varies. Also, TTL values vary across OS and protocol. For example, in Windows 7, for IMCP/TCP/UDP, ttl is 128. In Linux/UNIX, TTL is 64 (may vary on different verions of Linux) 
+		\item How might an attacker exploit TTL information from ping or other sources? 
+		\\\textbf{Ans.} with knowledge of TTL information, adversary can send lots of packages in a way that those packages will expire at the switch/router. Thus, the switch is forced to generate large amount of ICMP exceed messages. This may caused heavy load on switch, and may cause Deny of Service on the target. 
+		\item Is the TOS field being used in the sniffed IP packets?
+		\\ \textbf{Ans.} No. In the sniffed IP package, the TOS field is after Version Number (i.e 4) and IFL (i.e 5), it's \texttt{00} which means it was not used.
+ 		\item How about the fragmentation fields?.
+ 		\\\textbf{Ans. }No. Because in our sniffed package, combination of flag field and fragmentation field  is \texttt{0000}. Therefore, framentation was not used.
+	\end{enumerate}
+
+
+
+\end{problem}
 
 \end{document}
