@@ -171,13 +171,13 @@ int main(int argc, char *argv[])
 			}
 			else
 			{
-				printf("Child: There is no file name\n");
+				printf("Child: resspone KO\n");
 				exit(1);
 			}
 			/*file descriptor*/
 		    /*try open file*/
 		    int fd;
-		    if ((fd = open(fileName,O_RDWR)) <= 0)
+		    if ((fd = open(fileName,O_RDWR, 0)) < 0)
 		    {
 				printf("Child: Cannot open file. File may not exist.");
 				char * deny = "KO";
