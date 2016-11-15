@@ -184,7 +184,7 @@ int main(int argc, char *argv[])
                 printf("dcm1\n");
 
             }
-		    if ((fd = open(fileName,O_RDWR, 0666)) < 0)
+		    if ((fd = open(fileName,O_RDONLY, 0666)) < 0)
 		    {
 				printf("Child: Cannot open file. File may not exist.");
 				char * deny = "KO";
