@@ -38,12 +38,14 @@ char* concatString(char *s1, char *s2)
 /*Alarm handler*/
 void SIGALARM_handler(int sig_num)
 {
-    printf("SIGARM: write to /dev/audio \n");
-
-    if(write (audioFD, globalBuffer, payloadSize) < 0){
+    ssize_t numBytesWrt;
+    
+    if((numBytesWrt = write (audioFD, globalBuffer, payloadSize)) < 0){
         printf("%s", strerror(errno));
         exit(1);
     }
+
+    printf("SIGARM: write to /dev/audio %ld\n", numBytesWrt);
     globalBuffer = globalBuffer + payloadSize; 
     /*reinstall the handler */
     signal(SIGALRM, SIGALARM_handler); 
@@ -66,7 +68,6 @@ void SIGIOHandler(int sig_num)
     } 
     else 
     {
-        printf("%ld\n", numBytesRcvd);
         currentEndBuffer = currentEndBuffer + numBytesRcvd;
         char confirmBack[MAX_BUF];
         sprintf(confirmBack,"%d %d",currentEndBuffer,targetBufferSize);
