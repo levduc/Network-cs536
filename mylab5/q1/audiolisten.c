@@ -39,13 +39,30 @@ char* concatString(char *s1, char *s2)
 void SIGALARM_handler(int sig_num)
 {
     ssize_t numBytesWrt;
-    if((numBytesWrt = write(audioFD, globalBuffer, payloadSize)) < 0){
-        printf("%s", strerror(errno));
-        exit(1);
+    if(currentEndBuffer > 0)
+    {
+        /*write payloadsize*/
+        if(currentEndBuffer >= payloadSize)
+        {
+            if((numBytesWrt = write(audioFD, globalBuffer, payloadSize)) < 0)
+            {
+                printf("%s", strerror(errno));
+                exit(1);
+            }
+        }
+        else /*otherwise write same as currentEndBuffer*/
+        {
+            if((numBytesWrt = write(audioFD, globalBuffer, currentEndBuffer)) < 0)
+            {
+                printf("%s", strerror(errno));
+                exit(1);
+            }
+        }
+        // printf("SIGARM: write to file %ld\n", numBytesWrt);
+        strcpy(globalBuffer,globalBuffer + numBytesWrt);
+        currentEndBuffer = currentEndBuffer - numBytesWrt;
+        printf("SIGALARM:%d %ld\n",currentEndBuffer,numBytesWrt);
     }
-    printf("SIGARM: write to file %ld\n", numBytesWrt);
-    // globalBuffer = globalBuffer + payloadSize; 
-    printf("%ld\n", strlen(globalBuffer));
     /*reinstall the handler */
     signal(SIGALRM, SIGALARM_handler); 
 }
@@ -66,6 +83,7 @@ void SIGIOHandler(int sig_num)
     } 
     else 
     {
+        // printf("%ld\n", numBytesRcvd);
         currentEndBuffer = currentEndBuffer + numBytesRcvd;
         char confirmBack[MAX_BUF];
         sprintf(confirmBack,"%d %d",currentEndBuffer,targetBufferSize);
@@ -128,9 +146,8 @@ int main(int argc, char *argv[])
     bufferSize = strtol(argv[7], NULL,10);
     printf("Buffer size: %d\n", bufferSize);
     //allocate
-    globalBuffer = malloc(bufferSize+1);
+    globalBuffer = malloc((bufferSize+1)*sizeof(char));
     globalBuffer[bufferSize+1] = '\0';
-    
     /*target buffer size*/
     targetBufferSize = strtol(argv[8], NULL,10);
     printf("target buffer size: %d\n", targetBufferSize);
@@ -277,9 +294,9 @@ int main(int argc, char *argv[])
     /***************************SIGIO handler***************************/
 
     /*sleep to prefetch*/
-    // usleep(payloadDelay);
+    usleep(10000000);
     
-    char * audioFileName = "lonroi1.mp3";
+    char * audioFileName = "/dev/audio";
     audioFD = open(audioFileName, O_CREAT|O_WRONLY, 0666);
     if (audioFD < 0) 
     {
@@ -287,7 +304,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    int mu = (int) 1000000/gammaVal; 
+    int mu = (int) 1000000/gammaVal;
     ualarm(mu,mu);
     signal(SIGALRM, SIGALARM_handler);    
     

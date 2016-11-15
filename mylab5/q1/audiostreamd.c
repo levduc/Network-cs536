@@ -30,6 +30,7 @@ char* concatString(char *s1, char *s2)
     return result;
 }
 
+/*SIGIOhandler*/
 void SIGIOHandler(int sig_num) 
 {
   ssize_t numBytesRcvd;
@@ -55,8 +56,7 @@ void SIGIOHandler(int sig_num)
 
 int main(int argc, char *argv[])
 {
-	 
-  	/*child count*/
+    /*child count*/
   	unsigned int childCount = 0; //child count
     /*client Buffer*/
     char buf[MAX_BUF];
@@ -112,7 +112,6 @@ int main(int argc, char *argv[])
    	listen(tcpSocket,10);
 	printf("Listening ... \n");
    	/*************************tcp-server***********************************/
-   	
 	
 	int status;
 	int len;
