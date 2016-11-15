@@ -43,8 +43,8 @@ void SIGALARM_handler(int sig_num)
         printf("%s", strerror(errno));
         exit(1);
     }
-    printf("SIGARM: write to /dev/audio %ld\n", numBytesWrt);
-    globalBuffer = globalBuffer + payloadSize; 
+    printf("SIGARM: write to file %ld\n", numBytesWrt);
+    // globalBuffer = globalBuffer + payloadSize; 
     printf("%ld\n", strlen(globalBuffer));
     /*reinstall the handler */
     signal(SIGALRM, SIGALARM_handler); 
@@ -214,7 +214,6 @@ int main(int argc, char *argv[])
         exit(1);
     }
     close(tcpSocket);
-
     printf("%s\n", serverBuf);
     /*server buffer*/
     serverBuf[numBytesRcvd] = '\0';       
@@ -280,17 +279,18 @@ int main(int argc, char *argv[])
     /*sleep to prefetch*/
     // usleep(payloadDelay);
     
-    char * audioFileName = "/dev/audio";
-    audioFD = open(audioFileName, O_RDWR, 0666);
+    char * audioFileName = "lonroi1.mp3";
+    audioFD = open(audioFileName, O_CREAT|O_WRONLY, 0666);
     if (audioFD < 0) 
     {
         printf("cannot open file: %s \n", audioFileName);
         exit(1);
     }
 
-    int mu = (int) 1000000/gammaVal;
+    int mu = (int) 1000000/gammaVal; 
     ualarm(mu,mu);
     signal(SIGALRM, SIGALARM_handler);    
+    
     while(1)
     {
 
