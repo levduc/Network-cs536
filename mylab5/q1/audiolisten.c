@@ -25,6 +25,7 @@ int bufferSize;
 int targetBufferSize;
 int clientUDPSocket;
 int currentEndBuffer = 0;
+int audioFD;
 /*concatString is to concatenate two string together*/
 char* concatString(char *s1, char *s2)
 {
@@ -38,15 +39,8 @@ char* concatString(char *s1, char *s2)
 void SIGALARM_handler(int sig_num)
 {
     printf("SIGARM: write to /dev/audio \n");
-    char * fileName = "/dev/audio";
-    int fd = open(fileName, O_RDWR , 0);
-    if (fd < 0) 
-    {
-        printf("cannot open file\n");
-        exit(1);
-    }
 
-    if(write (fd, globalBuffer, payloadSize) < 0){
+    if(write (audioFD, globalBuffer, payloadSize) < 0){
         printf("%s", strerror(errno));
         exit(1);
     }
@@ -286,6 +280,16 @@ int main(int argc, char *argv[])
 
     /*sleep to prefetch*/
     usleep(payloadDelay);
+    
+    
+    char * audioFileName = "/dev/audio";
+    int audioFD = open(audioFileName, O_RDWR , 0);
+    if (audioFD < 0) 
+    {
+        printf("cannot open file\n");
+        exit(1);
+    }
+    
     int mu = (int) 1000000/gammaVal;
     ualarm(mu,mu);
     signal(SIGALRM, SIGALARM_handler);
