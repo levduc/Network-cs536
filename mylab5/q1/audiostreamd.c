@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
 			/*file descriptor*/
 		    /*try open file*/
 		    int fd;
-		    if ((fd = open(fileName,O_RDWR, 0)) < 0)
+		    if ((fd = open(fileName,O_RDWR, 0666)) < 0)
 		    {
 				printf("Child: Cannot open file. File may not exist.");
 				char * deny = "KO";
