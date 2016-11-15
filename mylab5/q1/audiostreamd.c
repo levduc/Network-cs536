@@ -9,6 +9,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <time.h>
+#include <errno.h>
 
 #define MAX_BUF 4906
 #define SK_MAX 20
@@ -17,6 +18,8 @@
 int packageSpacing;
 /*payload size*/
 int payloadSize;
+/*global udp socket*/
+int udpSocket;
 
 /*concatString is to concatenate two string together*/
 char* concatString(char *s1, char *s2)
@@ -32,19 +35,22 @@ void SIGIOHandler(int sig_num)
   ssize_t numBytesRcvd;
   do 
   { 
-    struct sockaddr_in csin; //self address
+    struct sockaddr_in csin; //address
     socklen_t sendsize = sizeof(csin); // Address length in-out parameter
     char buf[MAX_BUF];      // buf
     memset(buf,0,MAX_BUF);
-    numBytesRcvd = recvfrom(s, buf, 51, 0, (struct sockaddr *) &csin, &sendsize);
-    if (numBytesRcvd < 0) {
+    numBytesRcvd = recvfrom(udpSocket, buf, MAX_BUF, 0, (struct sockaddr *) &csin, &sendsize);
+    if (numBytesRcvd < 0) 
+    {
       if (errno != EWOULDBLOCK)
         printf("recvfrom() failed");
     } 
     else 
     {
+    	/*Adjust tau here*/
+    	printf("%s\n", buf);
     }
-  } while (numBytesRcvd >= 0);
+  } while (numBytesRcvd > 0);
 }
 
 int main(int argc, char *argv[])
@@ -75,6 +81,7 @@ int main(int argc, char *argv[])
     /*tau*/
     packageSpacing = strtol(argv[4],NULL,10);
     printf("Package Spacing: %d\n", packageSpacing);
+   	/*************************tcp-server***********************************/
   	/*server address*/
   	struct sockaddr_in tcp_sin;
     /*build address data structure*/
@@ -83,8 +90,6 @@ int main(int argc, char *argv[])
     /*server tcp-port*/
     tcpPort = strtol(argv[1],NULL,10);
     printf("TCP-Port: %d\n", tcpPort);
-    udpPort = strtol(argv[2],NULL,10);
-    printf("initial UDP-Port: %d\n", udpPort);
     /*set port number, using htons function to use proper byte order */
   	tcp_sin.sin_port = htons(tcpPort);
   	/*set IP address to localhost */
@@ -106,11 +111,17 @@ int main(int argc, char *argv[])
    	/*Listening to incoming request*/
    	listen(tcpSocket,10);
 	printf("Listening ... \n");
+   	/*************************tcp-server***********************************/
+   	
+	
 	int status;
 	int len;
 	/*delimiter*/
-	const char d[2] = "$";
-
+	const char d[2] = " ";
+    /*server udp-port*/
+    udpPort = strtol(argv[2],NULL,10);
+    printf("initial UDP-Port: %d\n", udpPort);
+	
 	while(1)
 	{
 		/*clear buffer*/
@@ -178,7 +189,6 @@ int main(int argc, char *argv[])
 		    /*File exists. binding udp*/
 		   	/***************************server udp**************************************/
 		    struct sockaddr_in udp_sin;
-		    int udpSocket;
     		udp_sin.sin_family = AF_INET;
 	  		udp_sin.sin_addr.s_addr = htonl(INADDR_ANY);
 		    udp_sin.sin_port = htons(udpPort);
@@ -206,6 +216,27 @@ int main(int argc, char *argv[])
 		    printf("%d\n", clientUdpPortInt);
 		    /***************************client udp**************************************/
 			
+			/***************************SIGIO handler***********************************/
+			/*SigIO handler*/
+		    struct sigaction handler;
+		    handler.sa_handler = SIGIOHandler; // Set signal handler for SIGIO
+		    // Create mask that mask all signals
+		    if (sigfillset(&handler.sa_mask) < 0)
+		      printf("sigfillset() failed");
+		    handler.sa_flags = 0;              // No flags
+
+		    if (sigaction(SIGIO, &handler, 0) < 0)
+		      printf("sigaction() failed for SIGIO");
+
+		    // We must own the socket to receive the SIGIO message
+		    if (fcntl(udpSocket, F_SETOWN, getpid()) < 0)
+		      printf("Unable to set process owner to us");
+
+		    // Arrange for nonblocking I/O and SIGIO delivery
+		    if (fcntl(udpSocket, F_SETFL, O_NONBLOCK | FASYNC) < 0)
+		      printf("Unable to put client sock into non-blocking/async mode");
+			/***************************SIGIO handler***********************************/
+			
 			/*Sending confirmation*/
 			printf("Child: File exists. Sending confirmation ....\n");
 		    char confirmation[SK_MAX];
@@ -221,12 +252,13 @@ int main(int argc, char *argv[])
 		 	int byteWrite = 0;
 		 	while((byteWrite = read(fd, writeBuf, payloadSize)) > 0)
 		 	{
-		 	    if (sendto(udpSocket,writeBuf,strlen(writeBuf),0,(struct sockaddr*)&udp_csin, sizeof(udp_csin)) < 0)
+		 	    if (sendto(udpSocket,writeBuf,byteWrite,0,(struct sockaddr*)&udp_csin, sizeof(udp_csin)) < 0)
 		 	    {
 					printf("Child: Fail to send\n");
 					exit(1);
 				}
 				/*success usleep*/
+				printf("payload %d byteWrite %d\n", payloadSize, byteWrite);
 				usleep(packageSpacing);
 	   			memset(writeBuf,0, payloadSize);
 		 	}
