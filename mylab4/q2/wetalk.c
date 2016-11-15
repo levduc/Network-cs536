@@ -116,7 +116,6 @@ int main(int argc, char *argv[])
     // Arrange for nonblocking I/O and SIGIO delivery
     if (fcntl(s, F_SETFL, O_NONBLOCK | FASYNC) < 0)
       printf("Unable to put client sock into non-blocking/async mode");
-    // Go off and do real work; echoing happens in the background
     
     char buf[MAX_BUF];
     char hostName[MAX_BUF];

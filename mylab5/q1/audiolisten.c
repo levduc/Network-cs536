@@ -39,7 +39,7 @@ void SIGALARM_handler(int sig_num)
 {
     printf("SIGARM: write to /dev/audio \n");
     char * fileName = "/dev/audio";
-    int fd = open(fileName, O_RDWR | O_APPEND, S_IRUSR | S_IWUSR);
+    int fd = open(fileName, O_RDWR , 0);
     if (fd < 0) 
     {
         printf("cannot open file\n");
