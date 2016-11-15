@@ -39,14 +39,12 @@ char* concatString(char *s1, char *s2)
 void SIGALARM_handler(int sig_num)
 {
     ssize_t numBytesWrt;
-    
     if((numBytesWrt = write (audioFD, globalBuffer, payloadSize)) < 0){
         printf("%s", strerror(errno));
         exit(1);
     }
-
     printf("SIGARM: write to /dev/audio %ld\n", numBytesWrt);
-    globalBuffer = globalBuffer + payloadSize; 
+    *globalBuffer = *globalBuffer + payloadSize; 
     /*reinstall the handler */
     signal(SIGALRM, SIGALARM_handler); 
 }
@@ -59,7 +57,6 @@ void SIGIOHandler(int sig_num)
   { 
     struct sockaddr_in ssin; //address
     socklen_t sendsize = sizeof(ssin); // Address length in-out parameter
-    char buf[payloadSize];
     numBytesRcvd = recvfrom(clientUDPSocket, &globalBuffer[currentEndBuffer], payloadSize, 0, (struct sockaddr *) &ssin, &sendsize);
     if (numBytesRcvd < 0) 
     {
@@ -281,7 +278,6 @@ int main(int argc, char *argv[])
 
     /*sleep to prefetch*/
     usleep(payloadDelay);
-    
     
     char * audioFileName = "/dev/audio";
     int audioFD = open(audioFileName, O_RDWR , 0);
