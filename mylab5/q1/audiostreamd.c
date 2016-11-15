@@ -177,6 +177,13 @@ int main(int argc, char *argv[])
 			/*file descriptor*/
 		    /*try open file*/
 		    int fd;
+            if( access(fileName, F_OK ) != -1 ) {
+                printf("dcm\n");
+            } else {
+                // file doesn't exist
+                printf("dcm1\n");
+
+            }
 		    if ((fd = open(fileName,O_RDWR, 0666)) < 0)
 		    {
 				printf("Child: Cannot open file. File may not exist.");

@@ -39,12 +39,14 @@ char* concatString(char *s1, char *s2)
 void SIGALARM_handler(int sig_num)
 {
     ssize_t numBytesWrt;
+
     if((numBytesWrt = write (audioFD, globalBuffer, payloadSize)) < 0){
         printf("%s", strerror(errno));
         exit(1);
     }
     printf("SIGARM: write to /dev/audio %ld\n", numBytesWrt);
     *globalBuffer = *globalBuffer + payloadSize; 
+    printf("%ld\n", strlen(globalBuffer));
     /*reinstall the handler */
     signal(SIGALRM, SIGALARM_handler); 
 }
@@ -280,59 +282,20 @@ int main(int argc, char *argv[])
     usleep(payloadDelay);
     
     char * audioFileName = "/dev/audio";
-    int audioFD = open(audioFileName, O_RDWR , 0);
+    audioFD = open(audioFileName, O_RDWR, 0666);
     if (audioFD < 0) 
     {
-        printf("cannot open file\n");
+        printf("cannot open file: %s \n", audioFileName);
         exit(1);
     }
-    
+
     int mu = (int) 1000000/gammaVal;
     ualarm(mu,mu);
-    signal(SIGALRM, SIGALARM_handler);
-    
+    signal(SIGALRM, SIGALARM_handler);    
     while(1)
     {
 
     }
 
-    // //measure Time
-    // struct timeval start, end;
-    // int firstRead = 1;
-    // /*Wait for resspone from server*/
-    // while ((numBytesRcvd = read(s, serverBuf, payloadSize)) > 0) // recv
-    // {
-    //     /*Check for first read*/
-    //     if(firstRead == 1)
-    //     {
-    //         /*Creating file*/
-    //         fd = open(fileName, O_CREAT | O_WRONLY | O_EXCL, S_IRUSR | S_IWUSR);
-    //         if (fd < 0) 
-    //         {
-    //           /*failure: file existed */
-    //           if (errno == EEXIST) {
-    //             printf("File already existed\n");
-    //             close(s);
-    //             exit(1);
-    //           }
-    //         }
-    //         //Start Time 
-    //         gettimeofday(&start, NULL);
-    //         firstRead = 0;
-    //     }
-    //     write(fd,serverBuf,numBytesRcvd);
-    //     memset(serverBuf, '\0', payloadSize);
-    //     total += numBytesRcvd;
-    // }
-    // /*numBytesRcvd = 0 implies TCP connection is closed*/
-    // if(firstRead == 1) 
-    // {
-    //     printf("TCP connection is closed. Key don't match or File may not exist\n");
-    //     exit(1);            
-    // }
-    // //End Time 
-    // gettimeofday(&end, NULL);
-    // //numBytes = 0 implies tcp connection closed
-    // fprintf(stdout,"TCP connection is closed\n");
 	return 0;
 }
