@@ -39,13 +39,12 @@ char* concatString(char *s1, char *s2)
 void SIGALARM_handler(int sig_num)
 {
     ssize_t numBytesWrt;
-
-    if((numBytesWrt = write (audioFD, globalBuffer, payloadSize)) < 0){
+    if((numBytesWrt = write(audioFD, globalBuffer, payloadSize)) < 0){
         printf("%s", strerror(errno));
         exit(1);
     }
     printf("SIGARM: write to /dev/audio %ld\n", numBytesWrt);
-    *globalBuffer = *globalBuffer + payloadSize; 
+    globalBuffer = globalBuffer + payloadSize; 
     printf("%ld\n", strlen(globalBuffer));
     /*reinstall the handler */
     signal(SIGALRM, SIGALARM_handler); 
