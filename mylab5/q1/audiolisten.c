@@ -278,7 +278,7 @@ int main(int argc, char *argv[])
     /***************************SIGIO handler***************************/
 
     /*sleep to prefetch*/
-    usleep(payloadDelay);
+    // usleep(payloadDelay);
     
     char * audioFileName = "/dev/audio";
     audioFD = open(audioFileName, O_RDWR, 0666);
