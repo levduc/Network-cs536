@@ -26,7 +26,6 @@ int udpSocket;
 struct timespec sleepTime, remainTime;
 const char d[2] = " ";
 /*value a for method A*/
-float a = 1;
 int mode;
 /*Log Buffer*/
 char LogBuffer[EXMAX_BUF];
@@ -114,9 +113,14 @@ void SIGIOHandler(int sig_num)
 		/*parse to int*/
 		int currentBL = strtol(currentBufferLevel, NULL, 10);
 		int targetBL = strtol(targetBuf, NULL, 10);
-		// int gammaVal = strtof(gamma, NULL, 10);
-		float lambda;
-    	
+		float gammaVal = strtof(gamma, NULL);
+		// float lambda;
+		/*for method A*/
+		float a = 3.0;
+    	/*for method B*/
+    	float b = 1.25;
+    	/*for method C*/
+    	float c = .75;
     	/*Q* == Q(t) do nothing*/
     	if(currentBL == targetBL)
     	{
@@ -136,10 +140,21 @@ void SIGIOHandler(int sig_num)
 		    			printf("decrease packet spacing:%d\n", packageSpacing);
 		    		}
 		    		break;
+    			/*method B*/
+    			case 1:
+    				if ((packageSpacing - a) > 0)
+		    		{
+		    			packageSpacing = packageSpacing - a; 
+		    			printf("decrease packet spacing:%d\n", packageSpacing);
+		    		}
+		    		break;
+		    	case 2:
+		    		packageSpacing = packageSpacing - a; 
+		    		printf("decrease packet spacing:%d\n", packageSpacing);
+		    		break;
 		    	default:
 		    		printf("Not sure which mode\n");
     		}
-    		/*method B*/
     		/*method C*/
     		/*method D*/
     	}
@@ -152,6 +167,10 @@ void SIGIOHandler(int sig_num)
     			/*method A*/
     			case 0:
 		    		packageSpacing = packageSpacing + a;
+		    		printf("increase packet spacing:%d\n", packageSpacing);
+		    		break;
+		    	case 1:
+		    		packageSpacing = packageSpacing*b; 
 		    		printf("increase packet spacing:%d\n", packageSpacing);
 		    		break;
 		    	default:
@@ -425,7 +444,7 @@ int main(int argc, char *argv[])
 					exit(1);
 				}
 			}	
-
+			/***********************/
 			//close connection
 			close(new_s);
 			close(udpSocket);
@@ -435,7 +454,7 @@ int main(int argc, char *argv[])
 	        printf("Child: write to log file\n");
 	        
 	        int logfd;
-		    if ((logfd = open(logFileName,O_RDWR | O_CREAT, S_IRUSR | S_IRGRP | S_IROTH)) < 0)
+		    if ((logfd = open(logFileName,O_RDWR | O_CREAT|O_TRUNC, 0666)) < 0)
 		    {
 				printf("Child: Cannot create file");
 				exit(1);		    	

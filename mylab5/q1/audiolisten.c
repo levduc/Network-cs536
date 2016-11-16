@@ -13,8 +13,8 @@
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <time.h>
-
-
+#include <semaphore.h>
+#include <pthread.h>
 #define MAX_BUF 1000000
 #define EXMAX_BUF 1000000000
 #define SK_MAX 20
@@ -29,6 +29,9 @@ int targetBufferSize;
 int clientUDPSocket;
 int currentEndBuffer = 0;
 int audioFD;
+/*define semaphore*/
+sem_t smp;
+sem_t waitForCurrentEndBuffer;
 
 /*Log Buffer*/
 char LogBuffer[EXMAX_BUF];
@@ -70,9 +73,11 @@ void SIGALARM_handler(int sig_num)
             }
         }
         // printf("SIGARM: write to file %ld\n", numBytesWrt);
-        printf("SIGALARM: current buffer level %d byte written %ld\n",currentEndBuffer, numBytesWrt);
+        printf("SIGALARM: current buffer level %d byte written %ld\n", currentEndBuffer, numBytesWrt);
         strcpy(globalBuffer,globalBuffer + numBytesWrt);
+        sem_wait(&smp);
         currentEndBuffer = currentEndBuffer - numBytesWrt;
+        sem_post(&smp);
     }
     /*reinstall the handler */
     signal(SIGALRM, SIGALARM_handler);
@@ -95,12 +100,17 @@ void SIGIOHandler(int sig_num)
     if (numBytesRcvd < 0) 
     {
       if (errno != EWOULDBLOCK)
-        printf("recvfrom() failed");
+      {
+            printf("recvfrom() failed");
+            exit(1);
+      }
     } 
     else if(numBytesRcvd != 3) 
     {
         // printf("numbytes received %ld\n", numBytesRcvd);
+        sem_wait (&smp);
         currentEndBuffer = currentEndBuffer + numBytesRcvd;
+        sem_post (&smp);
         char confirmBack[MAX_BUF];
         sprintf(confirmBack,"Q %d %d %f",currentEndBuffer,targetBufferSize,gammaVal);
         if (sendto(clientUDPSocket,confirmBack,strlen(confirmBack), 0,(struct sockaddr*)&ssin, sizeof(ssin)) < 0)
@@ -116,7 +126,7 @@ void SIGIOHandler(int sig_num)
         endTranmission = 1;
     }
   } while (numBytesRcvd > 0);
-}
+ }
 
 int main(int argc, char *argv[])
 {
@@ -168,7 +178,7 @@ int main(int argc, char *argv[])
     bufferSize = strtol(argv[7], NULL,10);
     printf("Buffer size: %d\n", bufferSize);
     //allocate
-    globalBuffer = malloc(bufferSize*sizeof(char));
+    globalBuffer = malloc(bufferSize);
     /*target buffer size*/
     targetBufferSize = strtol(argv[8], NULL,10);
     printf("target buffer size: %d\n", targetBufferSize);
@@ -179,6 +189,9 @@ int main(int argc, char *argv[])
     /*file name*/
     fileName = argv[10];
     printf("file name: %s\n", fileName);
+
+    /***initialize semaphore*****/
+    sem_init(&smp, 0, 1);
 
     /***********************tcp server*********************************/
     /* Address family = Internet */
@@ -329,26 +342,27 @@ int main(int argc, char *argv[])
     }
 
     char * audioFileName = "dcm.mp3";
-    audioFD = open(audioFileName, O_CREAT|O_RDWR, 0666);
+    audioFD = open(audioFileName, O_RDWR|O_CREAT|O_TRUNC, 0666);
     if (audioFD < 0) 
     {
         printf("cannot open file: %s \n", audioFileName);
         exit(1);
     }
     int mu = (int) 1000/gammaVal; /*30000*/
-    ualarm(mu,mu);
+    printf("mu values %d\n", mu);
+    ualarm(mu*1000,mu*1000);
     signal(SIGALRM, SIGALARM_handler);
-
-
-
-    while(endTranmission != 1)
+    /*still reading and writing*/
+    while(endTranmission != 1 || currentEndBuffer != 0)
     {
 
     }
+
+    /************************print to log file***********************/
     printf("End Tranmission\n");
     printf("Write to log file\n");
     int logfd;
-    if ((logfd = open(logFileName,O_RDWR|O_CREAT, S_IRUSR | S_IRGRP | S_IROTH)) < 0)
+    if ((logfd = open(logFileName,O_RDWR|O_CREAT|O_TRUNC, 0666)) < 0)
     {
         printf("Child: Cannot create file");
         exit(1);                
@@ -359,5 +373,6 @@ int main(int argc, char *argv[])
         exit(1);
     }
     close(logfd);
+    /************************print to log file***********************/
 	return 0;
 }
