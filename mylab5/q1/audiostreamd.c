@@ -266,14 +266,7 @@ int main(int argc, char *argv[])
 				printf("Child: resspone KO\n");
 				exit(1);
 			}
-			/*file descriptor*/
-		    /*try open file*/
-            // if( access(fileName, F_OK ) != -1 ) {
-            //     printf("dcm\n");
-            // } else {
-            //     // file doesn't exist
-            //     printf("dcm1\n");
-            // }
+			
             
 		    int fd;
 		    if ((fd = open(fileName,O_RDONLY, 0666)) < 0)

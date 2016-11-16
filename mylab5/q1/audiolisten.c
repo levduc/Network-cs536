@@ -22,7 +22,7 @@ char * globalBuffer;
 /*Number of byte for single write*/
 int payloadSize;
 int payloadDelay;
-int gammaVal;
+float gammaVal;
 int bufferSize;  
 int targetBufferSize;
 int clientUDPSocket;
@@ -91,7 +91,7 @@ void SIGIOHandler(int sig_num)
         // printf("numbytes received %ld\n", numBytesRcvd);
         currentEndBuffer = currentEndBuffer + numBytesRcvd;
         char confirmBack[MAX_BUF];
-        sprintf(confirmBack,"Q %d %d %d",currentEndBuffer,targetBufferSize,gammaVal);
+        sprintf(confirmBack,"Q %d %d %f",currentEndBuffer,targetBufferSize,gammaVal);
         if (sendto(clientUDPSocket,confirmBack,strlen(confirmBack), 0,(struct sockaddr*)&ssin, sizeof(ssin)) < 0)
         {
             printf("Fail to send\n");
@@ -149,8 +149,8 @@ int main(int argc, char *argv[])
     printf("Payload delay: %d\n", payloadDelay);
 
     /*get gammaVal*/
-    gammaVal = strtol(argv[6], NULL,10);
-    printf("gammaVal: %d\n", gammaVal);
+    gammaVal = strtof(argv[6], NULL);
+    printf("gammaVal: %f\n", gammaVal);
     
     /*buffer size*/
     bufferSize = strtol(argv[7], NULL,10);
@@ -320,7 +320,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    int mu = (int) 1000000/gammaVal;
+    int mu = (int) 1000/gammaVal;
     ualarm(mu,mu);
     signal(SIGALRM, SIGALARM_handler);
 
