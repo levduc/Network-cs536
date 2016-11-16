@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
    	listen(tcpSocket,10);
 	printf("Listening ... \n");
    	/*************************tcp-server***********************************/
-	
+
 	int status;
 	int len;
 	/*delimiter*/
@@ -250,7 +250,7 @@ int main(int argc, char *argv[])
 	    	printf("%s\n", confirmation);
 			write(new_s, confirmation, strlen(confirmation));
 			close(new_s);
-			/*********************/
+			/********************************************************/
 
 		    /*start writing*/
 		  	unsigned char writeBuf[payloadSize];

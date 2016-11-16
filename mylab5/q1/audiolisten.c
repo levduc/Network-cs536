@@ -146,8 +146,7 @@ int main(int argc, char *argv[])
     bufferSize = strtol(argv[7], NULL,10);
     printf("Buffer size: %d\n", bufferSize);
     //allocate
-    globalBuffer = malloc((bufferSize+1)*sizeof(char));
-    globalBuffer[bufferSize+1] = '\0';
+    globalBuffer = malloc(bufferSize*sizeof(char));
     /*target buffer size*/
     targetBufferSize = strtol(argv[8], NULL,10);
     printf("target buffer size: %d\n", targetBufferSize);
@@ -230,6 +229,7 @@ int main(int argc, char *argv[])
         printf("error");
         exit(1);
     }
+    /*close tcp socket*/
     close(tcpSocket);
     printf("%s\n", serverBuf);
     /*server buffer*/
@@ -240,6 +240,7 @@ int main(int argc, char *argv[])
     /*getting*/
     char serverAnswer[2];
     strncpy(serverAnswer, token, 2);
+
     serverAnswer[2] = '\0';
     token = strtok(NULL, d);
     /*client File Name*/
@@ -251,7 +252,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        printf("There is no port\n");
+        printf("File doesn't exist\n");
         exit(1);
     }
 
@@ -271,7 +272,13 @@ int main(int argc, char *argv[])
     /* Set all bits of the padding field to 0 */
     memset(udp_ssin.sin_zero, '\0', sizeof udp_ssin.sin_zero);
     /***********************udp server*********************************/
-    
+
+    /*sleep to prefetch*/
+    usleep(1000000);
+    usleep(1000000);
+    usleep(500000);
+    /******************/
+
     /***************************SIGIO handler**************************/
     /*SigIO handler*/
     struct sigaction handler;
@@ -293,10 +300,7 @@ int main(int argc, char *argv[])
       printf("Unable to put client sock into non-blocking/async mode");
     /***************************SIGIO handler***************************/
 
-    /*sleep to prefetch*/
-    usleep(10000000);
-    
-    char * audioFileName = "/dev/audio";
+    char * audioFileName = "test";
     audioFD = open(audioFileName, O_CREAT|O_WRONLY, 0666);
     if (audioFD < 0) 
     {
