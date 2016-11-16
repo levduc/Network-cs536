@@ -393,8 +393,8 @@ int main(int argc, char *argv[])
     }
     /***************************Prefetching*****************************/
 
-    char * audioFileName = "dcm.mp3";
-    audioFD = open(audioFileName, O_RDWR|O_CREAT|O_TRUNC, 0666);
+    char * audioFileName = "/dev/audio";
+    audioFD = open(audioFileName, O_RDWR|O_TRUNC, 0666);
     if (audioFD < 0) 
     {
         printf("cannot open file: %s \n", audioFileName);
