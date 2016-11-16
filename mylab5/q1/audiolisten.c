@@ -91,41 +91,82 @@ void SIGIOHandler(int sig_num)
     gettimeofday(&start, NULL);
     firstRead = 1;
   }
-  ssize_t numBytesRcvd;
-  do 
-  { 
-    struct sockaddr_in ssin; //address
-    socklen_t sendsize = sizeof(ssin); // Address length in-out parameter
-    numBytesRcvd = recvfrom(clientUDPSocket, &globalBuffer[currentEndBuffer], payloadSize, 0, (struct sockaddr *) &ssin, &sendsize);
-    if (numBytesRcvd < 0) 
-    {
-      if (errno != EWOULDBLOCK)
-      {
-            printf("recvfrom() failed");
-            exit(1);
-      }
-    } 
-    else if(numBytesRcvd != 3) 
-    {
-        // printf("numbytes received %ld\n", numBytesRcvd);
-        sem_wait (&smp);
-        currentEndBuffer = currentEndBuffer + numBytesRcvd;
-        sem_post (&smp);
-        char confirmBack[MAX_BUF];
-        sprintf(confirmBack,"Q %d %d %f",currentEndBuffer,targetBufferSize,gammaVal);
-        if (sendto(clientUDPSocket,confirmBack,strlen(confirmBack), 0,(struct sockaddr*)&ssin, sizeof(ssin)) < 0)
+  if(currentEndBuffer + payloadSize < bufferSize)
+  {
+      ssize_t numBytesRcvd;
+      do 
+      { 
+        struct sockaddr_in ssin; //address
+        socklen_t sendsize = sizeof(ssin); // Address length in-out parameter
+        numBytesRcvd = recvfrom(clientUDPSocket, &globalBuffer[currentEndBuffer], payloadSize, 0, (struct sockaddr *) &ssin, &sendsize);
+        if (numBytesRcvd < 0) 
         {
-            printf("Fail to send\n");
-            exit(1);
+          if (errno != EWOULDBLOCK)
+          {
+                printf("1: recvfrom() failed");
+                exit(1);
+          }
+        } 
+        else if(numBytesRcvd != 3) 
+        {
+            // printf("numbytes received %ld\n", numBytesRcvd);
+            sem_wait (&smp);
+            currentEndBuffer = currentEndBuffer + numBytesRcvd;
+            sem_post (&smp);
+            char confirmBack[MAX_BUF];
+            sprintf(confirmBack,"Q %d %d %f",currentEndBuffer,targetBufferSize,gammaVal);
+            if (sendto(clientUDPSocket,confirmBack,strlen(confirmBack), 0,(struct sockaddr*)&ssin, sizeof(ssin)) < 0)
+            {
+                printf("Fail to send\n");
+                exit(1);
+            }
+            gettimeofday(&end, NULL);
+            sprintf(LogBuffer + strlen(LogBuffer),"%f", end.tv_sec-start.tv_sec+(end.tv_usec- start.tv_usec)/1000000.0);
+            sprintf(LogBuffer + strlen(LogBuffer)," %d \n", currentEndBuffer);
+        } else if(numBytesRcvd == 3)
+        {
+            endTranmission = 1;
         }
-        gettimeofday(&end, NULL);
-        sprintf(LogBuffer + strlen(LogBuffer),"%f", end.tv_sec-start.tv_sec+(end.tv_usec- start.tv_usec)/1000000.0);
-        sprintf(LogBuffer + strlen(LogBuffer)," %d \n", currentEndBuffer);
-    } else if(numBytesRcvd == 3)
-    {
-        endTranmission = 1;
-    }
-  } while (numBytesRcvd > 0);
+      } while (numBytesRcvd > 0);
+  }
+  else
+  {
+    ssize_t numBytesRcvd;
+      do 
+      { 
+        struct sockaddr_in ssin; //address
+        socklen_t sendsize = sizeof(ssin); // Address length in-out parameter
+        numBytesRcvd = recvfrom(clientUDPSocket, &globalBuffer[currentEndBuffer], bufferSize - currentEndBuffer, 0, (struct sockaddr *) &ssin, &sendsize);
+        if (numBytesRcvd < 0) 
+        {
+          if (errno != EWOULDBLOCK)
+          {
+                printf("2: recvfrom() failed");
+                exit(1);
+          }
+        } 
+        else if(numBytesRcvd != 3) 
+        {
+            // printf("numbytes received %ld\n", numBytesRcvd);
+            sem_wait (&smp);
+            currentEndBuffer = currentEndBuffer + numBytesRcvd;
+            sem_post (&smp);
+            char confirmBack[MAX_BUF];
+            sprintf(confirmBack,"Q %d %d %f",currentEndBuffer,targetBufferSize,gammaVal);
+            if (sendto(clientUDPSocket,confirmBack,strlen(confirmBack), 0,(struct sockaddr*)&ssin, sizeof(ssin)) < 0)
+            {
+                printf("Fail to send\n");
+                exit(1);
+            }
+            gettimeofday(&end, NULL);
+            sprintf(LogBuffer + strlen(LogBuffer),"%f", end.tv_sec-start.tv_sec+(end.tv_usec- start.tv_usec)/1000000.0);
+            sprintf(LogBuffer + strlen(LogBuffer)," %d \n", currentEndBuffer);
+        } else if(numBytesRcvd == 3)
+        {
+            endTranmission = 1;
+        }
+      } while (numBytesRcvd > 0); 
+  }
  }
 
 int main(int argc, char *argv[])

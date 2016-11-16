@@ -118,7 +118,7 @@ void SIGIOHandler(int sig_num)
 		/*for method A*/
 		float a = 3.0;
     	/*for method B*/
-    	float b = 1.25;
+    	float b = 2;
     	/*for method C*/
     	float c = .75;
     	/*Q* == Q(t) do nothing*/
@@ -142,6 +142,7 @@ void SIGIOHandler(int sig_num)
 		    		break;
     			/*method B*/
     			case 1:
+    				a = 10;
     				if ((packageSpacing - a) > 0)
 		    		{
 		    			packageSpacing = packageSpacing - a; 
