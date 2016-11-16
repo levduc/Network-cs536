@@ -12,6 +12,8 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <netinet/in.h>
+#include <time.h>
+
 
 #define MAX_BUF 1024
 #define SK_MAX 20
@@ -26,6 +28,9 @@ int targetBufferSize;
 int clientUDPSocket;
 int currentEndBuffer = 0;
 int audioFD;
+
+struct timespec sleepTime, remainTime;
+
 /*concatString is to concatenate two string together*/
 char* concatString(char *s1, char *s2)
 {
@@ -59,13 +64,11 @@ void SIGALARM_handler(int sig_num)
             }
         }
         // printf("SIGARM: write to file %ld\n", numBytesWrt);
+        printf("SIGALARM: current buffer level %d byte written %ld\n",currentEndBuffer, numBytesWrt);
         strcpy(globalBuffer,globalBuffer + numBytesWrt);
         currentEndBuffer = currentEndBuffer - numBytesWrt;
-        printf("SIGALARM: current buffer level %d byte written %ld\n",currentEndBuffer, numBytesWrt);
     }
     /*reinstall the handler */
-    int mu = (int) 1000000/gammaVal;
-    ualarm(mu,mu);
     signal(SIGALRM, SIGALARM_handler); 
 }
 
@@ -93,6 +96,11 @@ void SIGIOHandler(int sig_num)
         {
             printf("Fail to send\n");
             exit(1);
+        }
+        /*finish sleep*/
+        if ((nanosleep(&remainTime,&remainTime)) < 0)
+        {
+            printf("aslo interupted\n");
         }
     }
   } while (numBytesRcvd > 0);
@@ -275,11 +283,6 @@ int main(int argc, char *argv[])
     memset(udp_ssin.sin_zero, '\0', sizeof udp_ssin.sin_zero);
     /***********************udp server*********************************/
 
-    /*sleep to prefetch*/
-    usleep(1000000);
-    usleep(1000000);
-    usleep(500000);
-    /******************/
 
     /***************************SIGIO handler**************************/
     /*SigIO handler*/
@@ -301,6 +304,13 @@ int main(int argc, char *argv[])
     if (fcntl(clientUDPSocket, F_SETFL, O_NONBLOCK | FASYNC) < 0)
       printf("Unable to put client sock into non-blocking/async mode");
     /***************************SIGIO handler***************************/
+    /*nanosleep*/
+    sleepTime.tv_sec = 0;
+    sleepTime.tv_nsec = 2500000000; //mili to nano
+    if(nanosleep(&sleepTime, &remainTime) < 0)
+    {
+        printf("Child: nanosleep was interupted %f \n", (remainTime.tv_sec + remainTime.tv_nsec/1000000000.0));
+    }
 
     char * audioFileName = "dcm.mp3";
     audioFD = open(audioFileName, O_CREAT|O_RDWR, 0666);
@@ -312,8 +322,8 @@ int main(int argc, char *argv[])
 
     int mu = (int) 1000000/gammaVal;
     ualarm(mu,mu);
-    signal(SIGALRM, SIGALARM_handler);    
-    
+    signal(SIGALRM, SIGALARM_handler);
+
     while(1)
     {
 

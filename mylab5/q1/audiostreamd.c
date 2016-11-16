@@ -20,6 +20,7 @@ int packageSpacing;
 int payloadSize;
 /*global udp socket*/
 int udpSocket;
+struct timespec sleepTime, remainTime;
 const char d[2] = " ";
 /*value a for method A*/
 float a = 1;
@@ -139,6 +140,11 @@ void SIGIOHandler(int sig_num)
 
     		/*method D*/
     	}
+    	/*finish sleep*/
+  		if ((nanosleep(&remainTime,&remainTime)) < 0)
+  		{
+  			printf("aslo interupted\n");
+  		}	
     }
   } while (numBytesRcvd > 0);
 }
@@ -156,7 +162,6 @@ int main(int argc, char *argv[])
     /*Port Number*/
 	int tcpPort;
 	int udpPort;
-
     /*Checking user input*/
     if(argc != 7)
     {
@@ -352,9 +357,14 @@ int main(int argc, char *argv[])
 					printf("Child: Fail to send\n");
 					exit(1);
 				}
-				/*success usleep*/
-				printf("Num byte written %d, packet-spacing %d\n", byteWrite, packageSpacing);
-				printf("%d\n", usleep(packageSpacing));
+				/*nanosleep*/
+				sleepTime.tv_sec = 0;
+				sleepTime.tv_nsec = packageSpacing*1000000; //mili to nano
+				if(nanosleep(&sleepTime,&remainTime) < 0)
+				{
+					printf("Child: nanosleep was interupted %f \n", (remainTime.tv_sec + remainTime.tv_nsec/1000000000.0));
+				}
+				printf("Child Num byte written %d, packet-spacing %d\n", byteWrite, packageSpacing);
 	   			memset(writeBuf,0, payloadSize);
 		 	}
 			//close connection
