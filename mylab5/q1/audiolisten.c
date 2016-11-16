@@ -97,11 +97,6 @@ void SIGIOHandler(int sig_num)
             printf("Fail to send\n");
             exit(1);
         }
-        /*finish sleep*/
-        if ((nanosleep(&remainTime,&remainTime)) < 0)
-        {
-            printf("aslo interupted\n");
-        }
     }
   } while (numBytesRcvd > 0);
 }
@@ -305,13 +300,17 @@ int main(int argc, char *argv[])
       printf("Unable to put client sock into non-blocking/async mode");
     /***************************SIGIO handler***************************/
     /*nanosleep*/
-    sleepTime.tv_sec = 0;
-    sleepTime.tv_nsec = 2500000000; //mili to nano
+    sleepTime.tv_sec = 2;
+    sleepTime.tv_nsec = 500000000; //mili to nano
     if(nanosleep(&sleepTime, &remainTime) < 0)
     {
-        printf("Child: nanosleep was interupted %f \n", (remainTime.tv_sec + remainTime.tv_nsec/1000000000.0));
+        printf("Child: nanosleep was interupted by signal. Time left: %f \n", (remainTime.tv_sec + remainTime.tv_nsec/1000000000.0));
     }
-
+    while((nanosleep(&remainTime,&remainTime)) != 0)
+    {
+        printf("interupted\n");
+    }
+    
     char * audioFileName = "dcm.mp3";
     audioFD = open(audioFileName, O_CREAT|O_RDWR, 0666);
     if (audioFD < 0) 
@@ -319,6 +318,7 @@ int main(int argc, char *argv[])
         printf("cannot open file: %s \n", audioFileName);
         exit(1);
     }
+
 
     int mu = (int) 1000/gammaVal;
     ualarm(mu,mu);

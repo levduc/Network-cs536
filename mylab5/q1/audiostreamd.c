@@ -141,10 +141,10 @@ void SIGIOHandler(int sig_num)
     		/*method D*/
     	}
     	/*finish sleep*/
-  		if ((nanosleep(&remainTime,&remainTime)) < 0)
-  		{
-  			printf("aslo interupted\n");
-  		}	
+  		// if ((nanosleep(&remainTime,&remainTime)) < 0)
+  		// {
+  		// 	printf("aslo interupted\n");
+  		// }	
     }
   } while (numBytesRcvd > 0);
 }
@@ -357,6 +357,10 @@ int main(int argc, char *argv[])
 				{
 					printf("Child: nanosleep was interupted %f \n", (remainTime.tv_sec + remainTime.tv_nsec/1000000000.0));
 				}
+				while((nanosleep(&remainTime,&remainTime)) != 0)
+			    {
+			        printf("I need to finish sleeping\n");
+			    }
 				printf("Child Num byte written %d, packet-spacing %d\n", byteWrite, packageSpacing);
 	   			memset(writeBuf,0, payloadSize);
 		 	}
