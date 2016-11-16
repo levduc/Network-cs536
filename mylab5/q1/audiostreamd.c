@@ -11,7 +11,7 @@
 #include <time.h>
 #include <errno.h>
 
-#define MAX_BUF 4906
+#define MAX_BUF 100000
 #define SK_MAX 20
 
 /*package spacing*/
@@ -20,6 +20,9 @@ int packageSpacing;
 int payloadSize;
 /*global udp socket*/
 int udpSocket;
+const char d[2] = " ";
+/*value a for method A*/
+float a = 1;
 
 /*concatString is to concatenate two string together*/
 char* concatString(char *s1, char *s2)
@@ -50,6 +53,92 @@ void SIGIOHandler(int sig_num)
     {
     	/*Adjust tau here*/
     	printf("%s\n", buf);
+    	/*breakdown buf*/
+    	char *token;
+		/*getting client-udp port*/
+	    token = strtok(buf, d); 
+		
+		if(strcmp(token, "Q") == 0)
+		{
+			// printf("This is a query: %s\n", token);
+		}
+		else
+		{
+			printf("This is not a query\n");
+		}
+		/*get current buffer*/
+	    token = strtok(NULL, d);
+		char currentBufferLevel[SK_MAX];
+
+		if(token != NULL)
+		{
+			strncpy(currentBufferLevel, token, SK_MAX);
+			currentBufferLevel[SK_MAX] = '\0';
+		}
+		else
+		{
+			printf("No current buffer\n");
+		}
+	    /*get target buffer*/
+	    token = strtok(NULL, d);
+		char targetBuf[MAX_BUF];
+		if(token != NULL)
+		{
+			strncpy(targetBuf, token, MAX_BUF);
+			targetBuf[MAX_BUF] = '\0';
+		}
+		else
+		{
+			printf("No target buffer\n");
+		}
+		/*getting gamma*/
+		token = strtok(NULL, d);
+		char gamma[SK_MAX];
+		if(token != NULL)
+		{
+			strncpy(gamma, token, SK_MAX);
+			gamma[SK_MAX] = '\0';
+		}
+		else
+		{
+			printf("No gamma\n");
+		}
+		/*parse to int*/
+		int currentBL = strtol(currentBufferLevel, NULL, 10);
+		int targetBL = strtol(targetBuf, NULL, 10);
+		int gammaVal = strtol(gamma, NULL, 10);
+    	
+    	/*Q* == Q(t) do nothing*/
+    	if(currentBL == targetBL)
+    	{
+    		/*do nothing*/
+    	}
+    	/*Q* > Q(t) increase lambda*/
+    	if(currentBL < targetBL)
+    	{
+    		/*increase lambda*/
+    		/*method A*/
+    		// float lambda = 1000000.0/packageSpacing + a;
+    		// packageSpacing = (int) 1000000/lambda;
+    		// printf("decrease packet spacing:%d\n", packageSpacing);
+    		/*method B*/
+    		/*method C*/
+    		/*method D*/
+    	}
+    	/*Q* < Q(t) decrease lambda*/
+    	if(currentBL > targetBL)
+    	{
+    		/*decrease lambda*/
+    		/*method A*/
+    		// float lambda = 1000000.0/packageSpacing - a;
+    		// packageSpacing = (int) (1000000.0/lambda);
+    		// printf("increase packet spacing: %d\n", packageSpacing);
+    		/*method B*/
+
+    		/*method C*/
+
+    		/*method D*/
+    	}
     }
   } while (numBytesRcvd > 0);
 }
@@ -67,7 +156,7 @@ int main(int argc, char *argv[])
     /*Port Number*/
 	int tcpPort;
 	int udpPort;
-	/*********************************************************************************************/
+
     /*Checking user input*/
     if(argc != 7)
     {
@@ -116,7 +205,6 @@ int main(int argc, char *argv[])
 	int status;
 	int len;
 	/*delimiter*/
-	const char d[2] = " ";
     /*server udp-port*/
     udpPort = strtol(argv[2],NULL,10);
     printf("initial UDP-Port: %d\n", udpPort);
@@ -255,17 +343,18 @@ int main(int argc, char *argv[])
 		    /*start writing*/
 		  	unsigned char writeBuf[payloadSize];
 	   		memset(writeBuf, 0, payloadSize);
-		 	int byteWrite = 0;
-		 	while((byteWrite = read(fd, writeBuf, payloadSize)) > 0)
+		 	int byteRead = 0;
+		 	int  byteWrite = 0;
+		 	while((byteRead = read(fd, writeBuf, payloadSize)) > 0)
 		 	{
-		 	    if (sendto(udpSocket,writeBuf,byteWrite,0,(struct sockaddr*)&udp_csin, sizeof(udp_csin)) < 0)
+		 	    if ((byteWrite = sendto(udpSocket,writeBuf,byteRead,0,(struct sockaddr*)&udp_csin, sizeof(udp_csin))) < 0)
 		 	    {
 					printf("Child: Fail to send\n");
 					exit(1);
 				}
 				/*success usleep*/
-				printf("payload %d byteWrite %d\n", payloadSize, byteWrite);
-				usleep(packageSpacing);
+				printf("Num byte written %d, packet-spacing %d\n", byteWrite, packageSpacing);
+				printf("%d\n", usleep(packageSpacing));
 	   			memset(writeBuf,0, payloadSize);
 		 	}
 			//close connection

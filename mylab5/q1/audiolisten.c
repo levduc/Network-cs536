@@ -61,9 +61,11 @@ void SIGALARM_handler(int sig_num)
         // printf("SIGARM: write to file %ld\n", numBytesWrt);
         strcpy(globalBuffer,globalBuffer + numBytesWrt);
         currentEndBuffer = currentEndBuffer - numBytesWrt;
-        printf("SIGALARM:%d %ld\n",currentEndBuffer,numBytesWrt);
+        printf("SIGALARM: current buffer level %d byte written %ld\n",currentEndBuffer, numBytesWrt);
     }
     /*reinstall the handler */
+    int mu = (int) 1000000/gammaVal;
+    ualarm(mu,mu);
     signal(SIGALRM, SIGALARM_handler); 
 }
 
@@ -83,10 +85,10 @@ void SIGIOHandler(int sig_num)
     } 
     else 
     {
-        // printf("%ld\n", numBytesRcvd);
+        // printf("numbytes received %ld\n", numBytesRcvd);
         currentEndBuffer = currentEndBuffer + numBytesRcvd;
         char confirmBack[MAX_BUF];
-        sprintf(confirmBack,"%d %d",currentEndBuffer,targetBufferSize);
+        sprintf(confirmBack,"Q %d %d %d",currentEndBuffer,targetBufferSize,gammaVal);
         if (sendto(clientUDPSocket,confirmBack,strlen(confirmBack), 0,(struct sockaddr*)&ssin, sizeof(ssin)) < 0)
         {
             printf("Fail to send\n");
@@ -300,7 +302,7 @@ int main(int argc, char *argv[])
       printf("Unable to put client sock into non-blocking/async mode");
     /***************************SIGIO handler***************************/
 
-    char * audioFileName = "/dev/audio";
+    char * audioFileName = "dcm.mp3";
     audioFD = open(audioFileName, O_CREAT|O_RDWR, 0666);
     if (audioFD < 0) 
     {
