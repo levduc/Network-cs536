@@ -22,7 +22,7 @@
 char * globalBuffer;
 /*Number of byte for single write*/
 int payloadSize;
-int payloadDelay;
+float payloadDelay;
 float gammaVal;
 int bufferSize;  
 int targetBufferSize;
@@ -209,8 +209,8 @@ int main(int argc, char *argv[])
     printf("Payload size: %d\n", payloadSize);
     
     /*get payload delay*/
-    payloadDelay = strtol(argv[5], NULL,10);
-    printf("Payload delay: %d\n", payloadDelay);
+    payloadDelay = strtof(argv[5], NULL);
+    printf("Payload delay: %f\n", payloadDelay);
 
     /*get gammaVal*/
     gammaVal = strtof(argv[6], NULL);
@@ -371,9 +371,18 @@ int main(int argc, char *argv[])
     if (fcntl(clientUDPSocket, F_SETFL, O_NONBLOCK | FASYNC) < 0)
       printf("Unable to put client sock into non-blocking/async mode");
     /***************************SIGIO handler***************************/
-    /*nanosleep*/
-    sleepTime.tv_sec = 2;
-    sleepTime.tv_nsec = 500000000; //mili to nano
+    /***************************Prefetching*****************************/
+    int pDelay = (int) payloadDelay*1000000000;
+    if(pDelay < 999999999)
+    {   
+        sleepTime.tv_sec = 0;
+        sleepTime.tv_nsec = pDelay; //mili to nano
+    }
+    else
+    {
+        sleepTime.tv_sec = (int) pDelay/1000000000;
+        sleepTime.tv_nsec = (pDelay%1000000000)*1000000; //mili to nano    
+    }
     if(nanosleep(&sleepTime, &remainTime) < 0)
     {
         printf("Child: nanosleep was interupted by signal. Time left: %f \n", (remainTime.tv_sec + remainTime.tv_nsec/1000000000.0));
@@ -382,6 +391,7 @@ int main(int argc, char *argv[])
     {
         printf("Prefetching....\n");
     }
+    /***************************Prefetching*****************************/
 
     char * audioFileName = "dcm.mp3";
     audioFD = open(audioFileName, O_RDWR|O_CREAT|O_TRUNC, 0666);
