@@ -300,8 +300,8 @@ int main(int argc, char *argv[])
       printf("Unable to put client sock into non-blocking/async mode");
     /***************************SIGIO handler***************************/
 
-    char * audioFileName = "test";
-    audioFD = open(audioFileName, O_CREAT|O_WRONLY, 0666);
+    char * audioFileName = "/dev/audio";
+    audioFD = open(audioFileName, O_CREAT|O_RDWR, 0666);
     if (audioFD < 0) 
     {
         printf("cannot open file: %s \n", audioFileName);
