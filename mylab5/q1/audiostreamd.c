@@ -10,8 +10,11 @@
 #include <netinet/in.h>
 #include <time.h>
 #include <errno.h>
+#include <sys/time.h>
+// #include <limits.h>
 
 #define MAX_BUF 100000
+#define EXMAX_BUF 1000000000
 #define SK_MAX 20
 
 /*package spacing*/
@@ -24,6 +27,10 @@ struct timespec sleepTime, remainTime;
 const char d[2] = " ";
 /*value a for method A*/
 float a = 1;
+int mode;
+/*Log Buffer*/
+char LogBuffer[EXMAX_BUF];
+
 
 /*concatString is to concatenate two string together*/
 char* concatString(char *s1, char *s2)
@@ -107,7 +114,8 @@ void SIGIOHandler(int sig_num)
 		/*parse to int*/
 		int currentBL = strtol(currentBufferLevel, NULL, 10);
 		int targetBL = strtol(targetBuf, NULL, 10);
-		int gammaVal = strtol(gamma, NULL, 10);
+		// int gammaVal = strtof(gamma, NULL, 10);
+		float lambda;
     	
     	/*Q* == Q(t) do nothing*/
     	if(currentBL == targetBL)
@@ -118,10 +126,19 @@ void SIGIOHandler(int sig_num)
     	if(currentBL < targetBL)
     	{
     		/*increase lambda*/
-    		/*method A*/
-    		// float lambda = 1000000.0/packageSpacing + a;
-    		// packageSpacing = (int) 1000000/lambda;
-    		// printf("decrease packet spacing:%d\n", packageSpacing);
+    		switch(mode)
+    		{
+    			/*method A*/
+    			case 0:
+		    		if ((packageSpacing - a) > 0)
+		    		{
+		    			packageSpacing = packageSpacing - a; 
+		    			printf("decrease packet spacing:%d\n", packageSpacing);
+		    		}
+		    		break;
+		    	default:
+		    		printf("Not sure which mode\n");
+    		}
     		/*method B*/
     		/*method C*/
     		/*method D*/
@@ -130,6 +147,16 @@ void SIGIOHandler(int sig_num)
     	if(currentBL > targetBL)
     	{
     		/*decrease lambda*/
+    		switch(mode)
+    		{
+    			/*method A*/
+    			case 0:
+		    		packageSpacing = packageSpacing + a;
+		    		printf("increase packet spacing:%d\n", packageSpacing);
+		    		break;
+		    	default:
+		    		printf("Not sure which mode\n");
+    		}
     		/*method A*/
     		// float lambda = 1000000.0/packageSpacing - a;
     		// packageSpacing = (int) (1000000.0/lambda);
@@ -140,11 +167,6 @@ void SIGIOHandler(int sig_num)
 
     		/*method D*/
     	}
-    	/*finish sleep*/
-  		// if ((nanosleep(&remainTime,&remainTime)) < 0)
-  		// {
-  		// 	printf("aslo interupted\n");
-  		// }	
     }
   } while (numBytesRcvd > 0);
 }
@@ -162,6 +184,8 @@ int main(int argc, char *argv[])
     /*Port Number*/
 	int tcpPort;
 	int udpPort;
+	/*log file name*/
+	char * logFileName;
     /*Checking user input*/
     if(argc != 7)
     {
@@ -175,6 +199,13 @@ int main(int argc, char *argv[])
     /*tau*/
     packageSpacing = strtol(argv[4],NULL,10);
     printf("Package Spacing: %d\n", packageSpacing);
+    /*mode*/
+    mode = strtol(argv[5],NULL,10);
+    printf("Mode used %d\n", mode);
+    /*logFile*/
+    logFileName = argv[6];
+    printf("Log File: %s\n", logFileName);
+   	
    	/*************************tcp-server***********************************/
   	/*server address*/
   	struct sockaddr_in tcp_sin;
@@ -206,7 +237,6 @@ int main(int argc, char *argv[])
    	listen(tcpSocket,10);
 	printf("Listening ... \n");
    	/*************************tcp-server***********************************/
-
 	int status;
 	int len;
 	/*delimiter*/
@@ -266,7 +296,6 @@ int main(int argc, char *argv[])
 				printf("Child: resspone KO\n");
 				exit(1);
 			}
-			
             
 		    int fd;
 		    if ((fd = open(fileName,O_RDONLY, 0666)) < 0)
@@ -276,7 +305,7 @@ int main(int argc, char *argv[])
 				write(new_s, deny, strlen(deny));
 				/*close*/
 				close(new_s);
-				exit(1);		    	
+				exit(1);
 		    }
 		    /*File exists. binding udp*/
 		   	/***************************server udp**************************************/
@@ -343,32 +372,80 @@ int main(int argc, char *argv[])
 	   		memset(writeBuf, 0, payloadSize);
 		 	int byteRead = 0;
 		 	int  byteWrite = 0;
+		 	/*to write to log file*/
+			struct timeval start, end;
+		 	int firstRead = 0;
+		 	memset(LogBuffer,0,EXMAX_BUF);
 		 	while((byteRead = read(fd, writeBuf, payloadSize)) > 0)
 		 	{
+		 		if(firstRead == 0)
+		 		{
+		 	    	gettimeofday(&start, NULL);
+		 	    	firstRead = 1;
+		 		}
 		 	    if ((byteWrite = sendto(udpSocket,writeBuf,byteRead,0,(struct sockaddr*)&udp_csin, sizeof(udp_csin))) < 0)
 		 	    {
 					printf("Child: Fail to send\n");
 					exit(1);
 				}
-				/*nanosleep*/
-				sleepTime.tv_sec = 0;
-				sleepTime.tv_nsec = packageSpacing*1000000; //mili to nano
+		 	   	gettimeofday(&end, NULL);
+
+				sprintf(LogBuffer + strlen(LogBuffer),"%f", end.tv_sec-start.tv_sec+(end.tv_usec- start.tv_usec)/1000000.0);
+				sprintf(LogBuffer + strlen(LogBuffer)," %f \n", 1.0/packageSpacing);
+				/******************************nanosleep*******************************/
+				if(packageSpacing*1000000 < 999999999)
+				{	
+					sleepTime.tv_sec = 0;
+					sleepTime.tv_nsec = packageSpacing*1000000; //mili to nano
+				}
+				else
+				{
+					sleepTime.tv_sec = (int)(packageSpacing/1000);
+					sleepTime.tv_nsec = ((packageSpacing*1000000)%1000000000)*1000000; //mili to nano	
+				}
 				if(nanosleep(&sleepTime,&remainTime) < 0)
 				{
-					printf("Child: nanosleep was interupted %f \n", (remainTime.tv_sec + remainTime.tv_nsec/1000000000.0));
+					printf("Child: nanosleep was interupted by signal. Time left: %f \n", (remainTime.tv_sec + remainTime.tv_nsec/1000000000.0));
 				}
 				while((nanosleep(&remainTime,&remainTime)) != 0)
 			    {
 			        printf("I need to finish sleeping\n");
 			    }
-				printf("Child Num byte written %d, packet-spacing %d\n", byteWrite, packageSpacing);
+				/******************************nanosleep*******************************/
+				printf("Child Num byte sent %d, packet-spacing %d\n", byteWrite, packageSpacing);
 	   			memset(writeBuf,0, payloadSize);
 		 	}
+		 	/*signal end tranmission*/
+			int i;
+			for(i =0; i<3; i++)
+			{
+			 	if ((sendto(udpSocket,"EEE",3,0,(struct sockaddr*)&udp_csin, sizeof(udp_csin))) < 0)
+		 	    {
+					printf("Child: Fail to send\n");
+					exit(1);
+				}
+			}	
+
 			//close connection
 			close(new_s);
 			close(udpSocket);
 		    close(fd);
 	        memset(fileName,0,MAX_BUF);
+	        printf("Child: Done sending\n");
+	        printf("Child: write to log file\n");
+	        
+	        int logfd;
+		    if ((logfd = open(logFileName,O_RDWR | O_CREAT, S_IRUSR | S_IRGRP | S_IROTH)) < 0)
+		    {
+				printf("Child: Cannot create file");
+				exit(1);		    	
+		    }
+		    if(write(logfd,LogBuffer,strlen(LogBuffer)) < 0)
+		    {
+		    	printf("Child: Cannot write to file");
+				exit(1);
+		    }
+		    close(logfd);
 	    	exit(0);
     	}
 	  	else if(k>0) 

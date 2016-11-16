@@ -15,7 +15,8 @@
 #include <time.h>
 
 
-#define MAX_BUF 1024
+#define MAX_BUF 1000000
+#define EXMAX_BUF 1000000000
 #define SK_MAX 20
 
 char * globalBuffer;
@@ -29,6 +30,11 @@ int clientUDPSocket;
 int currentEndBuffer = 0;
 int audioFD;
 
+/*Log Buffer*/
+char LogBuffer[EXMAX_BUF];
+struct timeval start, end;
+int firstRead = 0;
+int endTranmission = 0;
 struct timespec sleepTime, remainTime;
 
 /*concatString is to concatenate two string together*/
@@ -69,12 +75,17 @@ void SIGALARM_handler(int sig_num)
         currentEndBuffer = currentEndBuffer - numBytesWrt;
     }
     /*reinstall the handler */
-    signal(SIGALRM, SIGALARM_handler); 
+    signal(SIGALRM, SIGALARM_handler);
 }
 
 /*SIGIO handler*/
 void SIGIOHandler(int sig_num) 
 {
+  if(firstRead == 0)
+  {
+    gettimeofday(&start, NULL);
+    firstRead = 1;
+  }
   ssize_t numBytesRcvd;
   do 
   { 
@@ -86,7 +97,7 @@ void SIGIOHandler(int sig_num)
       if (errno != EWOULDBLOCK)
         printf("recvfrom() failed");
     } 
-    else 
+    else if(numBytesRcvd != 3) 
     {
         // printf("numbytes received %ld\n", numBytesRcvd);
         currentEndBuffer = currentEndBuffer + numBytesRcvd;
@@ -97,6 +108,12 @@ void SIGIOHandler(int sig_num)
             printf("Fail to send\n");
             exit(1);
         }
+        gettimeofday(&end, NULL);
+        sprintf(LogBuffer + strlen(LogBuffer),"%f", end.tv_sec-start.tv_sec+(end.tv_usec- start.tv_usec)/1000000.0);
+        sprintf(LogBuffer + strlen(LogBuffer)," %d \n", currentEndBuffer);
+    } else if(numBytesRcvd == 3)
+    {
+        endTranmission = 1;
     }
   } while (numBytesRcvd > 0);
 }
@@ -308,9 +325,9 @@ int main(int argc, char *argv[])
     }
     while((nanosleep(&remainTime,&remainTime)) != 0)
     {
-        printf("interupted\n");
+        printf("Prefetching....\n");
     }
-    
+
     char * audioFileName = "dcm.mp3";
     audioFD = open(audioFileName, O_CREAT|O_RDWR, 0666);
     if (audioFD < 0) 
@@ -318,16 +335,29 @@ int main(int argc, char *argv[])
         printf("cannot open file: %s \n", audioFileName);
         exit(1);
     }
-
-
-    int mu = (int) 1000/gammaVal;
+    int mu = (int) 1000/gammaVal; /*30000*/
     ualarm(mu,mu);
     signal(SIGALRM, SIGALARM_handler);
 
-    while(1)
+
+
+    while(endTranmission != 1)
     {
 
     }
-
+    printf("End Tranmission\n");
+    printf("Write to log file\n");
+    int logfd;
+    if ((logfd = open(logFileName,O_RDWR|O_CREAT, S_IRUSR | S_IRGRP | S_IROTH)) < 0)
+    {
+        printf("Child: Cannot create file");
+        exit(1);                
+    }
+    if(write(logfd,LogBuffer,strlen(LogBuffer)) < 0)
+    {
+        printf("Child: Cannot write to file");
+        exit(1);
+    }
+    close(logfd);
 	return 0;
 }
