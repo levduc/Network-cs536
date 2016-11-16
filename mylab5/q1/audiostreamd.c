@@ -18,7 +18,7 @@
 #define SK_MAX 20
 
 /*package spacing*/
-int packageSpacing;
+float packageSpacing;
 /*payload size*/
 int payloadSize;
 /*global udp socket*/
@@ -114,19 +114,21 @@ void SIGIOHandler(int sig_num)
 		int currentBL = strtol(currentBufferLevel, NULL, 10);
 		int targetBL = strtol(targetBuf, NULL, 10);
 		float gammaVal = strtof(gamma, NULL);
-		// float lambda;
+		float lambda = 1000/packageSpacing;
 		/*for method A*/
-		float a = 3.0;
+		float a = 1;
     	/*for method B*/
-    	float b = 2;
+    	float b = .5;
     	/*for method C*/
-    	float c = .75;
+    	float c = .001;
+    	/*for method D*/
+    	float d = .5;
     	/*Q* == Q(t) do nothing*/
     	if(currentBL == targetBL)
     	{
     		/*do nothing*/
     	}
-    	/*Q* > Q(t) increase lambda*/
+    	/*Q(t)<Q*  increase lambda*/
     	if(currentBL < targetBL)
     	{
     		/*increase lambda*/
@@ -134,32 +136,34 @@ void SIGIOHandler(int sig_num)
     		{
     			/*method A*/
     			case 0:
-		    		if ((packageSpacing - a) > 0)
-		    		{
-		    			packageSpacing = packageSpacing - a; 
-		    			printf("decrease packet spacing:%d\n", packageSpacing);
-		    		}
+		    		lambda = lambda + a;
+		    		packageSpacing = 1000/lambda;		
+	    			printf("decrease packet spacing:%f\n", packageSpacing);
 		    		break;
     			/*method B*/
     			case 1:
-    				a = 10;
-    				if ((packageSpacing - a) > 0)
-		    		{
-		    			packageSpacing = packageSpacing - a; 
-		    			printf("decrease packet spacing:%d\n", packageSpacing);
-		    		}
+	    			lambda = lambda + a;
+	    			packageSpacing = 1000/lambda;
+	    			printf("decrease packet spacing:%f\n", packageSpacing);
 		    		break;
+    			/*method C*/
 		    	case 2:
-		    		packageSpacing = packageSpacing - a; 
-		    		printf("decrease packet spacing:%d\n", packageSpacing);
+	    			lambda = lambda + c*(targetBL-currentBL); 
+		    		packageSpacing = 1000/lambda;
+	    			printf("decrease packet spacing:%f\n", packageSpacing);
+		    		break;
+    			/*method D*/
+		    	case 3:
+	    			lambda = lambda + c*(targetBL-currentBL) -d*(lambda - gammaVal); 
+		    		packageSpacing = 1000/lambda;
+	    			printf("decrease packet spacing:%f\n", packageSpacing);
 		    		break;
 		    	default:
 		    		printf("Not sure which mode\n");
     		}
-    		/*method C*/
-    		/*method D*/
+
     	}
-    	/*Q* < Q(t) decrease lambda*/
+    	/*Q(t)>Q*  decrease lambda*/
     	if(currentBL > targetBL)
     	{
     		/*decrease lambda*/
@@ -167,23 +171,43 @@ void SIGIOHandler(int sig_num)
     		{
     			/*method A*/
     			case 0:
-		    		packageSpacing = packageSpacing + a;
-		    		printf("increase packet spacing:%d\n", packageSpacing);
+		    		if ((lambda - a) > 0)
+		    		{
+		    			lambda = lambda - a; 
+		    			packageSpacing = 1000/lambda;
+		    			printf("increase packet spacing:%f\n", packageSpacing);
+		    		}
 		    		break;
 		    	case 1:
-		    		packageSpacing = packageSpacing*b; 
-		    		printf("increase packet spacing:%d\n", packageSpacing);
+    				/*method B*/
+		    		if (lambda*b > 0)
+		    		{
+		    			lambda = lambda*b; 
+		    			packageSpacing = 1000/lambda;
+		    			printf("increase packet spacing:%f\n", packageSpacing);
+		    		}
+		    		break;
+    			/*method C*/
+		    	case 2:
+		    		if(lambda + c*(targetBL-currentBL) > 0)
+		    		{
+		    			lambda = lambda + c*(targetBL-currentBL); 
+			    		packageSpacing = 1000/lambda;
+		    			printf("increase packet spacing:%f\n", packageSpacing);
+		    		}
+		    		break;
+		    	case 3:
+		    		if(lambda + c*(targetBL-currentBL) -d*(lambda - gammaVal) > 0)
+		    		{
+		    			lambda = lambda + c*(targetBL-currentBL) -d*(lambda - gammaVal); 
+			    		packageSpacing = 1000/lambda;
+		    			printf("decrease packet spacing:%f\n", packageSpacing);
+		    		}
 		    		break;
 		    	default:
 		    		printf("Not sure which mode\n");
     		}
-    		/*method A*/
-    		// float lambda = 1000000.0/packageSpacing - a;
-    		// packageSpacing = (int) (1000000.0/lambda);
-    		// printf("increase packet spacing: %d\n", packageSpacing);
-    		/*method B*/
 
-    		/*method C*/
 
     		/*method D*/
     	}
@@ -217,8 +241,8 @@ int main(int argc, char *argv[])
     printf("Payload Size: %d\n", payloadSize);
     /*packet Spacing*/
     /*tau*/
-    packageSpacing = strtol(argv[4],NULL,10);
-    printf("Package Spacing: %d\n", packageSpacing);
+    packageSpacing = strtof(argv[4],NULL);
+    printf("Package Spacing: %f\n", packageSpacing);
     /*mode*/
     mode = strtol(argv[5],NULL,10);
     printf("Mode used %d\n", mode);
@@ -411,17 +435,18 @@ int main(int argc, char *argv[])
 		 	   	gettimeofday(&end, NULL);
 
 				sprintf(LogBuffer + strlen(LogBuffer),"%f", end.tv_sec-start.tv_sec+(end.tv_usec- start.tv_usec)/1000000.0);
-				sprintf(LogBuffer + strlen(LogBuffer)," %f \n", 1.0/packageSpacing);
+				sprintf(LogBuffer + strlen(LogBuffer)," %f \n", 1000/packageSpacing);
 				/******************************nanosleep*******************************/
-				if(packageSpacing*1000000 < 999999999)
+				int tau = (int) packageSpacing*1000000;
+				if(tau < 999999999)
 				{	
 					sleepTime.tv_sec = 0;
-					sleepTime.tv_nsec = packageSpacing*1000000; //mili to nano
+					sleepTime.tv_nsec = tau; //mili to nano
 				}
 				else
 				{
-					sleepTime.tv_sec = (int)(packageSpacing/1000);
-					sleepTime.tv_nsec = ((packageSpacing*1000000)%1000000000)*1000000; //mili to nano	
+					sleepTime.tv_sec = tau/1000000000;
+					sleepTime.tv_nsec = (tau%1000000000)*1000000; //mili to nano	
 				}
 				if(nanosleep(&sleepTime,&remainTime) < 0)
 				{
@@ -432,7 +457,7 @@ int main(int argc, char *argv[])
 			        printf("I need to finish sleeping\n");
 			    }
 				/******************************nanosleep*******************************/
-				printf("Child Num byte sent %d, packet-spacing %d\n", byteWrite, packageSpacing);
+				printf("Child Num byte sent %d, packet-spacing %f\n", byteWrite, packageSpacing);
 	   			memset(writeBuf,0, payloadSize);
 		 	}
 		 	/*signal end tranmission*/

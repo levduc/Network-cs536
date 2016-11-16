@@ -60,24 +60,25 @@ void SIGALARM_handler(int sig_num)
         {
             if((numBytesWrt = write(audioFD, globalBuffer, payloadSize)) < 0)
             {
-                printf("%s", strerror(errno));
-                exit(1);
+                printf("Error writing skip\n");
             }
         }
         else /*otherwise write same as currentEndBuffer*/
         {
             if((numBytesWrt = write(audioFD, globalBuffer, currentEndBuffer)) < 0)
             {
-                printf("%s", strerror(errno));
-                exit(1);
+                printf("Error writing skip\n");
             }
         }
         // printf("SIGARM: write to file %ld\n", numBytesWrt);
-        printf("SIGALARM: current buffer level %d byte written %ld\n", currentEndBuffer, numBytesWrt);
-        strcpy(globalBuffer,globalBuffer + numBytesWrt);
-        sem_wait(&smp);
-        currentEndBuffer = currentEndBuffer - numBytesWrt;
-        sem_post(&smp);
+        if(numBytesWrt > 0)
+        {
+            printf("SIGALARM: current buffer level %d byte written %ld\n", currentEndBuffer, numBytesWrt);
+            strcpy(globalBuffer,globalBuffer + numBytesWrt);
+            sem_wait(&smp);
+            currentEndBuffer = currentEndBuffer - numBytesWrt;
+            sem_post(&smp);
+        }
     }
     /*reinstall the handler */
     signal(SIGALRM, SIGALARM_handler);
@@ -104,7 +105,7 @@ void SIGIOHandler(int sig_num)
           if (errno != EWOULDBLOCK)
           {
                 printf("1: recvfrom() failed");
-                exit(1);
+                // exit(1);
           }
         } 
         else if(numBytesRcvd != 3) 
@@ -142,7 +143,7 @@ void SIGIOHandler(int sig_num)
           if (errno != EWOULDBLOCK)
           {
                 printf("2: recvfrom() failed");
-                exit(1);
+                // exit(1);
           }
         } 
         else if(numBytesRcvd != 3) 
