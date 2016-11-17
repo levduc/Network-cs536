@@ -416,7 +416,7 @@ int main(int argc, char *argv[])
 			/********************************************************/
 
 		    /*start writing*/
-		  	unsigned char writeBuf[SK_MAX + payloadSize];
+		  	unsigned char writeBuf[payloadSize];
 	   		memset(writeBuf, 0,payloadSize);
 		 	int byteRead = 0;
 		 	int  byteWrite = 0;
@@ -427,24 +427,25 @@ int main(int argc, char *argv[])
 		 	int packageCount = 0;
 		 	char *arr[audioBuf];
 		 	char temp[SK_MAX+payloadSize+2];
-	   		memset(temp, 0, SK_MAX + payloadSize+1);
-		 	while((byteRead = read(fd, writeBuf, payloadSize)) > 0)
+		 	while((byteRead = read(fd, writeBuf, payloadSize- strlen(temp))) > 0)
 		 	{
+	   			memset(temp, 0, SK_MAX + payloadSize);
 		 		if(firstRead == 0)
 		 		{
 		 	    	gettimeofday(&start, NULL);
 		 	    	firstRead = 1;
 		 		}
-		 		sprintf(temp,"$%d$%s", packageCount,writeBuf);
-		 	    if ((byteWrite = sendto(udpSocket,temp,strlen(temp),0,(struct sockaddr*)&udp_csin, sizeof(udp_csin))) < 0)
+		 		sprintf(temp,"$%d$%s",packageCount,writeBuf);
+		 	    if ((byteWrite = sendto(udpSocket,temp,byteRead,0,(struct sockaddr*)&udp_csin, sizeof(udp_csin))) < 0)
 		 	    {
 					printf("Child: Fail to send\n");
 					exit(1);
 				}
 	   			memset(temp, 0, SK_MAX + payloadSize);
 				arr[packageCount%audioBuf] = writeBuf;
-				printf("%s\n", arr[packageCount%audioBuf]);
+				// printf("%s\n", arr[packageCount%audioBuf]);
 				packageCount++;
+
 		 	   	gettimeofday(&end, NULL);
 				sprintf(LogBuffer + strlen(LogBuffer),"%f", end.tv_sec-start.tv_sec+(end.tv_usec- start.tv_usec)/1000000.0);
 				sprintf(LogBuffer + strlen(LogBuffer)," %f \n", 1000/packageSpacing);
@@ -469,8 +470,8 @@ int main(int argc, char *argv[])
 			        printf("I need to finish sleeping\n");
 			    }
 				/******************************nanosleep*******************************/
-				// printf("Child Num byte sent %d, packet-spacing %f\n", byteWrite, packageSpacing);
-	   			memset(writeBuf,0, SK_MAX + payloadSize);
+				printf("Child Num byte sent %d, packet-spacing %f\n", byteWrite, packageSpacing);
+	   			memset(writeBuf,0, payloadSize);
 		 	}
 		 	/*signal end tranmission*/
 			int i;

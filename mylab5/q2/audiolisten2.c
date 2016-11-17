@@ -102,6 +102,7 @@ void SIGIOHandler(int sig_num)
         struct sockaddr_in ssin; //address
         socklen_t sendsize = sizeof(ssin); // Address length in-out parameter
         numBytesRcvd = recvfrom(clientUDPSocket, &globalBuffer[currentEndBuffer], payloadSize, 0, (struct sockaddr *) &ssin, &sendsize);
+        printf("%s\n",&globalBuffer[currentEndBuffer]);
         if (numBytesRcvd < 0) 
         {
           if (errno != EWOULDBLOCK)
@@ -150,6 +151,7 @@ void SIGIOHandler(int sig_num)
         } 
         else if(numBytesRcvd != 3) 
         {
+            endTranmission = 1;
             // printf("numbytes received %ld\n", numBytesRcvd);
             sem_wait (&smp);
             currentEndBuffer = currentEndBuffer + numBytesRcvd;
@@ -167,7 +169,6 @@ void SIGIOHandler(int sig_num)
         } 
         else if(numBytesRcvd == 3)
         {
-            printf("dcm\n");
             endTranmission = 1;
         }
       } while (numBytesRcvd > 0); 
@@ -416,9 +417,8 @@ int main(int argc, char *argv[])
     ualarm(mu*1000,mu*1000);
     signal(SIGALRM, SIGALARM_handler);
     /*still reading and writing*/
-    while(endTranmission != 1 && currentEndBuffer != 0)
+    while(endTranmission != 1 || currentEndBuffer != 0)
     {
-        printf("ahihi\n");
     }
 
     /************************print to log file***********************/
