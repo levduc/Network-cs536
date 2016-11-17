@@ -120,7 +120,7 @@ void SIGIOHandler(int sig_num)
     	/*for method B*/
     	float b = .5;
     	/*for method C*/
-    	float c = .001;
+    	float c = .0015;
     	/*for method D*/
     	float d = .5;
     	/*Q* == Q(t) do nothing*/
