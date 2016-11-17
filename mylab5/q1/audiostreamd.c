@@ -189,7 +189,7 @@ void SIGIOHandler(int sig_num)
 		    		break;
     			/*method C*/
 		    	case 2:
-		    		if(lambda + c*(targetBL-currentBL) > 0)
+		    		if( (lambda + c*(targetBL-currentBL)) > 0)
 		    		{
 		    			lambda = lambda + c*(targetBL-currentBL); 
 			    		packageSpacing = 1000/lambda;

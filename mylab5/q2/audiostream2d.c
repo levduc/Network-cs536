@@ -30,6 +30,7 @@ int mode;
 /*Log Buffer*/
 char LogBuffer[EXMAX_BUF];
 
+int audioBuf;
 
 /*concatString is to concatenate two string together*/
 char* concatString(char *s1, char *s2)
@@ -138,7 +139,7 @@ void SIGIOHandler(int sig_num)
     			case 0:
 		    		lambda = lambda + a;
 		    		packageSpacing = 1000/lambda;		
-	    			printf("decrease packet spacing:%f\n", packageSpacing);
+	    			// printf("decrease packet spacing:%f\n", packageSpacing);
 		    		break;
     			/*method B*/
     			case 1:
@@ -196,6 +197,7 @@ void SIGIOHandler(int sig_num)
 		    			printf("increase packet spacing:%f\n", packageSpacing);
 		    		}
 		    		break;
+    			/*method D*/
 		    	case 3:
 		    		if(lambda + c*(targetBL-currentBL) -d*(lambda - gammaVal) > 0)
 		    		{
@@ -209,7 +211,6 @@ void SIGIOHandler(int sig_num)
     		}
 
 
-    		/*method D*/
     	}
     }
   } while (numBytesRcvd > 0);
@@ -231,9 +232,9 @@ int main(int argc, char *argv[])
 	/*log file name*/
 	char * logFileName;
     /*Checking user input*/
-    if(argc != 7)
+    if(argc != 8)
     {
-        printf("Usage: <tcp-port> <udp-port> <payload-size> <packet-spacing> <mode> <logfile-s>\n");
+        printf("Usage: <tcp-port> <udp-port> <payload-size> <packet-spacing> <mode> <logfile-s> <audiobuf>\n");
         exit(1);
     } 
     /*payload Size*/
@@ -249,7 +250,10 @@ int main(int argc, char *argv[])
     /*logFile*/
     logFileName = argv[6];
     printf("Log File: %s\n", logFileName);
-   	
+   	/*adiobuf*/
+    audioBuf = strtol(argv[7],NULL,10);
+    printf("Audio Buffer %d\n", audioBuf);
+
    	/*************************tcp-server***********************************/
   	/*server address*/
   	struct sockaddr_in tcp_sin;
@@ -412,14 +416,18 @@ int main(int argc, char *argv[])
 			/********************************************************/
 
 		    /*start writing*/
-		  	unsigned char writeBuf[payloadSize];
-	   		memset(writeBuf, 0, payloadSize);
+		  	unsigned char writeBuf[SK_MAX + payloadSize];
+	   		memset(writeBuf, 0,payloadSize);
 		 	int byteRead = 0;
 		 	int  byteWrite = 0;
 		 	/*to write to log file*/
 			struct timeval start, end;
 		 	int firstRead = 0;
 		 	memset(LogBuffer,0,EXMAX_BUF);
+		 	int packageCount = 0;
+		 	char *arr[audioBuf];
+		 	char temp[SK_MAX+payloadSize+2];
+	   		memset(temp, 0, SK_MAX + payloadSize+1);
 		 	while((byteRead = read(fd, writeBuf, payloadSize)) > 0)
 		 	{
 		 		if(firstRead == 0)
@@ -427,13 +435,17 @@ int main(int argc, char *argv[])
 		 	    	gettimeofday(&start, NULL);
 		 	    	firstRead = 1;
 		 		}
-		 	    if ((byteWrite = sendto(udpSocket,writeBuf,byteRead,0,(struct sockaddr*)&udp_csin, sizeof(udp_csin))) < 0)
+		 		sprintf(temp,"$%d$%s", packageCount,writeBuf);
+		 	    if ((byteWrite = sendto(udpSocket,temp,strlen(temp),0,(struct sockaddr*)&udp_csin, sizeof(udp_csin))) < 0)
 		 	    {
 					printf("Child: Fail to send\n");
 					exit(1);
 				}
+	   			memset(temp, 0, SK_MAX + payloadSize);
+				arr[packageCount%audioBuf] = writeBuf;
+				printf("%s\n", arr[packageCount%audioBuf]);
+				packageCount++;
 		 	   	gettimeofday(&end, NULL);
-
 				sprintf(LogBuffer + strlen(LogBuffer),"%f", end.tv_sec-start.tv_sec+(end.tv_usec- start.tv_usec)/1000000.0);
 				sprintf(LogBuffer + strlen(LogBuffer)," %f \n", 1000/packageSpacing);
 				/******************************nanosleep*******************************/
@@ -457,8 +469,8 @@ int main(int argc, char *argv[])
 			        printf("I need to finish sleeping\n");
 			    }
 				/******************************nanosleep*******************************/
-				printf("Child Num byte sent %d, packet-spacing %f\n", byteWrite, packageSpacing);
-	   			memset(writeBuf,0, payloadSize);
+				// printf("Child Num byte sent %d, packet-spacing %f\n", byteWrite, packageSpacing);
+	   			memset(writeBuf,0, SK_MAX + payloadSize);
 		 	}
 		 	/*signal end tranmission*/
 			int i;

@@ -111,6 +111,7 @@ void SIGIOHandler(int sig_num)
         else if(numBytesRcvd != 3) 
         {
             // printf("numbytes received %ld\n", numBytesRcvd);
+            endTranmission = 0;
             sem_wait (&smp);
             currentEndBuffer = currentEndBuffer + numBytesRcvd;
             sem_post (&smp);

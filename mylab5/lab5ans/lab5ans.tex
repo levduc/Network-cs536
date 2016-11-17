@@ -47,12 +47,20 @@ As we discussed in class, method D has the best result. Below are plots for each
 \includegraphics[scale = .5]{listen2.pdf}
 \includegraphics[scale = .5]{stream2.pdf}
 \\
-\textbf{Method D} \\
+\textbf{Method D}
+\\
 \includegraphics[scale = .5]{listen3.pdf}
 \includegraphics[scale = .5]{stream3.pdf}
 \\
 \textit{Discussion:}
-
+The plot is sample of first 50 seconds of 4 methods. The parameters we used are:
+\begin{enumerate}
+	\item For method A, $a = 1$
+	\item For method B, $a = 1, \delta = 0.5$
+	\item For method C, $\epsilon = 0.001$
+	\item For method D, $\epsilon = 0.001, \beta = 0.5$
+\end{enumerate}
+Method D has the best results and the streaming using method D seems to have better quality. Method B also has a decent streaming quality. For 2 clients, streaming server did not have any problem support both clients.
 \end{problem}
 
 \end{document}

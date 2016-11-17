@@ -25,10 +25,12 @@ int payloadSize;
 float payloadDelay;
 float gammaVal;
 int bufferSize;  
+int discardK;
 int targetBufferSize;
 int clientUDPSocket;
 int currentEndBuffer = 0;
 int audioFD;
+int retransmitFlag;
 /*define semaphore*/
 sem_t smp;
 sem_t waitForCurrentEndBuffer;
@@ -110,7 +112,7 @@ void SIGIOHandler(int sig_num)
         } 
         else if(numBytesRcvd != 3) 
         {
-            // printf("numbytes received %ld\n", numBytesRcvd);
+            endTranmission =0;
             sem_wait (&smp);
             currentEndBuffer = currentEndBuffer + numBytesRcvd;
             sem_post (&smp);
@@ -162,8 +164,10 @@ void SIGIOHandler(int sig_num)
             gettimeofday(&end, NULL);
             sprintf(LogBuffer + strlen(LogBuffer),"%f", end.tv_sec-start.tv_sec+(end.tv_usec- start.tv_usec)/1000000.0);
             sprintf(LogBuffer + strlen(LogBuffer)," %d \n", currentEndBuffer);
-        } else if(numBytesRcvd == 3)
+        } 
+        else if(numBytesRcvd == 3)
         {
+            printf("dcm\n");
             endTranmission = 1;
         }
       } while (numBytesRcvd > 0); 
@@ -184,9 +188,9 @@ int main(int argc, char *argv[])
     int tcpServerPort, clientUdpPort;
 	/*Build address data structure*/
 	/*Check for client input*/
-	if(argc != 11)
+	if(argc != 13)
 	{
-		printf("Usage: <server-ip> <server-tcp-port> <client-udp-port> <payload-size> <playback-del> <gammaVal> <buf-sz> <target-buf> <logfile-s> <filename>\n ");
+		printf("Usage: <server-ip> <server-tcp-port> <client-udp-port> <payload-size> <playback-del> <gammaVal> <buf-sz> <target-buf> <logfile-s> <filename> <discard-k> <flag>\n ");
 		exit(1);
 	}
 
@@ -232,9 +236,16 @@ int main(int argc, char *argv[])
     fileName = argv[10];
     printf("file name: %s\n", fileName);
 
+    /*Discard K*/
+    discardK = strtol(argv[11], NULL, 10);
+    printf("Discard at: %d\n", discardK);
+
+    /*Retransmit Flag*/
+    retransmitFlag = strtol(argv[12], NULL, 10);
+    printf("Retransmit: %d\n", retransmitFlag);
+
     /***initialize semaphore*****/
     sem_init(&smp, 0, 1);
-
     /***********************tcp server*********************************/
     /* Address family = Internet */
     tcp_serversin.sin_family = AF_INET;
@@ -393,8 +404,8 @@ int main(int argc, char *argv[])
     }
     /***************************Prefetching*****************************/
 
-    char * audioFileName = "/dev/audio";
-    audioFD = open(audioFileName, O_RDWR|O_TRUNC, 0666);
+    char * audioFileName = "audio.mp3";
+    audioFD = open(audioFileName, O_CREAT|O_RDWR|O_TRUNC, 0666);
     if (audioFD < 0) 
     {
         printf("cannot open file: %s \n", audioFileName);
@@ -405,9 +416,9 @@ int main(int argc, char *argv[])
     ualarm(mu*1000,mu*1000);
     signal(SIGALRM, SIGALARM_handler);
     /*still reading and writing*/
-    while(endTranmission != 1 || currentEndBuffer != 0)
+    while(endTranmission != 1 && currentEndBuffer != 0)
     {
-
+        printf("ahihi\n");
     }
 
     /************************print to log file***********************/
