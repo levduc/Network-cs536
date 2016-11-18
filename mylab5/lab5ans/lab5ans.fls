@@ -153,6 +153,13 @@ INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/symbols/msam7.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm10.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm10.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm7.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmtt12.tfm
+INPUT /home/diamondduck/Networking/mylab5/lab5ans/q2listen3.pdf
+INPUT /home/diamondduck/Networking/mylab5/lab5ans/q2listen3.pdf
+INPUT /home/diamondduck/Networking/mylab5/lab5ans/q2listen3.pdf
+INPUT /home/diamondduck/Networking/mylab5/lab5ans/q2stream3.pdf
+INPUT /home/diamondduck/Networking/mylab5/lab5ans/q2stream3.pdf
+INPUT /home/diamondduck/Networking/mylab5/lab5ans/q2stream3.pdf
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmsl12.tfm
 INPUT /home/diamondduck/Networking/mylab5/lab5ans/lab5ans.aux
 INPUT /home/diamondduck/Networking/mylab5/lab5ans/lab5ans.out
@@ -162,3 +169,4 @@ INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb
 INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb
 INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb
 INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb
+INPUT /usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb

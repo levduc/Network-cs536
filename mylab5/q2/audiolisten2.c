@@ -103,11 +103,8 @@ void SIGIOHandler(int sig_num)
       int dcm = recvfrom(clientUDPSocket, tempBuf, payloadSize+4, 0, (struct sockaddr *) &ssin, &sendsize);
       if(dcm != 3)
       {
-            int temp =  (int)((unsigned char)(tempBuf[0]) << 24 |
-                                (unsigned char)(tempBuf[1]) << 16 |
-                                (unsigned char)(tempBuf[2]) << 8 |
-                                (unsigned char)(tempBuf[3]));
-            printf("Discard %d\n", temp);  
+  
+            printf("Discard %x%x%x%x\n", (unsigned char)tempBuf[0],(unsigned char)tempBuf[1],(unsigned char)tempBuf[2],(unsigned char)tempBuf[3]);  
       }
   }
   else /*do work*/
@@ -153,10 +150,10 @@ void SIGIOHandler(int sig_num)
                         unsigned char negACK[6];
                         negACK[0] = 'M';
                         negACK[1] = ' ';
-                        negACK[2] = globalBuffer[currentEndBuffer];
-                        negACK[3] = globalBuffer[currentEndBuffer+1];
-                        negACK[4] = globalBuffer[currentEndBuffer+2];
-                        negACK[5] = globalBuffer[currentEndBuffer+3];
+                        negACK[2] = ((lastPacket) >> 24) & 0xFF;
+                        negACK[3] = ((lastPacket) >> 16) & 0xFF;
+                        negACK[4] = ((lastPacket) >> 8) & 0xFF;
+                        negACK[5] = (lastPacket) & 0xFF;
                         if (sendto(clientUDPSocket,negACK,6, 0,(struct sockaddr*)&ssin, sizeof(ssin)) < 0)
                         {
                             printf("Fail to send\n");
@@ -216,9 +213,9 @@ void SIGIOHandler(int sig_num)
                 endTranmission =0;
                 int isGood = 0;
                 int temp =  (int)((unsigned char)(globalBuffer[currentEndBuffer]) << 24 |
-                                (unsigned char)(globalBuffer[currentEndBuffer + 1]) << 16 |
-                                (unsigned char)(globalBuffer[currentEndBuffer + 2]) << 8 |
-                                (unsigned char)(globalBuffer[currentEndBuffer + 3]));
+                                  (unsigned char)(globalBuffer[currentEndBuffer + 1]) << 16 |
+                                  (unsigned char)(globalBuffer[currentEndBuffer + 2]) << 8 |
+                                  (unsigned char)(globalBuffer[currentEndBuffer + 3]));
                 /*checking packet*/
                 if(temp < lastPacket) /*ignore*/
                 {
@@ -234,16 +231,16 @@ void SIGIOHandler(int sig_num)
                         unsigned char negACK[6];
                         negACK[0] = 'M';
                         negACK[1] = ' ';
-                        negACK[2] = globalBuffer[currentEndBuffer];
-                        negACK[3] = globalBuffer[currentEndBuffer+1];
-                        negACK[4] = globalBuffer[currentEndBuffer+2];
-                        negACK[5] = globalBuffer[currentEndBuffer+3];
+                        negACK[2] = ((lastPacket) >> 24) & 0xFF;
+                        negACK[3] = ((lastPacket) >> 16) & 0xFF;
+                        negACK[4] = ((lastPacket) >> 8) & 0xFF;
+                        
                         if (sendto(clientUDPSocket,negACK,6, 0,(struct sockaddr*)&ssin, sizeof(ssin)) < 0)
                         {
                             printf("Fail to send\n");
                             exit(1);
                         }
-                        printf("negACK sent: %c %x%x%x%x\n", negACK[0], negACK[2],negACK[3],negACK[4],negACK[5]);
+                        printf("negACK sent: %c %x%x%x%x\n",negACK[0],negACK[2],negACK[3],negACK[4],negACK[5]);
                     }
                 } 
                 else if (temp == lastPacket +1)

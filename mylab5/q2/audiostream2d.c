@@ -221,7 +221,7 @@ void SIGIOHandler(int sig_num)
 	                printf("Fail to send\n");
 	                exit(1);
 	            }
-	            printf("Retransmit: %x%x%x%x\n", (unsigned char)buf[2], (unsigned char)buf[3], (unsigned char) buf[4], (unsigned char) buf[5]);
+	            printf("Retransmit: %x%x%x%x\n", (unsigned char)arr[temp%audioBuf][0], (unsigned char)arr[temp%audioBuf][1], (unsigned char) arr[temp%audioBuf][2], (unsigned char) arr[temp%audioBuf][3]);
             }
             else
             {
@@ -266,6 +266,7 @@ int main(int argc, char *argv[])
     /*logFile*/
     logFileName = argv[6];
     printf("Log File: %s\n", logFileName);
+   	
    	/*adiobuf*/
     audioBuf = strtol(argv[7],NULL,10);
     arr = malloc(audioBuf*sizeof(char*));
@@ -465,9 +466,8 @@ int main(int argc, char *argv[])
 					printf("Child: Fail to send\n");
 					exit(1);
 				}
-				arr[packageCount%audioBuf] = writeBuf;
+			    arr[packageCount%audioBuf]=writeBuf;
 				packageCount++;
-
 		 	   	gettimeofday(&end, NULL);
 				sprintf(LogBuffer + strlen(LogBuffer),"%f", end.tv_sec-start.tv_sec+(end.tv_usec- start.tv_usec)/1000000.0);
 				sprintf(LogBuffer + strlen(LogBuffer)," %f \n", 1000/packageSpacing);
@@ -492,7 +492,7 @@ int main(int argc, char *argv[])
 			        // printf("I need to finish sleeping\n");
 			    }
 				/******************************nanosleep*******************************/
-				printf("Child Num byte sent %d, packet-spacing %f\n", byteWrite, packageSpacing);
+				// printf("Child Num byte sent %d, packet-spacing %f\n", byteWrite, packageSpacing);
 	   			memset(writeBuf,0, payloadSize);
 		 	}
 		 	/*signal end tranmission*/
