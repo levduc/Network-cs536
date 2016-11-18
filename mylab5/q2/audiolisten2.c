@@ -34,14 +34,14 @@ int retransmitFlag;
 /*define semaphore*/
 sem_t smp;
 sem_t waitForCurrentEndBuffer;
-
 /*Log Buffer*/
 char LogBuffer[EXMAX_BUF];
 struct timeval start, end;
 int firstRead = 0;
 int endTranmission = 0;
 struct timespec sleepTime, remainTime;
-
+int packageCount=0;
+int lastPacket=0;
 /*concatString is to concatenate two string together*/
 char* concatString(char *s1, char *s2)
 {
@@ -60,22 +60,20 @@ void SIGALARM_handler(int sig_num)
         /*write payloadsize*/
         if(currentEndBuffer >= payloadSize)
         {
-            if((numBytesWrt = write(audioFD, globalBuffer, payloadSize)) < 0)
+            while((numBytesWrt = write(audioFD, globalBuffer, payloadSize)) < 0)
             {
-                printf("Error writing skip\n");
             }
         }
         else /*otherwise write same as currentEndBuffer*/
         {
-            if((numBytesWrt = write(audioFD, globalBuffer, currentEndBuffer)) < 0)
+            while((numBytesWrt = write(audioFD, globalBuffer, currentEndBuffer)) < 0)
             {
-                printf("Error writing skip\n");
             }
         }
         // printf("SIGARM: write to file %ld\n", numBytesWrt);
         if(numBytesWrt > 0)
         {
-            printf("SIGALARM: current buffer level %d byte written %ld\n", currentEndBuffer, numBytesWrt);
+            // printf("SIGALARM: current buffer level %d byte written %ld\n", currentEndBuffer, numBytesWrt);
             strcpy(globalBuffer,globalBuffer + numBytesWrt);
             sem_wait(&smp);
             currentEndBuffer = currentEndBuffer - numBytesWrt;
@@ -86,93 +84,200 @@ void SIGALARM_handler(int sig_num)
     signal(SIGALRM, SIGALARM_handler);
 }
 
+
 /*SIGIO handler*/
 void SIGIOHandler(int sig_num) 
 {
+  /*increase number of package received*/
+  packageCount++;
   if(firstRead == 0)
   {
     gettimeofday(&start, NULL);
     firstRead = 1;
   }
-  if(currentEndBuffer + payloadSize < bufferSize)
+  if(packageCount%discardK == 0) /*ignore*/
   {
-      ssize_t numBytesRcvd;
-      do 
-      { 
-        struct sockaddr_in ssin; //address
-        socklen_t sendsize = sizeof(ssin); // Address length in-out parameter
-        numBytesRcvd = recvfrom(clientUDPSocket, &globalBuffer[currentEndBuffer], payloadSize, 0, (struct sockaddr *) &ssin, &sendsize);
-        printf("%s\n",&globalBuffer[currentEndBuffer]);
-        if (numBytesRcvd < 0) 
-        {
-          if (errno != EWOULDBLOCK)
-          {
-                printf("1: recvfrom() failed");
-                // exit(1);
-          }
-        } 
-        else if(numBytesRcvd != 3) 
-        {
-            endTranmission =0;
-            sem_wait (&smp);
-            currentEndBuffer = currentEndBuffer + numBytesRcvd;
-            sem_post (&smp);
-            char confirmBack[MAX_BUF];
-            sprintf(confirmBack,"Q %d %d %f",currentEndBuffer,targetBufferSize,gammaVal);
-            if (sendto(clientUDPSocket,confirmBack,strlen(confirmBack), 0,(struct sockaddr*)&ssin, sizeof(ssin)) < 0)
-            {
-                printf("Fail to send\n");
-                exit(1);
-            }
-            gettimeofday(&end, NULL);
-            sprintf(LogBuffer + strlen(LogBuffer),"%f", end.tv_sec-start.tv_sec+(end.tv_usec- start.tv_usec)/1000000.0);
-            sprintf(LogBuffer + strlen(LogBuffer)," %d \n", currentEndBuffer);
-        } else if(numBytesRcvd == 3)
-        {
-            endTranmission = 1;
-        }
-      } while (numBytesRcvd > 0);
+      struct sockaddr_in ssin; //address
+      socklen_t sendsize = sizeof(ssin); // Address length in-out parameter
+      char tempBuf[MAX_BUF];
+      int dcm = recvfrom(clientUDPSocket, tempBuf, payloadSize+4, 0, (struct sockaddr *) &ssin, &sendsize);
+      if(dcm != 3)
+      {
+            int temp =  (int)((unsigned char)(tempBuf[0]) << 24 |
+                                (unsigned char)(tempBuf[1]) << 16 |
+                                (unsigned char)(tempBuf[2]) << 8 |
+                                (unsigned char)(tempBuf[3]));
+            printf("Discard %d\n", temp);  
+      }
   }
-  else
-  {
-    ssize_t numBytesRcvd;
-      do 
-      { 
-        struct sockaddr_in ssin; //address
-        socklen_t sendsize = sizeof(ssin); // Address length in-out parameter
-        numBytesRcvd = recvfrom(clientUDPSocket, &globalBuffer[currentEndBuffer], bufferSize - currentEndBuffer, 0, (struct sockaddr *) &ssin, &sendsize);
-        if (numBytesRcvd < 0) 
-        {
-          if (errno != EWOULDBLOCK)
-          {
-                printf("2: recvfrom() failed");
-                // exit(1);
-          }
-        } 
-        else if(numBytesRcvd != 3) 
-        {
-            endTranmission = 1;
-            // printf("numbytes received %ld\n", numBytesRcvd);
-            sem_wait (&smp);
-            currentEndBuffer = currentEndBuffer + numBytesRcvd;
-            sem_post (&smp);
-            char confirmBack[MAX_BUF];
-            sprintf(confirmBack,"Q %d %d %f",currentEndBuffer,targetBufferSize,gammaVal);
-            if (sendto(clientUDPSocket,confirmBack,strlen(confirmBack), 0,(struct sockaddr*)&ssin, sizeof(ssin)) < 0)
+  else /*do work*/
+  {     
+      if(currentEndBuffer + payloadSize < bufferSize)
+      {
+          ssize_t numBytesRcvd;
+          do 
+          { 
+            struct sockaddr_in ssin; //address
+            socklen_t sendsize = sizeof(ssin); // Address length in-out parameter
+            char * temp = malloc(payloadSize+4);
+            // memset(temp,0,payloadSize+4);
+            numBytesRcvd = recvfrom(clientUDPSocket, &globalBuffer[currentEndBuffer], payloadSize+4, 0, (struct sockaddr *) &ssin, &sendsize);
+            if (numBytesRcvd < 0) 
             {
-                printf("Fail to send\n");
-                exit(1);
+              if (errno != EWOULDBLOCK)
+              {
+                    printf("1: recvfrom() failed");
+                    // exit(1);
+              }
+            } 
+            else if(numBytesRcvd != 3) 
+            {
+                endTranmission =0;
+                int isGood = 0;
+                int temp =  (int)((unsigned char)(globalBuffer[currentEndBuffer]) << 24 |
+                                (unsigned char)(globalBuffer[currentEndBuffer + 1]) << 16 |
+                                (unsigned char)(globalBuffer[currentEndBuffer + 2]) << 8 |
+                                (unsigned char)(globalBuffer[currentEndBuffer + 3]));
+                /*checking packet*/
+                if(temp < lastPacket) /*ignore*/
+                {
+                    isGood = 0;
+                    printf("ignore %d\n", temp);
+                } 
+                else if(temp > lastPacket+1) /*detect missing*/
+                {
+                    isGood = 1;
+                    lastPacket = temp; /*updating*/
+                    if(retransmitFlag == 1)
+                    {
+                        unsigned char negACK[6];
+                        negACK[0] = 'M';
+                        negACK[1] = ' ';
+                        negACK[2] = globalBuffer[currentEndBuffer];
+                        negACK[3] = globalBuffer[currentEndBuffer+1];
+                        negACK[4] = globalBuffer[currentEndBuffer+2];
+                        negACK[5] = globalBuffer[currentEndBuffer+3];
+                        if (sendto(clientUDPSocket,negACK,6, 0,(struct sockaddr*)&ssin, sizeof(ssin)) < 0)
+                        {
+                            printf("Fail to send\n");
+                            exit(1);
+                        }
+                        printf("negACK sent: %c %x%x%x%x\n", negACK[0], negACK[2],negACK[3],negACK[4],negACK[5]);
+                    }
+                } 
+                else if (temp == lastPacket +1)
+                {
+                    isGood=1;
+                    lastPacket = temp;
+                }
+                if(isGood)
+                {
+                    memmove(globalBuffer+currentEndBuffer, globalBuffer+currentEndBuffer+4, numBytesRcvd-4);
+                    // strcpy(globalBuffer+currentEndBuffer,temp+4);
+                    sem_wait (&smp);
+                    currentEndBuffer = currentEndBuffer + numBytesRcvd;
+                    sem_post (&smp);
+                    char confirmBack[MAX_BUF];
+                    sprintf(confirmBack,"Q %d %d %f",currentEndBuffer,targetBufferSize,gammaVal);
+                    if (sendto(clientUDPSocket,confirmBack,strlen(confirmBack), 0,(struct sockaddr*)&ssin, sizeof(ssin)) < 0)
+                    {
+                        printf("Fail to send\n");
+                        exit(1);
+                    }
+                    gettimeofday(&end, NULL);
+                    sprintf(LogBuffer + strlen(LogBuffer),"%f", end.tv_sec-start.tv_sec+(end.tv_usec- start.tv_usec)/1000000.0);
+                    sprintf(LogBuffer + strlen(LogBuffer)," %d \n", currentEndBuffer);
+                }
+            } 
+            else if(numBytesRcvd == 3)
+            {
+                endTranmission = 1;
             }
-            gettimeofday(&end, NULL);
-            sprintf(LogBuffer + strlen(LogBuffer),"%f", end.tv_sec-start.tv_sec+(end.tv_usec- start.tv_usec)/1000000.0);
-            sprintf(LogBuffer + strlen(LogBuffer)," %d \n", currentEndBuffer);
-        } 
-        else if(numBytesRcvd == 3)
-        {
-            endTranmission = 1;
-        }
-      } while (numBytesRcvd > 0); 
-  }
+          } while (numBytesRcvd > 0);
+      }
+      else
+      {
+        ssize_t numBytesRcvd;
+          do 
+          { 
+            struct sockaddr_in ssin; //address
+            socklen_t sendsize = sizeof(ssin); // Address length in-out parameter
+            numBytesRcvd = recvfrom(clientUDPSocket, &globalBuffer[currentEndBuffer], bufferSize - currentEndBuffer+4, 0, (struct sockaddr *) &ssin, &sendsize);
+            if (numBytesRcvd < 0) 
+            {
+              if (errno != EWOULDBLOCK)
+              {
+                    printf("2: recvfrom() failed");
+                    // exit(1);
+              }
+            } 
+            else if(numBytesRcvd != 3) 
+            {
+                endTranmission =0;
+                int isGood = 0;
+                int temp =  (int)((unsigned char)(globalBuffer[currentEndBuffer]) << 24 |
+                                (unsigned char)(globalBuffer[currentEndBuffer + 1]) << 16 |
+                                (unsigned char)(globalBuffer[currentEndBuffer + 2]) << 8 |
+                                (unsigned char)(globalBuffer[currentEndBuffer + 3]));
+                /*checking packet*/
+                if(temp < lastPacket) /*ignore*/
+                {
+                    isGood = 0;
+                    printf("ignore %d\n", temp);
+                } 
+                else if(temp > lastPacket+1) /*detect missing*/
+                {
+                    isGood = 1;
+                    lastPacket = temp; /*updating*/
+                     if(retransmitFlag == 1)
+                    {
+                        unsigned char negACK[6];
+                        negACK[0] = 'M';
+                        negACK[1] = ' ';
+                        negACK[2] = globalBuffer[currentEndBuffer];
+                        negACK[3] = globalBuffer[currentEndBuffer+1];
+                        negACK[4] = globalBuffer[currentEndBuffer+2];
+                        negACK[5] = globalBuffer[currentEndBuffer+3];
+                        if (sendto(clientUDPSocket,negACK,6, 0,(struct sockaddr*)&ssin, sizeof(ssin)) < 0)
+                        {
+                            printf("Fail to send\n");
+                            exit(1);
+                        }
+                        printf("negACK sent: %c %x%x%x%x\n", negACK[0], negACK[2],negACK[3],negACK[4],negACK[5]);
+                    }
+                } 
+                else if (temp == lastPacket +1)
+                {
+                    isGood=1;
+                    lastPacket = temp;
+                }
+                if(isGood)
+                {
+                    endTranmission = 0;
+                    memmove(globalBuffer+currentEndBuffer, globalBuffer+currentEndBuffer+4, numBytesRcvd-4);
+                    // printf("numbytes received %ld\n", numBytesRcvd);
+                    sem_wait (&smp);
+                    currentEndBuffer = currentEndBuffer + numBytesRcvd;
+                    sem_post (&smp);
+                    char confirmBack[MAX_BUF];
+                    sprintf(confirmBack,"Q %d %d %f",currentEndBuffer,targetBufferSize,gammaVal);
+                    if (sendto(clientUDPSocket,confirmBack,strlen(confirmBack), 0,(struct sockaddr*)&ssin, sizeof(ssin)) < 0)
+                    {
+                        printf("Fail to send\n");
+                        exit(1);
+                    }
+                    gettimeofday(&end, NULL);
+                    sprintf(LogBuffer + strlen(LogBuffer),"%f", end.tv_sec-start.tv_sec+(end.tv_usec- start.tv_usec)/1000000.0);
+                    sprintf(LogBuffer + strlen(LogBuffer)," %d \n", currentEndBuffer);
+                }
+            } 
+            else if(numBytesRcvd == 3)
+            {
+                endTranmission = 1;
+            }
+          } while (numBytesRcvd > 0); 
+      }
+    }//end else not discard
  }
 
 int main(int argc, char *argv[])
@@ -187,8 +292,8 @@ int main(int argc, char *argv[])
     char * logFileName;
     /*server port*/
     int tcpServerPort, clientUdpPort;
-	/*Build address data structure*/
-	/*Check for client input*/
+    /*Build address data structure*/
+    /*Check for client input*/
 	if(argc != 13)
 	{
 		printf("Usage: <server-ip> <server-tcp-port> <client-udp-port> <payload-size> <playback-del> <gammaVal> <buf-sz> <target-buf> <logfile-s> <filename> <discard-k> <flag>\n ");
@@ -222,12 +327,12 @@ int main(int argc, char *argv[])
     printf("gammaVal: %f\n", gammaVal);
     
     /*buffer size*/
-    bufferSize = strtol(argv[7], NULL,10);
+    bufferSize = 1000*strtol(argv[7], NULL,10);
     printf("Buffer size: %d\n", bufferSize);
     //allocate
     globalBuffer = malloc(bufferSize);
     /*target buffer size*/
-    targetBufferSize = strtol(argv[8], NULL,10);
+    targetBufferSize = 1000*strtol(argv[8], NULL,10);
     printf("target buffer size: %d\n", targetBufferSize);
     /*log file name*/
     logFileName = argv[9];
@@ -405,8 +510,8 @@ int main(int argc, char *argv[])
     }
     /***************************Prefetching*****************************/
 
-    char * audioFileName = "audio.mp3";
-    audioFD = open(audioFileName, O_CREAT|O_RDWR|O_TRUNC, 0666);
+    char * audioFileName = "/dev/audio";
+    audioFD = open(audioFileName, O_RDWR|O_TRUNC, 0666);
     if (audioFD < 0) 
     {
         printf("cannot open file: %s \n", audioFileName);

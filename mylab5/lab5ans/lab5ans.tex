@@ -33,7 +33,7 @@
 \maketitle
  
 \begin{problem}{1} \ \\
-As we discussed in class, method D has the best result. Below are plots for each method:
+Below are plots for each method:
 \\
 \textbf{Method A} \\
 \includegraphics[scale = .5]{listen0.pdf}
@@ -53,14 +53,14 @@ As we discussed in class, method D has the best result. Below are plots for each
 \includegraphics[scale = .5]{stream3.pdf}
 \\
 \textit{Discussion:}
-The plot is sample of first 50 seconds of 4 methods. The parameters we used are:
+As we discussed in class, the plot is sample of first 50 seconds of 4 methods. The parameters we used are:
 \begin{enumerate}
-	\item For method A, $a = 1$
-	\item For method B, $a = 1, \delta = 0.5$
-	\item For method C, $\epsilon = 0.001$
-	\item For method D, $\epsilon = 0.001, \beta = 0.5$
+	\item For method A, $a = 2$
+	\item For method B, $a = 2, \delta = 0.5$
+	\item For method C, $\epsilon = 0.00005$
+	\item For method D, $\epsilon = 0.001, \beta = 0.1$
 \end{enumerate}
-Method D has the best results and the streaming using method D seems to have better quality. Method B also has a decent streaming quality. For 2 clients, streaming server did not have any problem support both clients.
+Method D has the best results and the streaming using method D seems to have better quality. Method B,C also has a decent streaming quality as current buffer level always above payload size. Method A does not have a good streaming quality, as the current buffer level always hits bottom. For testing streaming server with 2 clients, I don't see any significant diffences when streaming server supports two clients vs one client.
 \end{problem}
 
 \end{document}

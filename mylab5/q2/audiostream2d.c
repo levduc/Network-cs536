@@ -11,7 +11,6 @@
 #include <time.h>
 #include <errno.h>
 #include <sys/time.h>
-// #include <limits.h>
 
 #define MAX_BUF 100000
 #define EXMAX_BUF 1000000000
@@ -29,8 +28,10 @@ const char d[2] = " ";
 int mode;
 /*Log Buffer*/
 char LogBuffer[EXMAX_BUF];
-
+/**/
+int packageCount;
 int audioBuf;
+char **arr;
 
 /*concatString is to concatenate two string together*/
 char* concatString(char *s1, char *s2)
@@ -60,7 +61,6 @@ void SIGIOHandler(int sig_num)
     else 
     {
     	/*Adjust tau here*/
-    	printf("%s\n", buf);
     	/*breakdown buf*/
     	char *token;
 		/*getting client-udp port*/
@@ -68,151 +68,167 @@ void SIGIOHandler(int sig_num)
 		
 		if(strcmp(token, "Q") == 0)
 		{
-			// printf("This is a query: %s\n", token);
-		}
-		else
-		{
-			printf("This is not a query\n");
-		}
-		/*get current buffer*/
-	    token = strtok(NULL, d);
-		char currentBufferLevel[SK_MAX];
-
-		if(token != NULL)
-		{
-			strncpy(currentBufferLevel, token, SK_MAX);
-			currentBufferLevel[SK_MAX] = '\0';
-		}
-		else
-		{
-			printf("No current buffer\n");
-		}
-	    /*get target buffer*/
-	    token = strtok(NULL, d);
-		char targetBuf[MAX_BUF];
-		if(token != NULL)
-		{
-			strncpy(targetBuf, token, MAX_BUF);
-			targetBuf[MAX_BUF] = '\0';
-		}
-		else
-		{
-			printf("No target buffer\n");
-		}
-		/*getting gamma*/
-		token = strtok(NULL, d);
-		char gamma[SK_MAX];
-		if(token != NULL)
-		{
-			strncpy(gamma, token, SK_MAX);
-			gamma[SK_MAX] = '\0';
-		}
-		else
-		{
-			printf("No gamma\n");
-		}
-		/*parse to int*/
-		int currentBL = strtol(currentBufferLevel, NULL, 10);
-		int targetBL = strtol(targetBuf, NULL, 10);
-		float gammaVal = strtof(gamma, NULL);
-		float lambda = 1000/packageSpacing;
-		/*for method A*/
-		float a = 1;
-    	/*for method B*/
-    	float b = .5;
-    	/*for method C*/
-    	float c = .001;
-    	/*for method D*/
-    	float d = .5;
-    	/*Q* == Q(t) do nothing*/
-    	if(currentBL == targetBL)
-    	{
-    		/*do nothing*/
-    	}
-    	/*Q(t)<Q*  increase lambda*/
-    	if(currentBL < targetBL)
-    	{
-    		/*increase lambda*/
-    		switch(mode)
-    		{
-    			/*method A*/
-    			case 0:
-		    		lambda = lambda + a;
-		    		packageSpacing = 1000/lambda;		
-	    			// printf("decrease packet spacing:%f\n", packageSpacing);
-		    		break;
-    			/*method B*/
-    			case 1:
-	    			lambda = lambda + a;
-	    			packageSpacing = 1000/lambda;
-	    			printf("decrease packet spacing:%f\n", packageSpacing);
-		    		break;
-    			/*method C*/
-		    	case 2:
-	    			lambda = lambda + c*(targetBL-currentBL); 
-		    		packageSpacing = 1000/lambda;
-	    			printf("decrease packet spacing:%f\n", packageSpacing);
-		    		break;
-    			/*method D*/
-		    	case 3:
-	    			lambda = lambda + c*(targetBL-currentBL) -d*(lambda - gammaVal); 
-		    		packageSpacing = 1000/lambda;
-	    			printf("decrease packet spacing:%f\n", packageSpacing);
-		    		break;
-		    	default:
-		    		printf("Not sure which mode\n");
-    		}
-
-    	}
-    	/*Q(t)>Q*  decrease lambda*/
-    	if(currentBL > targetBL)
-    	{
-    		/*decrease lambda*/
-    		switch(mode)
-    		{
-    			/*method A*/
-    			case 0:
-		    		if ((lambda - a) > 0)
-		    		{
-		    			lambda = lambda - a; 
+		
+			/*get current buffer*/
+		    token = strtok(NULL, d);
+			char currentBufferLevel[SK_MAX];
+			if(token != NULL)
+			{
+				strncpy(currentBufferLevel, token, SK_MAX);
+				currentBufferLevel[SK_MAX] = '\0';
+			}
+			else
+			{
+				printf("No current buffer\n");
+			}
+		    /*get target buffer*/
+		    token = strtok(NULL, d);
+			char targetBuf[MAX_BUF];
+			if(token != NULL)
+			{
+				strncpy(targetBuf, token, MAX_BUF);
+				targetBuf[MAX_BUF] = '\0';
+			}
+			else
+			{
+				printf("No target buffer\n");
+			}
+			/*getting gamma*/
+			token = strtok(NULL, d);
+			char gamma[SK_MAX];
+			if(token != NULL)
+			{
+				strncpy(gamma, token, SK_MAX);
+				gamma[SK_MAX] = '\0';
+			}
+			else
+			{
+				printf("No gamma\n");
+			}
+			/*parse to int*/
+			int currentBL = strtol(currentBufferLevel, NULL, 10);
+			int targetBL = strtol(targetBuf, NULL, 10);
+			float gammaVal = strtof(gamma, NULL);
+			float lambda = 1000/packageSpacing;
+			/*for method A*/
+			float a = 1;
+	    	/*for method B*/
+	    	float b = .5;
+	    	/*for method C*/
+	    	float c = .001;
+	    	/*for method D*/
+	    	float d = .5;
+	    	/*Q* == Q(t) do nothing*/
+	    	if(currentBL == targetBL)
+	    	{
+	    		/*do nothing*/
+	    	}
+	    	/*Q(t)<Q*  increase lambda*/
+	    	if(currentBL < targetBL)
+	    	{
+	    		/*increase lambda*/
+	    		switch(mode)
+	    		{
+	    			/*method A*/
+	    			case 0:
+			    		lambda = lambda + a;
+			    		packageSpacing = 1000/lambda;		
+		    			// printf("decrease packet spacing:%f\n", packageSpacing);
+			    		break;
+	    			/*method B*/
+	    			case 1:
+		    			lambda = lambda + a;
 		    			packageSpacing = 1000/lambda;
-		    			printf("increase packet spacing:%f\n", packageSpacing);
-		    		}
-		    		break;
-		    	case 1:
-    				/*method B*/
-		    		if (lambda*b > 0)
-		    		{
-		    			lambda = lambda*b; 
-		    			packageSpacing = 1000/lambda;
-		    			printf("increase packet spacing:%f\n", packageSpacing);
-		    		}
-		    		break;
-    			/*method C*/
-		    	case 2:
-		    		if(lambda + c*(targetBL-currentBL) > 0)
-		    		{
+		    			// printf("decrease packet spacing:%f\n", packageSpacing);
+			    		break;
+	    			/*method C*/
+			    	case 2:
 		    			lambda = lambda + c*(targetBL-currentBL); 
 			    		packageSpacing = 1000/lambda;
-		    			printf("increase packet spacing:%f\n", packageSpacing);
-		    		}
-		    		break;
-    			/*method D*/
-		    	case 3:
-		    		if(lambda + c*(targetBL-currentBL) -d*(lambda - gammaVal) > 0)
-		    		{
+		    			// printf("decrease packet spacing:%f\n", packageSpacing);
+			    		break;
+	    			/*method D*/
+			    	case 3:
 		    			lambda = lambda + c*(targetBL-currentBL) -d*(lambda - gammaVal); 
 			    		packageSpacing = 1000/lambda;
-		    			printf("decrease packet spacing:%f\n", packageSpacing);
-		    		}
-		    		break;
-		    	default:
-		    		printf("Not sure which mode\n");
-    		}
+		    			// printf("decrease packet spacing:%f\n", packageSpacing);
+			    		break;
+			    	default:
+			    		printf("Not sure which mode\n");
+	    		}
 
-
-    	}
-    }
+	    	}
+	    	/*Q(t)>Q*  decrease lambda*/
+	    	if(currentBL > targetBL)
+	    	{
+	    		/*decrease lambda*/
+	    		switch(mode)
+	    		{
+	    			/*method A*/
+	    			case 0:
+			    		if ((lambda - a) > 0)
+			    		{
+			    			lambda = lambda - a; 
+			    			packageSpacing = 1000/lambda;
+			    			// printf("increase packet spacing:%f\n", packageSpacing);
+			    		}
+			    		break;
+			    	case 1:
+	    				/*method B*/
+			    		if (lambda*b > 0)
+			    		{
+			    			lambda = lambda*b; 
+			    			packageSpacing = 1000/lambda;
+			    			// printf("increase packet spacing:%f\n", packageSpacing);
+			    		}
+			    		break;
+	    			/*method C*/
+			    	case 2:
+			    		if(lambda + c*(targetBL-currentBL) > 0)
+			    		{
+			    			lambda = lambda + c*(targetBL-currentBL); 
+				    		packageSpacing = 1000/lambda;
+			    			// printf("increase packet spacing:%f\n", packageSpacing);
+			    		}
+			    		break;
+	    			/*method D*/
+			    	case 3:
+			    		if(lambda + c*(targetBL-currentBL) -d*(lambda - gammaVal) > 0)
+			    		{
+			    			lambda = lambda + c*(targetBL-currentBL) -d*(lambda - gammaVal); 
+				    		packageSpacing = 1000/lambda;
+			    			// printf("decrease packet spacing:%f\n", packageSpacing);
+			    		}
+			    		break;
+			    	default:
+			    		printf("Not sure which mode\n");
+	    		}
+	    	}
+    	} /*Query*/
+		else
+		{
+            printf("negACK: %c %x%x%x%x\n", buf[0], (unsigned char)buf[2], (unsigned char)buf[3], (unsigned char) buf[4], (unsigned char) buf[5]);
+            int temp =  (int)((unsigned char)(buf[2]) << 24 |
+                                (unsigned char)(buf[3]) << 16 |
+                                (unsigned char)(buf[4]) << 8 |
+                                (unsigned char)(buf[5]));
+            /*if in store buffer*/
+            if (temp > packageCount - audioBuf)
+            {
+            	/*temp is store at arr[temp%audioBuf]*/
+	            if (sendto(udpSocket,arr[temp%audioBuf],payloadSize+4, 0,(struct sockaddr*)&csin, sizeof(csin)) < 0)
+	            {
+	                printf("Fail to send\n");
+	                exit(1);
+	            }
+	            printf("Retransmit: %x%x%x%x\n", (unsigned char)buf[2], (unsigned char)buf[3], (unsigned char) buf[4], (unsigned char) buf[5]);
+            }
+            else
+            {
+            	printf("%x%x%x%x was discarded. \n", (unsigned char)buf[2], (unsigned char)buf[3], (unsigned char) buf[4], (unsigned char) buf[5]);
+            }
+		}
+    }//end else
   } while (numBytesRcvd > 0);
 }
 
@@ -252,6 +268,7 @@ int main(int argc, char *argv[])
     printf("Log File: %s\n", logFileName);
    	/*adiobuf*/
     audioBuf = strtol(argv[7],NULL,10);
+    arr = malloc(audioBuf*sizeof(char*));
     printf("Audio Buffer %d\n", audioBuf);
 
    	/*************************tcp-server***********************************/
@@ -416,7 +433,7 @@ int main(int argc, char *argv[])
 			/********************************************************/
 
 		    /*start writing*/
-		  	unsigned char writeBuf[payloadSize];
+		  	unsigned char writeBuf[payloadSize+4];
 	   		memset(writeBuf, 0,payloadSize);
 		 	int byteRead = 0;
 		 	int  byteWrite = 0;
@@ -424,26 +441,31 @@ int main(int argc, char *argv[])
 			struct timeval start, end;
 		 	int firstRead = 0;
 		 	memset(LogBuffer,0,EXMAX_BUF);
-		 	int packageCount = 0;
-		 	char *arr[audioBuf];
-		 	char temp[SK_MAX+payloadSize+2];
-		 	while((byteRead = read(fd, writeBuf, payloadSize- strlen(temp))) > 0)
+		 	unsigned char bytes[4];
+		 	while((byteRead = read(fd, &writeBuf[4], payloadSize)) > 0)
 		 	{
-	   			memset(temp, 0, SK_MAX + payloadSize);
+		 		/*convert to byte*/
+				bytes[0] = (packageCount >> 24) & 0xFF;
+				bytes[1] = (packageCount >> 16) & 0xFF;
+				bytes[2] = (packageCount >> 8) & 0xFF;
+				bytes[3] = packageCount & 0xFF;
+				/*sequencing*/
+		 		writeBuf[0] = bytes[0];
+		 		writeBuf[1] = bytes[1];
+		 		writeBuf[2] = bytes[2];
+		 		writeBuf[3] = bytes[3];
 		 		if(firstRead == 0)
 		 		{
 		 	    	gettimeofday(&start, NULL);
 		 	    	firstRead = 1;
 		 		}
-		 		sprintf(temp,"$%d$%s",packageCount,writeBuf);
-		 	    if ((byteWrite = sendto(udpSocket,temp,byteRead,0,(struct sockaddr*)&udp_csin, sizeof(udp_csin))) < 0)
+		 	
+		 	    if ((byteWrite = sendto(udpSocket,writeBuf,byteRead+4,0,(struct sockaddr*)&udp_csin, sizeof(udp_csin))) < 0)
 		 	    {
 					printf("Child: Fail to send\n");
 					exit(1);
 				}
-	   			memset(temp, 0, SK_MAX + payloadSize);
 				arr[packageCount%audioBuf] = writeBuf;
-				// printf("%s\n", arr[packageCount%audioBuf]);
 				packageCount++;
 
 		 	   	gettimeofday(&end, NULL);
@@ -463,11 +485,11 @@ int main(int argc, char *argv[])
 				}
 				if(nanosleep(&sleepTime,&remainTime) < 0)
 				{
-					printf("Child: nanosleep was interupted by signal. Time left: %f \n", (remainTime.tv_sec + remainTime.tv_nsec/1000000000.0));
+					// printf("Child: nanosleep was interupted by signal. Time left: %f \n", (remainTime.tv_sec + remainTime.tv_nsec/1000000000.0));
 				}
 				while((nanosleep(&remainTime,&remainTime)) != 0)
 			    {
-			        printf("I need to finish sleeping\n");
+			        // printf("I need to finish sleeping\n");
 			    }
 				/******************************nanosleep*******************************/
 				printf("Child Num byte sent %d, packet-spacing %f\n", byteWrite, packageSpacing);
