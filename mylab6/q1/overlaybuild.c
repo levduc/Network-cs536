@@ -22,7 +22,7 @@ char* concatString(char *s1, char *s2)
     strcat(result, s2);
     return result;
 }
-
+/* check valid ip*/
 int isValidIpAddress(char *ipAddress)
 {
     struct sockaddr_in sa;
@@ -120,6 +120,7 @@ int main(int argc, char *argv[])
   	sin.sin_port = htons(firstOLPort);
   	/* set all bits of the padding field to 0 */
   	memset(sin.sin_zero, '\0', sizeof sin.sin_zero);
+  	
 	/* create UDP socket*/
 	if((s = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
     {

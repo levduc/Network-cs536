@@ -30,6 +30,14 @@ char* concatString(char *s1, char *s2)
     return result;
 }
 
+int isValidIpAddress(char *ipAddress)
+{
+    struct sockaddr_in sa;
+    if (inet_pton(AF_INET, ipAddress, &(sa.sin_addr))<= 0)
+    	return -1;
+    return 0;
+}
+
 int main(int argc, char *argv[])
 {
 	int status;
@@ -74,7 +82,7 @@ int main(int argc, char *argv[])
   	/* set port number, using htons function to use proper byte order */
   	sin.sin_port = htons(routerPort);
   	/* set IP address to localhost */
-  	sin.sin_addr.s_addr = htonl(INADDR_ANY);
+  	sin.sin_addr.s_addr = htons(INADDR_ANY);
 
   	/* set all bits of the padding field to 0 */
   	memset(sin.sin_zero, '\0', sizeof sin.sin_zero);
@@ -93,18 +101,7 @@ int main(int argc, char *argv[])
    	}
 	printf("listening ... \n");
 	
-   struct ifaddrs *ifap, *ifa;
-   struct sockaddr_in *sa;
-   char *addr;
-   getifaddrs (&ifap);
-   for (ifa = ifap; ifa; ifa = ifa->ifa_next) {
-       if (ifa->ifa_addr->sa_family==AF_INET) {
-           sa = (struct sockaddr_in *) ifa->ifa_addr;
-           addr = inet_ntoa(sa->sin_addr);
-           printf("Interface: %s\tAddress: %s\n", ifa->ifa_name, addr);
-       }
-   }
-   freeifaddrs(ifap);
+   
 
 	while(1)
 	{
@@ -127,47 +124,97 @@ int main(int argc, char *argv[])
 		else if (k == 0)  
 		{ 
 			/* child code*/
-			/* breakdown mytunnel request*/
+			/* breakdown build-request request*/
 			printf("child [%d]:\n", getpid());
 			char* token;
 			char buildRequest[16];
+			char* forwardBuildRequest="";
 			/* split by delimiter*/
 		    token = strtok(buf, d);
 		    strncpy(buildRequest, token, 15);
 			buildRequest[16] = '\0';
-			char currentIP[16];
+			char ipRequest[16] = "";
+			int count = 0;
 			while(token != NULL)
 			{
-				strncpy(currentIP, token, 15);
-				currentIP[16] = '\0';
+				strncpy(ipRequest, token, 15);
+				ipRequest[16] = '\0';
+				if(isValidIpAddress(ipRequest) == 0)
+				{
+				    count++;
+				}
 		    	token = strtok(NULL, d);
+		    	if(token != NULL)
+		    	{
+					forwardBuildRequest = concatString(forwardBuildRequest, "$");
+					forwardBuildRequest = concatString(forwardBuildRequest, ipRequest);
+		    	}
 			}
-			printf("last ip: %s\n", currentIP); 
-			
-			/* compare with local address*/
+			forwardBuildRequest = concatString(forwardBuildRequest, "$");
+			/************************getting forward ip *****************************/
+			char* copyForwardRequest;
+			char* dcm;
+			char ipForward[16] = "";
+			copyForwardRequest = malloc(strlen(forwardBuildRequest)+1);
+			strcpy(copyForwardRequest,forwardBuildRequest);
+		    dcm = strtok(copyForwardRequest, d);
+			while(dcm != NULL)
+			{
+				if(isValidIpAddress(dcm) == 0)
+				{
+					strncpy(ipForward, dcm, 15);
+					ipForward[16] = '\0';
+				}
+		    	dcm = strtok(NULL, d);
+			}
+			/************************getting forward ip *****************************/
 
-		    /* build server address data structure*/
+			/****************************checking ip address*************************/
+			struct ifaddrs *ifap, *ifa;
+			struct sockaddr_in *sa;
+			char *addr;
+			/*same ip*/
+			int isSame = -1;
+			getifaddrs (&ifap);
+			for (ifa = ifap; ifa; ifa = ifa->ifa_next) {
+			   if (ifa->ifa_addr->sa_family==AF_INET) {
+			       sa = (struct sockaddr_in *) ifa->ifa_addr;
+			       addr = inet_ntoa(sa->sin_addr);
+			       /*must match at some point*/
+			       if(strcmp(addr, ipRequest) == 0)
+			       {
+			    		isSame = 1;
+			    		break;
+			       }
+			   }
+			}
+			freeifaddrs(ifap);
+			if(isSame < 0)
+			{
+				printf(" child: ip addresses do not match. request is discarded\n");
+				exit(1);
+			}
+			/****************************checking ip address*************************/
+			/* checking forward ip*/
+			if(isValidIpAddress(ipForward) != 0)
+			{
+				printf("ip is not an valid ip address %s\n",ipForward);
+				exit(1);
+			}
+			/* ip addresses are matched*/			
+			printf("next router: %s\n", ipForward);
+			printf("forward request: %s\n", forwardBuildRequest);
+			printf("number of ip in request %d\n", count);
+			printf("src-ip %s src-port %d\n", inet_ntoa(csin.sin_addr), ntohs(sin.sin_port));
+
+
+		    /* build address data structure*/
   	
-  	// 		struct sockaddr_in nsin;
-			// int serverSock;
-   //  		ssize_t bytesRcvd;
-			// int s_port;
-		 //  	/*Address family = Internet */
-		 //    nsin.sin_family = AF_INET;
-		 //    /*IP Address*/
-		 //    if(inet_pton(AF_INET, sIpAddress, &nsin.sin_addr)<=0)
-		 //    {
-		 //        printf("Child: inet_pton error occured\n");
-		 //        exit(1);
-		 //    }
-		 //  	/* Set port number, using htons function to use proper byte order */
-   // 			s_port = strtol(sPort,NULL,10);
-   // 			printf("server port %d\n", s_port);
-		 //  	nsin.sin_port = htons(s_port);
-		 //  	/* Set all bits of the padding field to 0 */
-		 //  	memset(nsin.sin_zero, '\0', sizeof nsin.sin_zero);
-		 //   	/*Creating Socket*/
-		 //   	if ((serverSock = socket(AF_INET,SOCK_DGRAM,0)) < 0)
+		  	// nsin.sin_port = htons(s_port);
+		  	/* Set all bits of the padding field to 0 */
+		  	// memset(nsin.sin_zero, '\0', sizeof nsin.sin_zero);
+		   	/*Creating Socket*/
+		   	// if ((serverSock = socket(AF_INET,SOCK_DGRAM,0)) < 0)
 			// {
 			//  	printf("Child:Fail to create socket");
 			//  	exit(1);
