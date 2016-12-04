@@ -205,7 +205,7 @@ int main(int argc, char *argv[])
 			printf("next router: %s\n", ipForward);
 			printf("forward request: %s\n", forwardBuildRequest);
 			printf("number of ip in request %d\n", count);
-			printf("src-ip %s src-port %d\n", inet_ntoa(csin.sin_addr), ntohs(sin.sin_port));
+			printf("src-ip src-port: %s %d\n", inet_ntoa(csin.sin_addr), ntohs(sin.sin_port));
 
 
 		    /* build address data structure*/

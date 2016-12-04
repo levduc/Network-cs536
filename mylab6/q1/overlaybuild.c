@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 				buildRequest = concatString("$", argv[i]);
 			else
 			{
-				printf("Error: invalid destination ip-address\n");
+				printf("error: invalid destination ip-address\n");
 				exit(1);
 			}
 		}
@@ -96,6 +96,11 @@ int main(int argc, char *argv[])
 			{
 				buildRequest = concatString(buildRequest,"$");
 				buildRequest = concatString(buildRequest,argv[i]);
+			}
+			else
+			{
+				printf("Error: there is one invalid ip in your input\n");
+				exit(1);
 			}	
 		}
 	}
@@ -120,7 +125,7 @@ int main(int argc, char *argv[])
   	sin.sin_port = htons(firstOLPort);
   	/* set all bits of the padding field to 0 */
   	memset(sin.sin_zero, '\0', sizeof sin.sin_zero);
-  	
+
 	/* create UDP socket*/
 	if((s = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
     {
