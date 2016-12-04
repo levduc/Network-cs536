@@ -30,6 +30,16 @@ char* concatString(char *s1, char *s2)
     return result;
 }
 
+void alarmHandler(int sig_num)
+{
+    if(sig_num == SIGALRM)
+    {
+    	printf("Error: Time out. Row [%d]: discared", getpid());
+    	exit(1);
+    }
+    
+}
+
 int isValidIpAddress(char *ipAddress)
 {
     struct sockaddr_in sa;
@@ -125,10 +135,10 @@ int main(int argc, char *argv[])
 		{ 
 			/* child code*/
 			/* breakdown build-request request*/
-			printf("child [%d]:\n", getpid());
 			char* token;
 			char buildRequest[16];
 			char* forwardBuildRequest="";
+			int16_t dstPort;
 			/* split by delimiter*/
 		    token = strtok(buf, d);
 		    strncpy(buildRequest, token, 15);
@@ -142,6 +152,10 @@ int main(int argc, char *argv[])
 				if(isValidIpAddress(ipRequest) == 0)
 				{
 				    count++;
+				}
+				if(isValidIpAddress(ipRequest) != 0)
+				{
+					dstPort = strtol(ipRequest, NULL, 10);
 				}
 		    	token = strtok(NULL, d);
 		    	if(token != NULL)
@@ -204,79 +218,153 @@ int main(int argc, char *argv[])
 			/* ip addresses are matched*/			
 			printf("next router: %s\n", ipForward);
 			printf("forward request: %s\n", forwardBuildRequest);
+			printf("src-ip src-port: %s %d\n", inet_ntoa(csin.sin_addr), ntohs(csin.sin_port));
 			printf("number of ip in request %d\n", count);
-			printf("src-ip src-port: %s %d\n", inet_ntoa(csin.sin_addr), ntohs(sin.sin_port));
-
-
+			
+			/*************************build forwarding address****************************/
+  			struct sockaddr_in forwardSin;
 		    /* build address data structure*/
-  	
-		  	// nsin.sin_port = htons(s_port);
+		  	/* address family = Internet */
+		    forwardSin.sin_family = AF_INET;
+  			/* ip*/
+			if(inet_pton(AF_INET, ipForward, &forwardSin.sin_addr)<=0)
+		    {
+		        printf("\n inet_pton error occured\n");
+		        exit(1);
+		    }
+		    /* port*/
+  			if(count > 2)
+  				/*well-known port*/
+		  		forwardSin.sin_port = htons(routerPort);
+		  	else
+		  	{
+		  		printf("this is last overlay. dstPort %d\n", dstPort);
+		  		forwardSin.sin_port = htons(dstPort);
+		  	}
+		  	/* set all bits of the padding field to 0 */
+		  	memset(forwardSin.sin_zero, '\0', sizeof forwardSin.sin_zero);
+			/*************************build forwarding address****************************/
+
+		   	/*************************build dedicated address*****************************/
+  			struct sockaddr_in dedicatedSin;
+  			int overlaySock;
+			/*Get random port number between 10001 and 25000*/
+			srand((unsigned) time(NULL));
+			int portNumber = rand()%15000+10001;
+		   	printf("%d\n", portNumber);
+		    /* build address data structure*/
+		  	/* Address family = Internet */
+		    dedicatedSin.sin_family = AF_INET;
+		  	/* Set port number, using htons function to use proper byte order */
+		  	dedicatedSin.sin_port = htons(portNumber);
+		  	/* Set IP address to localhost */
+		  	dedicatedSin.sin_addr.s_addr = htonl(INADDR_ANY);
 		  	/* Set all bits of the padding field to 0 */
-		  	// memset(nsin.sin_zero, '\0', sizeof nsin.sin_zero);
-		   	/*Creating Socket*/
-		   	// if ((serverSock = socket(AF_INET,SOCK_DGRAM,0)) < 0)
-			// {
-			//  	printf("Child:Fail to create socket");
-			//  	exit(1);
-			// }
-			// /*tunneld new address data structure to forward*/
-  	// 		struct sockaddr_in nssin;
-			// int clientSock;
-			// /*Get random port number between 10001 and 99999*/
-			// srand(time(NULL));
-			// int portNumber = rand()%89999+10001;
+		  	memset(sin.sin_zero, '\0', sizeof sin.sin_zero);
+		   	/* creating socket*/
+		   	if ((overlaySock = socket(AF_INET,SOCK_DGRAM,0)) < 0)
+			{
+			 	printf("Child:Fail to create socket");
+			 	exit(1);
+			}
+			/*need to bind this socket*/
+		   	while(bind(overlaySock, (struct sockaddr *) &dedicatedSin, sizeof(dedicatedSin)) < 0)
+		   	{
+		   		printf("Child: Fail to bind this port. Changing port number \n");
+		   		portNumber +=1;
+		  		dedicatedSin.sin_port = htons(portNumber);	
+		   	}
+		   	/************************build dedicated address*******************************/
+		   	
+		   	/************************forward request***************************************/
+		   	if(count > 2) /*not last overlay*/
+		   	{
+			   	if (sendto(overlaySock
+			   				,forwardBuildRequest
+			   		       	,strlen(forwardBuildRequest),0
+			   		       	,(struct sockaddr*)&forwardSin, sizeof(forwardSin)) < 0)
+			   	{
+					printf("Child: Fail to send\n");
+					exit(1);
+				}
+		   	}
+		   	/************************forward request***************************************/
+
+		   	/************************last ol-sending confirm back************************/
+		   	if(count == 2)/*last overlay*/
+		   	{
+		   		/*send back confirmation*/
+		   		printf("sending confimation\n");
+			   	char pathConfirm[40];
+			   	sprintf(pathConfirm,"$$%s$%d$",ipRequest, ntohs(dedicatedSin.sin_port));
+			   	printf("%s\n", pathConfirm);
+				if (sendto(overlaySock
+							,pathConfirm,strlen(pathConfirm)
+							,0,(struct sockaddr*)&csin, sizeof(csin)) < 0){
+					printf("Child: fail to send\n");
+					exit(1);
+				}
+		   	}
+		   	/************************last ol-sending confirm back************************/
+
+		   	/************************response overlaybuild with port number**************/
 			// char response[10];
-		 //    /*build address data structure*/
-		 //  	/* Address family = Internet */
-		 //    nssin.sin_family = AF_INET;
-		 //  	/* Set port number, using htons function to use proper byte order */
-		 //  	nssin.sin_port = htons(portNumber);
-		 //  	/* Set IP address to localhost */
-		 //  	nssin.sin_addr.s_addr = htonl(INADDR_ANY);
-		 //  	/* Set all bits of the padding field to 0 */
-		 //  	memset(sin.sin_zero, '\0', sizeof sin.sin_zero);
-   // 			/*Creating Socket*/
-		 //   	if ((clientSock = socket(AF_INET,SOCK_DGRAM,0)) < 0)
-			// {
-			//  	printf("Child: Fail to create socket");
-			//  	exit(1);
-			// }
-			// //Binding 
-		 //   	if ((bind(clientSock, (struct sockaddr *)&nssin, sizeof(nssin))) < 0)
-		 //   	{
-		 //   		printf("Child: Fail to bind");
-		 //   		exit(1);
-		 //   	}
-		 //   	/*Response Client with port number*/
 			// sprintf(response,"%d", portNumber);
-			// if (sendto(s,response,strlen(response),0,(struct sockaddr*)&csin, sizeof(csin)) < 0){
-			// 	printf("Child: Fail to send\n");
+			// if (sendto(overlaySock
+			// 			,response,strlen(response)
+			// 			,0,(struct sockaddr*)&csin, sizeof(csin)) < 0){
+			// 	printf("Child: fail to send\n");
 			// 	exit(1);
 			// }
-			// printf("Child is waiting\n");
-  	// 		struct sockaddr_in snd_in;
+		   	/***********************response overlaybuild with port number***************/
+
+			/**************************waiting for path confirmation*********************/
+			if(count > 2)
+			{
+				int32_t bytesRcvd;
+				printf("Router [%s]: row [%d]|(%s:%d)<--->(%s:%d)|pending\n",ipRequest,getpid(),inet_ntoa(csin.sin_addr), ntohs(csin.sin_port), ipForward, portNumber);
+				char confirmBuff[MAX_BUF];
+				memset(confirmBuff,0,MAX_BUF);
+				/*set alarm here*/
+				/*no confirmation then abandon path*/
+    			alarm(30);
+				signal(SIGALRM, alarmHandler);
+	  			struct sockaddr_in snd_in;
+				socklen_t send_size = sizeof(snd_in);
+				if((bytesRcvd = recvfrom(overlaySock, confirmBuff, sizeof(confirmBuff), 0, (struct sockaddr *) &snd_in, &send_size)) > 0)
+				{
+					/*comparing address*/
+					if(strcmp(inet_ntoa(forwardSin.sin_addr),inet_ntoa(snd_in.sin_addr)) == 0) // if match
+					{
+						char pathConfirm[40];
+						printf("Confirmation received: %s from address [%s:%d].\n"
+								,confirmBuff, inet_ntoa(forwardSin.sin_addr), ntohs(forwardSin.sin_port)); 
+						/*sending path comfirmation to previous router*/
+					   	sprintf(pathConfirm,"$$%s$%d$",ipRequest, ntohs(dedicatedSin.sin_port));
+						if (sendto(overlaySock
+									,pathConfirm,strlen(pathConfirm)
+									,0,(struct sockaddr*)&csin, sizeof(csin)) < 0){
+							printf("Child: fail to send\n");
+							exit(1);
+						}
+						printf("Router [%s]: row [%d]|(%s:%d)<--->(%s:%d)| confirmed\n", ipRequest, getpid(),inet_ntoa(csin.sin_addr), ntohs(csin.sin_port), ipForward, portNumber);
+			   			printf("confirmation sent: %s\n", pathConfirm);
+					}
+					else
+					{
+						printf("ip addresses are missmatched\n");
+						exit(1);
+					}
+				}
+			}
+
+			/**************************waiting for path confirmation*********************/
 			// /*buffer*/
-			// char snd_buf[MAX_BUF];
 			// memset(snd_buf,0,MAX_BUF);
-			// socklen_t send_size = sizeof(snd_in);
 			// /*==============================================Test Lab 3===========================================================*/
 			// /*This is for handle traffic generator in lab3*/
 			// /*Uncomment to test lab 3 code*/
 			// /*Block call*/
-			// while((bytesRcvd = recvfrom(clientSock, snd_buf, sizeof(snd_buf), 0, (struct sockaddr *) &snd_in, &send_size)) > 0)
-			// {
-			// 	/*Forward to server address nsin*/
-			// 	if (sendto(serverSock,snd_buf,strlen(snd_buf),0,(struct sockaddr*)&nsin, sizeof(nsin)) < 0){
-			// 		printf("Child: Fail to send\n");
-			// 		exit(1);
-			// 	}
-			// 	/*End of transmission package*/
-			// 	if (bytesRcvd == 3)
-			// 	{
-			// 	    break;
-			// 	}
-			// 	memset(snd_buf,0,MAX_BUF);
-			// }
 			/*==============================================Test Lab 3===========================================================*/
 
 

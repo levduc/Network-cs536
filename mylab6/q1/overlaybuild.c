@@ -107,15 +107,13 @@ int main(int argc, char *argv[])
 	printf("Build Request: %s\n", buildRequest);
 	/************************building request************************************/
 
-	/*Get 1st-overlay router ip address*/
-	printf("%s\n", argv[argc-3]);
+	/*****************Get 1st-overlay router ip address**************************/
+	printf("first overlay ip: %s\n", argv[argc-3]);
   	if(inet_pton(AF_INET, argv[argc-3], &sin.sin_addr)<=0)
     {
         printf("\n inet_pton error occured\n");
         exit(1);
     }
-	printf("%s \n", inet_ntoa(sin.sin_addr));
-
     /* get destination port number*/
     firstOLPort = strtol(argv[argc-2],NULL,10);
     printf("first overlay router port: %d\n", firstOLPort);  	
@@ -125,21 +123,41 @@ int main(int argc, char *argv[])
   	sin.sin_port = htons(firstOLPort);
   	/* set all bits of the padding field to 0 */
   	memset(sin.sin_zero, '\0', sizeof sin.sin_zero);
+	/*****************Get 1st-overlay router ip address**************************/
 
-	/* create UDP socket*/
-	if((s = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
-    {
-        printf("Failed to create socket \n");
-        exit(1);
-    }
-
+	
+  	/*****************binding socket to build-port*******************************/
+	struct sockaddr_in dcmsin;
+    /* address family = Internet */
+    dcmsin.sin_family = AF_INET;
+  	/* set port number, using htons function to use proper byte order */
+    int buildPort;
+    buildPort = strtol(argv[argc-1],NULL,10);
+    printf("build port: %d\n", buildPort);
+  	dcmsin.sin_port = htons(buildPort);
+  	/* set IP address to localhost */
+  	dcmsin.sin_addr.s_addr = htons(INADDR_ANY);
+  	/* set all bits of the padding field to 0 */
+  	memset(dcmsin.sin_zero, '\0', sizeof dcmsin.sin_zero);
+   	/* creating socket*/
+   	if ((s = socket(AF_INET,SOCK_DGRAM,0)) < 0)
+	{
+	 	printf("Fail to create socket");
+	 	exit(1);
+	}
+	/* binding*/
+   	if ((bind(s, (struct sockaddr *)&dcmsin, sizeof(dcmsin))) < 0)
+   	{
+   		printf("Fail to bind");
+   		exit(1);
+   	}
+  	/*****************binding socket to build-port*******************************/
 	/* sending build request*/
 	if (sendto(s,buildRequest,strlen(buildRequest),0,(struct sockaddr*)&sin, sizeof(sin)) < 0){
 		printf("Fail to send\n");
 		exit(1);
 	}
-	
-	/*Block to wait for an ACK from 1st Overlay router*/
+	/* block to wait for an ACK from 1st overlay router*/
     char buf[CLIENT_MAX_BUF];
 	memset(buf,0,CLIENT_MAX_BUF);
 	socklen_t sendsize = sizeof(ssin);	
