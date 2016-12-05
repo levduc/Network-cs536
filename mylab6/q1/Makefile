@@ -1,6 +1,7 @@
 CC=gcc
 CFLAGS = -Wall -o
 all:
+	git pull
 	$(CC) $(CFLAGS) olrouter overlayrouter.c
 	$(CC) $(CFLAGS) olbuild overlaybuild.c
 	$(CC) $(CFLAGS) mp myping.c
