@@ -406,7 +406,7 @@ int main(int argc, char *argv[])
 						printf("Child: Fail to send\n");
 						exit(1);
 					}
-					printf("Router [%s]: [%s:%d] ---> [%s:%d]", ipRequest, tempIP,ntohs(ssend_sin.sin_port)
+					printf("Router [%s]: [%s:%d] ---> [%s:%d].", ipRequest, tempIP,ntohs(ssend_sin.sin_port)
 							,inet_ntoa(csin.sin_addr),ntohs(csin.sin_port));	
 					gettimeofday(&end, NULL);
 			    	fprintf(stdout,"Time elapsed: %f ms\n", (end.tv_sec - start.tv_sec)*1000 + 
