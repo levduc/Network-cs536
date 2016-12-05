@@ -381,11 +381,12 @@ int main(int argc, char *argv[])
 			time_t t;
 			struct tm tm;
 			memset(snd_buf,0,MAX_BUF);
+			/************************/
 			struct sockaddr_in dcmmay;
 			/* address family = Internet */
 		    dcmmay.sin_family = AF_INET;
 		  	/* set port number, using htons function to use proper byte order */
-		  	dcmmay.sin_port = csin.sin_port;
+		  	dcmmay.sin_port = htons(ntohs(csin.sin_port));
 		  	/* set IP address to localhost */
 			if(inet_pton(AF_INET, fromIP, &dcmmay.sin_addr)<=0)
 		    {
@@ -394,30 +395,32 @@ int main(int argc, char *argv[])
 		    }
 		  	/* set all bits of the padding field to 0 */
 		  	memset(dcmmay.sin_zero, '\0', sizeof dcmmay.sin_zero);
-		
+			printf("before while src-ip src-port: %s %d\n", inet_ntoa(csin.sin_addr), ntohs(csin.sin_port));
 			while((bytesRcvd = recvfrom(overlaySock, snd_buf, sizeof(snd_buf), 0, (struct sockaddr *)&ssend_sin, &send_size)) > 0)
 			{
-				printf("1. %s  from address %s\n", ipForward, inet_ntoa(csin.sin_addr));
+				printf("before send src-ip src-port: %s %d\n", inet_ntoa(csin.sin_addr), ntohs(csin.sin_port));
 				/* traffic start to flow*/
 				t = time(NULL);
 				tm = *localtime(&t);
-				/* packet from fw router*/
+				/* packet from forward router*/
 				if((strcmp(inet_ntoa(ssend_sin.sin_addr),ipForward) == 0) && (ntohs(ssend_sin.sin_port) == ntohs(forwardSin.sin_port)) ) 
 				{
 					printf("2. %s  from address %s\n", ipForward, inet_ntoa(csin.sin_addr));
+					printf("after send src-ip src-port: %s %d\n", inet_ntoa(csin.sin_addr), ntohs(csin.sin_port));
 					if(isComplete == 0)
 					{
 						isComplete = 1;
 						printf("Path is set up. Router IP: %s\n", ipRequest);
 					}
-					if (sendto(overlaySock,snd_buf,strlen(snd_buf),0,(struct sockaddr*) &dcmmay, sizeof(dcmmay)) < 0){
+					if (sendto(overlaySock,snd_buf,strlen(snd_buf),0,(struct sockaddr*) &csin, sizeof(csin)) < 0){
 						printf("Child: Fail to send\n");
 						exit(1);
 					}
-					printf("3. %s  from address %s\n", inet_ntoa(ssend_sin.sin_addr), inet_ntoa(dcmmay.sin_addr));
+					printf("after send src-ip src-port: %s %d\n", inet_ntoa(csin.sin_addr), ntohs(csin.sin_port));
+					printf("3. %s  from address %s\n", inet_ntoa(ssend_sin.sin_addr), inet_ntoa(csin.sin_addr));
 
 					printf("This is back from: [%s:%d] To: [%s:%d]. Timestamp: %d:%d:%d\n",inet_ntoa(ssend_sin.sin_addr),ntohs(ssend_sin.sin_port)
-							,inet_ntoa(dcmmay.sin_addr),ntohs(dcmmay.sin_port)
+							,inet_ntoa(csin.sin_addr),ntohs(dcmmay.sin_port)
 							,tm.tm_hour, tm.tm_min, tm.tm_sec);	
 				}
 				/* packet from previous router*/
