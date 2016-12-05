@@ -220,10 +220,10 @@ int main(int argc, char *argv[])
 				exit(1);
 			}
 			/* ip addresses are matched*/			
-			printf("next router: %s\n", ipForward);
+			printf("fwd-router: %s\n", ipForward);
 			printf("forward request: %s\n", forwardBuildRequest);
 			printf("src-ip src-port: %s %d\n", inet_ntoa(csin.sin_addr), ntohs(csin.sin_port));
-			printf("number of ip in request %d\n", count);
+			// printf("number of ip in request %d\n", count);
 			
 			/*************************build forwarding address****************************/
   			struct sockaddr_in forwardSin;
@@ -255,7 +255,6 @@ int main(int argc, char *argv[])
 			/*Get random port number between 10001 and 25000*/
 			srand((unsigned) time(NULL));
 			int portNumber = rand()%15000+10001;
-		   	printf("%d\n", portNumber);
 		    /* build address data structure*/
 		  	/* Address family = Internet */
 		    dedicatedSin.sin_family = AF_INET;
@@ -301,6 +300,7 @@ int main(int argc, char *argv[])
 		   		alarm(30);
 				signal(SIGALRM, alarmHandler);
 			   	char pathConfirm[40];
+				printf("Router [%s]: row [%d]|(%s:%d)<--->(%s:%d)|pending\n",ipRequest,getpid(),inet_ntoa(csin.sin_addr), ntohs(csin.sin_port), ipForward, portNumber);
 			   	sprintf(pathConfirm,"$$%s$%d$",ipRequest, ntohs(dedicatedSin.sin_port));
 				if (sendto(overlaySock
 							,pathConfirm,strlen(pathConfirm)+1
@@ -396,8 +396,12 @@ int main(int argc, char *argv[])
 				{
 					if(isComplete == 0)
 					{
+						if(count == 2)
+							printf("Router [%s]: row [%d]|(%s:%d)<--->(%s:%d)|confirmed\n"
+								,ipRequest,getpid(),inet_ntoa(csin.sin_addr), ntohs(csin.sin_port), ipForward, portNumber);
 						isComplete = 1;
 						printf("Path is set up. Router IP: %s\n", ipRequest);
+
 					}
 					if (sendto(overlaySock,snd_buf,strlen(snd_buf),0,(struct sockaddr*) &csin, sizeof(csin)) < 0){
 						printf("Child: Fail to send\n");
@@ -414,6 +418,11 @@ int main(int argc, char *argv[])
 				{
 					if(isComplete == 0)
 					{
+						if(count == 2)
+							if(count == 2)
+							printf("Router [%s]: row [%d]|(%s:%d)<--->(%s:%d)|confirmed\n"
+								,ipRequest,getpid(),inet_ntoa(csin.sin_addr), ntohs(csin.sin_port), ipForward, portNumber);
+								
 						isComplete = 1;
 						printf("Path is set up. Router IP: %s\n", ipRequest);
 					}
