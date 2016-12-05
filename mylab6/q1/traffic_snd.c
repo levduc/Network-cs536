@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
     thisSin.sin_family = AF_INET;
   	/* Set port number, using htons function to use proper byte order */
     int16_t thisPort;
-    thisPort = strtol(argv[7],NULL,10);
+    thisPort = strtol(argv[6],NULL,10);
   	thisSin.sin_port = htons(thisPort);
   	/* Set IP address to localhost */
   	thisSin.sin_addr.s_addr = htonl(INADDR_ANY);
