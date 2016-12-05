@@ -44,9 +44,9 @@ int main(int argc, char *argv[])
 	ssize_t numBytesRcvd;
 	/*build address data structure*/
 	/*checking user input*/
-	if(argc != 6)
+	if(argc != 7)
 	{
-		printf("Error: <hostname> <portnumber> <payload-size> <package-count> <package-spacing>");
+		printf("Error: <hostname> <portnumber> <payload-size> <package-count> <package-spacing> <dedicated-port>");
 		exit(1);
 	}
 	/*Get IP address*/
@@ -74,11 +74,29 @@ int main(int argc, char *argv[])
   	/* Set all bits of the padding field to 0 */
   	memset(sin.sin_zero, '\0', sizeof sin.sin_zero);
 	/*Create UDP socket*/
+	struct sockaddr_in thisSin;
+    /*binding*/
+  	/* Address family = Internet */
+    thisSin.sin_family = AF_INET;
+  	/* Set port number, using htons function to use proper byte order */
+    int16_t thisPort;
+    thisPort = strtol(argv[7],NULL,10);
+  	thisSin.sin_port = htons(thisPort);
+  	/* Set IP address to localhost */
+  	thisSin.sin_addr.s_addr = htonl(INADDR_ANY);
+  	/* Set all bits of the padding field to 0 */
+  	memset(sin.sin_zero, '\0', sizeof sin.sin_zero);
+   	/* creating socket*/
 	if((s = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
     {
         printf("Failed to create socket \n");
         exit(1);
-    } 
+    }	
+    if ((bind(s, (struct sockaddr *)&thisSin, sizeof(thisSin))) < 0)
+   	{
+   		perror("Fail to bind");
+   		exit(1);
+   	} 
     /*Payload*/ 
 	unsigned char *senderRequest;
 	//Fill Payload
