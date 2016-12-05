@@ -33,43 +33,46 @@
 \maketitle
  
 \begin{problem}{1} \ \\
-Below are plots for each method:
-\\
-\textbf{Method A} \\
-\includegraphics[scale = .5]{listen0.pdf}
-\includegraphics[scale = .5]{stream0.pdf}
-\\
-\textbf{Method B} \\
-\includegraphics[scale = .5]{listen1.pdf}
-\includegraphics[scale = .5]{stream1.pdf}
-\\
-\textbf{Method C} \\
-\includegraphics[scale = .5]{listen2.pdf}
-\includegraphics[scale = .5]{stream2.pdf}
-\\
-\textbf{Method D}
-\\
-\includegraphics[scale = .5]{listen3.pdf}
-\includegraphics[scale = .5]{stream3.pdf}
-\\
-\textit{Discussion:}
-As we discussed in class, the plot is sample of first 50 seconds of 4 methods. The parameters we used are:
-\begin{enumerate}
-	\item For method A, $a = 2$
-	\item For method B, $a = 2, \delta = 0.5$
-	\item For method C, $\epsilon = 0.00005$
-	\item For method D, $\epsilon = 0.001, \beta = 0.1$
-\end{enumerate}
-Method D has the best results and the streaming using method D seems to have better quality. Method B,C also has a decent streaming quality as current buffer level always above payload size. Method A does not have a good streaming quality, as the current buffer level always hits bottom. For testing streaming server with 2 clients, I don't see any significant differences when streaming server supports two clients vs one client.
+The result is similar to the result of lab4:
+\begin{itemize}
+    \item For \texttt{myping.c}: since it takes longer for udp packets to travel between overlay nodes, the ping result increases as I increase the number of overlay nodes. I used 3 overlay routers which are \texttt{sslab02, sstlab04, sslab06}. The ping results are:
+    \begin{verbatim}
+       1.997 ms 
+       2.225 ms
+       1.792 ms
+       2.132 ms 
+    \end{verbatim}
+    Ping result without using overlay router is: \texttt{0.447 ms} on average.
+    \item For \texttt{traffic\_send.c}: Since we test the app on multiple sslabs with pretty much bandwidth, there is no significant differences when using overlay routers. However, if there is a bottle neck node in one of the overlay node, I would expect the bandwidth to be decrease. Below is result using same overlay nodes (i.e \texttt{sslab02, sslab04, sslab06})
+    \texttt{traffic\_snd} :
+    \begin{verbatim}
+        │Portnumber: 21806
+        │payloadSize: 1000
+        │Package Count: 1000
+        │Package Spacing: 1000
+        │Completion Time: 1.132008 s
+        │Package Per Second (PPS): 883.386047 packages/s
+        │Bit sent: 8440000
+        │Bits Per Second (BPS): 7455778.000000 bps 
+    \end{verbatim}
+    \texttt{traffic\_rcv}
+    \begin{verbatim}
+        Port Number: 30000
+        payloadSize: 1000
+        Start listening ... 
+        First Package arrived.
+        End of transmission
+        Package Count: 1000
+        Completion Time: 1.133577 s
+        Bits received: 8440000
+        Package Per Second (PPS): 883.722412 packages/s
+    \end{verbatim}
+    \item For testing multiple clients, I do not see any significant changes. 
+\end{itemize}
+
 \end{problem}
 
 \begin{problem}{2}
-    For this problem, on client side, I keep track of the sequence number of last package (i.e \texttt{lastPacket}), and compare it with sequence number of incoming package. If the sequence number of new package is greater than the last sequence plus 1, I send a  negative \texttt{ACK}, and update last sequence accordingly. 
-    On server side, I store an array that store \texttt{audioBuf} packets and \texttt{packageCounter} that store how many packets sent. If the server receives a negative \texttt{ACK}, it checks if the sequence number is greater than \texttt{packageCount - audioBuf}. If yes, the packet is still in the buffer, the server will retransmit; otherwise, ignore that negative \texttt{ACK}.    
-    \\
-    Below is graph, using method D:\\
-    \includegraphics[scale = .5]{q2listen3.pdf}
-    \includegraphics[scale = .5]{q2stream3.pdf}
+    
 \end{problem}
-
 \end{document}
