@@ -421,7 +421,7 @@ int main(int argc, char *argv[])
 				/* packet from previous router*/
 				if((strcmp(inet_ntoa(ssend_sin.sin_addr), inet_ntoa(csin.sin_addr)) == 0) && (ntohs(ssend_sin.sin_port) == ntohs(csin.sin_port))) 
 				{
-					printf("4. %s  from address %s\n", ipForward, inet_ntoa(csin.sin_addr));
+					printf("4. %s  from address %s\n", inet_ntoa(ssend_sin.sin_addr), inet_ntoa(csin.sin_addr));
 					if(isComplete == 0)
 					{
 						isComplete = 1;
