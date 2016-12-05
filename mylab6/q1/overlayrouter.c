@@ -397,7 +397,8 @@ int main(int argc, char *argv[])
 						printf("Child: Fail to send\n");
 						exit(1);
 					}
-					printf("%s %s\n", inet_ntoa(snd_in.sin_addr), ipForward);
+					printf("fr %s fw %s in %s\n", inet_ntoa(snd_in.sin_addr), ipForward, inet_ntoa(csin.sin_addr));
+
 					printf("From: [%s:%d] To: [%s:%d]. Timestamp: %d:%d:%d\n"
 							, inet_ntoa(snd_in.sin_addr),ntohs(snd_in.sin_port)
 							, inet_ntoa(csin.sin_addr),ntohs(csin.sin_port)
