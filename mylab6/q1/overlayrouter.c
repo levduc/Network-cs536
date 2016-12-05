@@ -379,7 +379,6 @@ int main(int argc, char *argv[])
 			time_t t;
 			struct tm tm;
 			memset(snd_buf,0,MAX_BUF);
-			printf("forward address %s  from address %s\n", ipForward, inet_ntoa(csin.sin_addr));
 			struct sockaddr_in dcmmay;
 			/* address family = Internet */
 		    dcmmay.sin_family = AF_INET;
@@ -396,12 +395,14 @@ int main(int argc, char *argv[])
 
 			while((bytesRcvd = recvfrom(overlaySock, snd_buf, sizeof(snd_buf), 0, (struct sockaddr *)&ssend_sin, &send_size)) > 0)
 			{
+				printf("1. %s  from address %s\n", ipForward, inet_ntoa(csin.sin_addr));
 				/* traffic start to flow*/
 				t = time(NULL);
 				tm = *localtime(&t);
 				/* packet from fw router*/
 				if((strcmp(inet_ntoa(ssend_sin.sin_addr),ipForward) == 0) && (ntohs(ssend_sin.sin_port) == ntohs(forwardSin.sin_port)) ) 
 				{
+					printf("2. %s  from address %s\n", ipForward, inet_ntoa(csin.sin_addr));
 					if(isComplete == 0)
 					{
 						isComplete = 1;
@@ -411,13 +412,16 @@ int main(int argc, char *argv[])
 						printf("Child: Fail to send\n");
 						exit(1);
 					}
-					printf("fr %s fw %s in %s\n", inet_ntoa(ssend_sin.sin_addr), ipForward, inet_ntoa(csin.sin_addr));
-					printf("This is back from: [%s:%d] To: [%s:%d]. Timestamp: %d:%d:%d\n",inet_ntoa(ssend_sin.sin_addr),ntohs(ssend_sin.sin_port),inet_ntoa(dcmmay.sin_addr),ntohs(dcmmay.sin_port)
+					printf("3. %s  from address %s\n", inet_ntoa(ssend_sin.sin_addr), inet_ntoa(csin.sin_addr));
+
+					printf("This is back from: [%s:%d] To: [%s:%d]. Timestamp: %d:%d:%d\n",inet_ntoa(ssend_sin.sin_addr),ntohs(ssend_sin.sin_port)
+							,inet_ntoa(dcmmay.sin_addr),ntohs(dcmmay.sin_port)
 							,tm.tm_hour, tm.tm_min, tm.tm_sec);	
 				}
 				/* packet from previous router*/
 				if((strcmp(inet_ntoa(ssend_sin.sin_addr), inet_ntoa(csin.sin_addr)) == 0) && (ntohs(ssend_sin.sin_port) == ntohs(csin.sin_port))) 
 				{
+					printf("4. %s  from address %s\n", ipForward, inet_ntoa(csin.sin_addr));
 					if(isComplete == 0)
 					{
 						isComplete = 1;
@@ -428,7 +432,7 @@ int main(int argc, char *argv[])
 						printf("Child: Fail to send\n");
 						exit(1);
 					}
-					printf("this is forward to %s fw %s in %s\n", inet_ntoa(ssend_sin.sin_addr), ipForward, inet_ntoa(csin.sin_addr));
+					printf("5. %s  from address %s\n", inet_ntoa(ssend_sin.sin_addr), inet_ntoa(csin.sin_addr));
 					printf("forward From: [%s:%d] To: [%s:%d]. Timestamp: %d:%d:%d\n",inet_ntoa(csin.sin_addr),ntohs(csin.sin_port), ipForward,ntohs(forwardSin.sin_port)
 							,tm.tm_hour, tm.tm_min, tm.tm_sec);
 				}
