@@ -379,6 +379,20 @@ int main(int argc, char *argv[])
 			struct tm tm;
 			memset(snd_buf,0,MAX_BUF);
 			printf("forward address %s  from address %s\n", ipForward, inet_ntoa(csin.sin_addr));
+			struct sockaddr_in dcmmay;
+			/* address family = Internet */
+		    dcmmay.sin_family = AF_INET;
+		  	/* set port number, using htons function to use proper byte order */
+		  	dcmmay.sin_port = csin.sin_port;
+		  	/* set IP address to localhost */
+			if(inet_pton(AF_INET, inet_ntoa(csin.sin_addr), &dcmmay.sin_addr)<=0)
+		    {
+		        printf("\n inet_pton error occured\n");
+		        exit(1);
+		    }
+		  	/* set all bits of the padding field to 0 */
+		  	memset(dcmmay.sin_zero, '\0', sizeof dcmmay.sin_zero);
+
 			while((bytesRcvd = recvfrom(overlaySock, snd_buf, sizeof(snd_buf), 0, (struct sockaddr *)&snd_in, &send_size)) > 0)
 			{
 				/* traffic start to flow*/
@@ -392,16 +406,14 @@ int main(int argc, char *argv[])
 						isComplete = 1;
 						printf("Path is set up. Router IP: %s\n", ipRequest);
 					}
-					if (sendto(overlaySock,snd_buf,strlen(snd_buf),0,(struct sockaddr*)&csin, sizeof(csin)) < 0){
+					if (sendto(overlaySock,snd_buf,strlen(snd_buf),0,(struct sockaddr*) &dcmmay, sizeof(dcmmay)) < 0){
 						printf("Child: Fail to send\n");
 						exit(1);
 					}
 					printf("fr %s fw %s in %s\n", inet_ntoa(snd_in.sin_addr), ipForward, inet_ntoa(csin.sin_addr));
-					printf("This is back from: [%s:%d] To: [%s:%d]. Timestamp: %d:%d:%d\n",inet_ntoa(snd_in.sin_addr), ntohs(snd_in.sin_port)
-							,inet_ntoa(csin.sin_addr), ntohs(csin.sin_port)
+					printf("This is back from: [%s:%d] To: [%s:%d]. Timestamp: %d:%d:%d\n",inet_ntoa(snd_in.sin_addr),ntohs(snd_in.sin_port),inet_ntoa(csin.sin_addr),ntohs(csin.sin_port)
 							,tm.tm_hour, tm.tm_min, tm.tm_sec);	
 				}
-
 				/* packet from previous router*/
 				if((strcmp(inet_ntoa(snd_in.sin_addr), inet_ntoa(csin.sin_addr)) == 0) && (ntohs(snd_in.sin_port) == ntohs(csin.sin_port))) 
 				{
