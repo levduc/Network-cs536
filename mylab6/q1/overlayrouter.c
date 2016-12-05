@@ -331,7 +331,6 @@ int main(int argc, char *argv[])
 					/*comparing address*/
 					if(strcmp(inet_ntoa(forwardSin.sin_addr),inet_ntoa(snd_in.sin_addr)) == 0) // if match
 					{
-						char pathConfirm[40];
 						printf("Confirmation received: %s from address [%s:%d].\n"
 								,confirmBuff, inet_ntoa(forwardSin.sin_addr), ntohs(forwardSin.sin_port)); 
 						/*updating port*/
@@ -341,18 +340,19 @@ int main(int argc, char *argv[])
 					    token1 = strtok(confirmBuff, d);
 					    strncpy(routerResponse, token1, 15);
 						routerResponse[16] = '\0';
-						char ipRequest[16] = "";
+						char dcm[16] = "";
 						while(token1 != NULL)
 						{
-							strncpy(ipRequest, token1, 15);
-							ipRequest[16] = '\0';
+							strncpy(dcm, token1, 15);
+							dcm[16] = '\0';
 					    	token1 = strtok(NULL, d);
 						}	
-						newPort = strtol(ipRequest, NULL, 10);
+						newPort = strtol(dcm, NULL, 10);
 						forwardSin.sin_port = htons(newPort);
 
 						/*sending path comfirmation to previous router*/
-					   	sprintf(pathConfirm,"$$%s$%d$",ipRequest, ntohs(dedicatedSin.sin_port));
+						char pathConfirm[40];
+					   	sprintf(pathConfirm,"$$%s$%d$",ipRequest,ntohs(dedicatedSin.sin_port));
 						if (sendto(overlaySock
 									,pathConfirm,strlen(pathConfirm)
 									,0,(struct sockaddr*)&csin, sizeof(csin)) < 0){
@@ -379,6 +379,8 @@ int main(int argc, char *argv[])
 			time_t t;
 			struct tm tm;
 			memset(snd_buf,0,MAX_BUF);
+			printf("forward %s  %s\n", ipForward, inet_ntoa(csin.sin_addr));
+
 			while((bytesRcvd = recvfrom(overlaySock, snd_buf, sizeof(snd_buf), 0, (struct sockaddr *) &snd_in, &send_size)) > 0)
 			{
 				/* traffic start to flow*/
@@ -412,12 +414,12 @@ int main(int argc, char *argv[])
 						isComplete = 1;
 						printf("Path is set up. Router IP: %s\n", ipRequest);
 					}
-
 					if (sendto(overlaySock,snd_buf,strlen(snd_buf),0,(struct sockaddr*)&forwardSin, sizeof(forwardSin)) < 0)
 					{
 						printf("Child: Fail to send\n");
 						exit(1);
 					}
+
 					printf("fr %s fw %s in %s\n", inet_ntoa(snd_in.sin_addr), ipForward, inet_ntoa(csin.sin_addr));
 					printf("From: [%s:%d] To: [%s:%d]. Timestamp: %d:%d:%d\n"
 							, inet_ntoa(csin.sin_addr),ntohs(csin.sin_port)
