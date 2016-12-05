@@ -11,7 +11,6 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-
 #include <sys/ioctl.h>
 #include <netinet/in.h>
 #include <net/if.h>
@@ -113,6 +112,7 @@ int main(int argc, char *argv[])
    		printf("Fail to bind");
    		exit(1);
    	}
+
 	printf("listening ... \n");
 	
    
@@ -303,7 +303,7 @@ int main(int argc, char *argv[])
 			   	char pathConfirm[40];
 			   	sprintf(pathConfirm,"$$%s$%d$",ipRequest, ntohs(dedicatedSin.sin_port));
 				if (sendto(overlaySock
-							,pathConfirm,strlen(pathConfirm)
+							,pathConfirm,strlen(pathConfirm)+1
 							,0,(struct sockaddr*)&csin, sizeof(csin)) < 0){
 					printf("Child: fail to send\n");
 					exit(1);
@@ -370,6 +370,7 @@ int main(int argc, char *argv[])
 				}
 			}
 			/**************************waiting for path confirmation*********************/
+
 			/**************************waiting for data to go through********************/
 			char snd_buf[MAX_BUF];
 			int32_t bytesRcvd;
