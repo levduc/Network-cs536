@@ -382,21 +382,21 @@ int main(int argc, char *argv[])
 			while((bytesRcvd = recvfrom(overlaySock, snd_buf, sizeof(snd_buf), 0, (struct sockaddr *) &snd_in, &send_size)) > 0)
 			{
 				/* traffic start to flow*/
-				if(isComplete == 0)
-				{
-					isComplete = 1;
-					printf("Path is complete \n");
-				}
 				t = time(NULL);
 				tm = *localtime(&t);
 				/* packet from fw router*/
 				if((strcmp(inet_ntoa(snd_in.sin_addr), ipForward) == 0) && (ntohs(snd_in.sin_port) == ntohs(forwardSin.sin_port)) ) 
 				{
+					if(isComplete == 0)
+					{
+						isComplete = 1;
+						printf("Path is set up. Router IP: %s\n", ipRequest);
+					}
 					if (sendto(overlaySock,snd_buf,strlen(snd_buf),0,(struct sockaddr*)&csin, sizeof(csin)) < 0){
 						printf("Child: Fail to send\n");
 						exit(1);
 					}
-					printf("From: [%s:%d] To: [%s:%d] .Timestamp: %d:%d:%d\n"
+					printf("From: [%s:%d] To: [%s:%d]. Timestamp: %d:%d:%d\n"
 							, inet_ntoa(snd_in.sin_addr),ntohs(snd_in.sin_port)
 							, inet_ntoa(csin.sin_addr),ntohs(csin.sin_port)
 							, tm.tm_hour, tm.tm_min, tm.tm_sec);	
@@ -404,12 +404,17 @@ int main(int argc, char *argv[])
 				/* packet from previous router*/
 				if((strcmp(inet_ntoa(snd_in.sin_addr), inet_ntoa(csin.sin_addr)) == 0) && (ntohs(snd_in.sin_port) == ntohs(csin.sin_port))) 
 				{
+					if(isComplete == 0)
+					{
+						isComplete = 1;
+						printf("Path is set up. Router IP: %s\n", ipRequest);
+					}
 					if (sendto(overlaySock,snd_buf,strlen(snd_buf),0,(struct sockaddr*)&forwardSin, sizeof(forwardSin)) < 0)
 					{
 						printf("Child: Fail to send\n");
 						exit(1);
 					}
-					printf("From: [%s:%d] To: [%s:%d] .Timestamp: %d:%d:%d\n"
+					printf("From: [%s:%d] To: [%s:%d]. Timestamp: %d:%d:%d\n"
 							, inet_ntoa(csin.sin_addr),ntohs(csin.sin_port)
 							, ipForward,ntohs(forwardSin.sin_port)
 							, tm.tm_hour, tm.tm_min, tm.tm_sec);
