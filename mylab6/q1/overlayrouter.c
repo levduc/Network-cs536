@@ -37,7 +37,7 @@ void alarmHandler(int sig_num)
     {
     	if(isComplete == 0)
     	{
-	    	printf("Error: Time out. Row [%d]: removed", getpid());
+	    	printf("Error: Time out. Row [%d]: removed \n", getpid());
 	    	exit(1);
     	}
     }
@@ -361,7 +361,7 @@ int main(int argc, char *argv[])
 			socklen_t send_size = sizeof(snd_in);
 			time_t t;
 			struct tm tm;
-			while((bytesRcvd = recvfrom(overlaySock, snd_buf, sizeof(snd_buf), 0, (struct sockaddr *) &snd_in, &send_size)) < 0)
+			while((bytesRcvd = recvfrom(overlaySock, snd_buf, sizeof(snd_buf), 0, (struct sockaddr *) &snd_in, &send_size)) > 0)
 			{
 				/* traffic start to flow*/
 				if(isComplete == 0)
