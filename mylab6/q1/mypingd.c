@@ -113,6 +113,7 @@ int main(int argc, char *argv[])
 	    //sleep(2);
 	    if(strcmp(s_secret_key, c_secret_key) != 0 ) //comparing secret key
 	    {
+	    	printf("%s %s\n", c_secret_key, s_secret_key);
 	    	printf("Secret key not match\n");
 	    }
 	    else if (strlen(command)+strlen(c_secret_key) != 998)
