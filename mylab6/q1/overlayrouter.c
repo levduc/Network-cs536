@@ -418,6 +418,7 @@ int main(int argc, char *argv[])
 					}
 					printf("after send src-ip src-port: %s %d\n", inet_ntoa(csin.sin_addr), ntohs(csin.sin_port));
 					printf("3. %s  from address %s\n", inet_ntoa(ssend_sin.sin_addr), inet_ntoa(csin.sin_addr));
+					printf("after send src-ip src-port: %s %d\n", inet_ntoa(csin.sin_addr), ntohs(csin.sin_port));
 
 					printf("This is back from: [%s:%d] To: [%s:%d]. Timestamp: %d:%d:%d\n",inet_ntoa(ssend_sin.sin_addr),ntohs(ssend_sin.sin_port)
 							,inet_ntoa(csin.sin_addr),ntohs(dcmmay.sin_port)
