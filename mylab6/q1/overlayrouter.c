@@ -30,6 +30,7 @@ char* concatString(char *s1, char *s2)
     return result;
 }
 
+
 void alarmHandler(int sig_num)
 {
     if(sig_num == SIGALRM)
@@ -386,16 +387,17 @@ int main(int argc, char *argv[])
 			inet_ntop(AF_INET, &(csin.sin_addr), fromIP, INET_ADDRSTRLEN);
 			/************************/
 			printf("before while src-ip src-port: %s %d\n", inet_ntoa(csin.sin_addr), ntohs(csin.sin_port));
+			struct timeval start, end;
 			while((bytesRcvd = recvfrom(overlaySock, snd_buf, sizeof(snd_buf), 0, (struct sockaddr *)&ssend_sin, &send_size)) > 0)
 			{
 				char tempIP[INET_ADDRSTRLEN];
 				memset(tempIP,'\0',INET_ADDRSTRLEN);
 				inet_ntop(AF_INET, &(ssend_sin.sin_addr), tempIP, INET_ADDRSTRLEN);
-
-				printf("before send src-ip src-port: %s %d\n", inet_ntoa(csin.sin_addr), ntohs(csin.sin_port));
 				/* traffic start to flow*/
 				t = time(NULL);
 				tm = *localtime(&t);
+				gettimeofday(&start, NULL);
+
 				/* packet from forward router*/
 				if(((strcmp(tempIP,ipForward) == 0) && (ntohs(ssend_sin.sin_port) == ntohs(forwardSin.sin_port)))) 
 				{
@@ -408,10 +410,12 @@ int main(int argc, char *argv[])
 						printf("Child: Fail to send\n");
 						exit(1);
 					}
-
-					printf("Back From: [%s:%d] To: [%s:%d]. Timestamp: %d:%d:%d\n",tempIP,ntohs(ssend_sin.sin_port)
+					printf("Router [%s]: [%s:%d] ---> [%s:%d]. Timestamp: %d:%d:%d.", ipRequest, tempIP,ntohs(ssend_sin.sin_port)
 							,inet_ntoa(csin.sin_addr),ntohs(csin.sin_port)
 							,tm.tm_hour, tm.tm_min, tm.tm_sec);	
+					gettimeofday(&end, NULL);
+			    	fprintf(stdout,"Time Elapsed: %f ms\n", (end.tv_sec - start.tv_sec)*1000 + 
+			              ((end.tv_usec - start.tv_usec)/1000.0));
 				}
 				/* packet from previous router*/
 				if(((strcmp(tempIP, fromIP) == 0) && (ntohs(ssend_sin.sin_port) == ntohs(csin.sin_port)))) 
@@ -426,8 +430,12 @@ int main(int argc, char *argv[])
 						printf("Child: Fail to send\n");
 						exit(1);
 					}
-					printf("Forward From: [%s:%d] To: [%s:%d]. Timestamp: %d:%d:%d\n",fromIP,ntohs(csin.sin_port),ipForward,ntohs(forwardSin.sin_port)
+					printf("Router [%s]: [%s:%d] ---> [%s:%d]. Timestamp: %d:%d:%d\n", ipRequest, 
+							fromIP,ntohs(csin.sin_port),ipForward,ntohs(forwardSin.sin_port)
 							,tm.tm_hour, tm.tm_min, tm.tm_sec);
+					gettimeofday(&end, NULL);
+			    	fprintf(stdout,"Time Elapsed: %f ms\n", (end.tv_sec - start.tv_sec)*1000 + 
+			              ((end.tv_usec - start.tv_usec)/1000.0));
 				}
 				memset(snd_buf,'\0',MAX_BUF);
 			}
