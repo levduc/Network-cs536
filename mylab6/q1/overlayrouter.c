@@ -410,11 +410,11 @@ int main(int argc, char *argv[])
 						printf("Child: Fail to send\n");
 						exit(1);
 					}
-					printf("Router [%s]: [%s:%d] ---> [%s:%d]. Timestamp: %d:%d:%d.", ipRequest, tempIP,ntohs(ssend_sin.sin_port)
+					printf("Router [%s]: [%s:%d] ---> [%s:%d]. Timestamp: %d:%d:%d ", ipRequest, tempIP,ntohs(ssend_sin.sin_port)
 							,inet_ntoa(csin.sin_addr),ntohs(csin.sin_port)
 							,tm.tm_hour, tm.tm_min, tm.tm_sec);	
 					gettimeofday(&end, NULL);
-			    	fprintf(stdout,"Time Elapsed: %f ms\n", (end.tv_sec - start.tv_sec)*1000 + 
+			    	fprintf(stdout,"%f ms\n", (end.tv_sec - start.tv_sec)*1000 + 
 			              ((end.tv_usec - start.tv_usec)/1000.0));
 				}
 				/* packet from previous router*/
@@ -430,11 +430,11 @@ int main(int argc, char *argv[])
 						printf("Child: Fail to send\n");
 						exit(1);
 					}
-					printf("Router [%s]: [%s:%d] ---> [%s:%d]. Timestamp: %d:%d:%d\n", ipRequest, 
+					printf("Router [%s]: [%s:%d] ---> [%s:%d]. %d:%d:%d ", ipRequest, 
 							fromIP,ntohs(csin.sin_port),ipForward,ntohs(forwardSin.sin_port)
 							,tm.tm_hour, tm.tm_min, tm.tm_sec);
 					gettimeofday(&end, NULL);
-			    	fprintf(stdout,"Time Elapsed: %f ms\n", (end.tv_sec - start.tv_sec)*1000 + 
+			    	fprintf(stdout,"%f ms\n", (end.tv_sec - start.tv_sec)*1000 + 
 			              ((end.tv_usec - start.tv_usec)/1000.0));
 				}
 				memset(snd_buf,'\0',MAX_BUF);
