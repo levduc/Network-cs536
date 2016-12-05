@@ -298,16 +298,17 @@ int main(int argc, char *argv[])
 		   	if(count == 2)/*last overlay*/
 		   	{
 		   		/*send back confirmation*/
-		   		printf("sending confimation\n");
+		   		alarm(30);
+				signal(SIGALRM, alarmHandler);
 			   	char pathConfirm[40];
 			   	sprintf(pathConfirm,"$$%s$%d$",ipRequest, ntohs(dedicatedSin.sin_port));
-			   	printf("%s\n", pathConfirm);
 				if (sendto(overlaySock
 							,pathConfirm,strlen(pathConfirm)
 							,0,(struct sockaddr*)&csin, sizeof(csin)) < 0){
 					printf("Child: fail to send\n");
 					exit(1);
 				}
+			   	printf("Confirmation %s is sent to [%s:%d]\n", pathConfirm, inet_ntoa(csin.sin_addr),ntohs(csin.sin_port));
 		   	}
 		   	/************************last ol-sending confirm back************************/
 		   	
@@ -315,7 +316,7 @@ int main(int argc, char *argv[])
 			if(count > 2)
 			{
 				int32_t bytesRcvd;
-				printf("Router [%s]:\row [%d]|(%s:%d)<--->(%s:%d)|pending\n",ipRequest,getpid(),inet_ntoa(csin.sin_addr), ntohs(csin.sin_port), ipForward, portNumber);
+				printf("Router [%s]: row [%d]|(%s:%d)<--->(%s:%d)|pending\n",ipRequest,getpid(),inet_ntoa(csin.sin_addr), ntohs(csin.sin_port), ipForward, portNumber);
 				char confirmBuff[MAX_BUF];
 				memset(confirmBuff,0,MAX_BUF);
 				/*set alarm here*/
