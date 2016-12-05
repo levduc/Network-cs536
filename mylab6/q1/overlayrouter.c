@@ -325,6 +325,7 @@ int main(int argc, char *argv[])
 				signal(SIGALRM, alarmHandler);
 	  			struct sockaddr_in snd_in;
 				socklen_t send_size = sizeof(snd_in);
+				int16_t newPort;
 				if((bytesRcvd = recvfrom(overlaySock, confirmBuff, sizeof(confirmBuff), 0, (struct sockaddr *) &snd_in, &send_size)) > 0)
 				{
 					/*comparing address*/
@@ -336,7 +337,6 @@ int main(int argc, char *argv[])
 						/*updating port*/
 						char* token1;
 						char routerResponse[16];
-						int16_t newPort;
 						/* split by delimiter*/
 					    token1 = strtok(confirmBuff, d);
 					    strncpy(routerResponse, token1, 15);
@@ -396,6 +396,7 @@ int main(int argc, char *argv[])
 						printf("Child: Fail to send\n");
 						exit(1);
 					}
+					printf("%s\n", snd_buf);
 					printf("From: [%s:%d] To: [%s:%d]. Timestamp: %d:%d:%d\n"
 							, inet_ntoa(snd_in.sin_addr),ntohs(snd_in.sin_port)
 							, inet_ntoa(csin.sin_addr),ntohs(csin.sin_port)
