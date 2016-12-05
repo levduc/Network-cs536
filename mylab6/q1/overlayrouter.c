@@ -373,12 +373,12 @@ int main(int argc, char *argv[])
 
 			/*Path is complele*/
 			char snd_buf[MAX_BUF];
-			memset(snd_buf,0,MAX_BUF);
 			int32_t bytesRcvd;
 			struct sockaddr_in snd_in;
 			socklen_t send_size = sizeof(snd_in);
 			time_t t;
 			struct tm tm;
+			memset(snd_buf,0,MAX_BUF);
 			while((bytesRcvd = recvfrom(overlaySock, snd_buf, sizeof(snd_buf), 0, (struct sockaddr *) &snd_in, &send_size)) > 0)
 			{
 				/* traffic start to flow*/
@@ -392,11 +392,12 @@ int main(int argc, char *argv[])
 						isComplete = 1;
 						printf("Path is set up. Router IP: %s\n", ipRequest);
 					}
+
 					if (sendto(overlaySock,snd_buf,strlen(snd_buf),0,(struct sockaddr*)&csin, sizeof(csin)) < 0){
 						printf("Child: Fail to send\n");
 						exit(1);
 					}
-					printf("%s\n", snd_buf);
+					printf("%s %s\n", inet_ntoa(snd_in.sin_addr, ipForward);
 					printf("From: [%s:%d] To: [%s:%d]. Timestamp: %d:%d:%d\n"
 							, inet_ntoa(snd_in.sin_addr),ntohs(snd_in.sin_port)
 							, inet_ntoa(csin.sin_addr),ntohs(csin.sin_port)
@@ -410,18 +411,20 @@ int main(int argc, char *argv[])
 						isComplete = 1;
 						printf("Path is set up. Router IP: %s\n", ipRequest);
 					}
+
 					if (sendto(overlaySock,snd_buf,strlen(snd_buf),0,(struct sockaddr*)&forwardSin, sizeof(forwardSin)) < 0)
 					{
 						printf("Child: Fail to send\n");
 						exit(1);
 					}
-					printf("%s\n", snd_buf);
+
+					printf("%s %s\n", inet_ntoa(snd_in.sin_addr, ipForward);
 					printf("From: [%s:%d] To: [%s:%d]. Timestamp: %d:%d:%d\n"
 							, inet_ntoa(csin.sin_addr),ntohs(csin.sin_port)
 							, ipForward,ntohs(forwardSin.sin_port)
 							, tm.tm_hour, tm.tm_min, tm.tm_sec);
 				}
-				memset(snd_buf,0,MAX_BUF);
+				memset(snd_buf,'\0',MAX_BUF);
 			}
 			/* done sending kill child process*/
 			printf("Child is done! \n");
