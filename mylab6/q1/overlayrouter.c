@@ -325,7 +325,7 @@ int main(int argc, char *argv[])
 				signal(SIGALRM, alarmHandler);
 	  			struct sockaddr_in snd_in;
 				socklen_t send_size = sizeof(snd_in);
-				if((bytesRcvd = recvfrom(overlaySock, confirmBuff, sizeof(confirmBuff), 0, (struct sockaddr *) &snd_in, &send_size)) > 0)
+				if((bytesRcvd = recvfrom(overlaySock, confirmBuff, sizeof(confirmBuff),0, (struct sockaddr *) &snd_in, &send_size)) > 0)
 				{
 					/*comparing address*/
 					if(strcmp(inet_ntoa(forwardSin.sin_addr),inet_ntoa(snd_in.sin_addr)) == 0) // if match
@@ -359,7 +359,7 @@ int main(int argc, char *argv[])
 							printf("Child: fail to send\n");
 							exit(1);
 						}
-						printf("Router [%s]: row [%d]|(%s:%d)<--->(%s:%d)| confirmed\n", ipRequest, getpid(),inet_ntoa(csin.sin_addr), ntohs(csin.sin_port), ipForward, portNumber);
+						printf("Router [%s]: row [%d]|(%s:%d)<--->(%s:%d)|confirmed\n", ipRequest, getpid(),inet_ntoa(csin.sin_addr), ntohs(csin.sin_port), ipForward, portNumber);
 			   			printf("Confirmation sent: %s to address [%s:%d]\n", pathConfirm, inet_ntoa(csin.sin_addr),ntohs(csin.sin_port));
 					}
 					else /*there is a miss match*/
@@ -379,28 +379,25 @@ int main(int argc, char *argv[])
 			struct tm tm;
 			memset(snd_buf,0,MAX_BUF);
 			printf("forward address %s  from address %s\n", ipForward, inet_ntoa(csin.sin_addr));
-			while((bytesRcvd = recvfrom(overlaySock, snd_buf, sizeof(snd_buf), 0, (struct sockaddr *) &snd_in, &send_size)) > 0)
+			while((bytesRcvd = recvfrom(overlaySock, snd_buf, sizeof(snd_buf), 0, (struct sockaddr *)&snd_in, &send_size)) > 0)
 			{
 				/* traffic start to flow*/
 				t = time(NULL);
 				tm = *localtime(&t);
 				/* packet from fw router*/
-				if((strcmp(inet_ntoa(snd_in.sin_addr), ipForward) == 0) && (ntohs(snd_in.sin_port) == ntohs(forwardSin.sin_port)) ) 
+				if((strcmp(inet_ntoa(snd_in.sin_addr),ipForward) == 0) && (ntohs(snd_in.sin_port) == ntohs(forwardSin.sin_port)) ) 
 				{
 					if(isComplete == 0)
 					{
 						isComplete = 1;
 						printf("Path is set up. Router IP: %s\n", ipRequest);
 					}
-
 					if (sendto(overlaySock,snd_buf,strlen(snd_buf),0,(struct sockaddr*)&csin, sizeof(csin)) < 0){
 						printf("Child: Fail to send\n");
 						exit(1);
 					}
 					printf("fr %s fw %s in %s\n", inet_ntoa(snd_in.sin_addr), ipForward, inet_ntoa(csin.sin_addr));
-
-					printf("Back From: [%s:%d] To: [%s:%d]. Timestamp: %d:%d:%d\n"
-							,inet_ntoa(snd_in.sin_addr), ntohs(snd_in.sin_port)
+					printf("This is fack From: [%s:%d] To: [%s:%d]. Timestamp: %d:%d:%d\n",inet_ntoa(snd_in.sin_addr), ntohs(snd_in.sin_port)
 							,inet_ntoa(csin.sin_addr), ntohs(csin.sin_port)
 							,tm.tm_hour, tm.tm_min, tm.tm_sec);	
 				}
@@ -412,18 +409,14 @@ int main(int argc, char *argv[])
 						isComplete = 1;
 						printf("Path is set up. Router IP: %s\n", ipRequest);
 					}
-
 					if (sendto(overlaySock,snd_buf,strlen(snd_buf),0,(struct sockaddr*)&forwardSin, sizeof(forwardSin)) < 0)
 					{
 						printf("Child: Fail to send\n");
 						exit(1);
 					}
-
 					printf("fr %s fw %s in %s\n", inet_ntoa(snd_in.sin_addr), ipForward, inet_ntoa(csin.sin_addr));
-					printf("From: [%s:%d] To: [%s:%d]. Timestamp: %d:%d:%d\n"
-							, inet_ntoa(csin.sin_addr),ntohs(csin.sin_port)
-							, ipForward, ntohs(forwardSin.sin_port)
-							, tm.tm_hour, tm.tm_min, tm.tm_sec);
+					printf("From: [%s:%d] To: [%s:%d]. Timestamp: %d:%d:%d\n",inet_ntoa(csin.sin_addr),ntohs(csin.sin_port),ipForward, ntohs(forwardSin.sin_port)
+							,tm.tm_hour, tm.tm_min, tm.tm_sec);
 				}
 				memset(snd_buf,'\0',MAX_BUF);
 			}
