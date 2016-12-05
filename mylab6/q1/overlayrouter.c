@@ -137,6 +137,8 @@ int main(int argc, char *argv[])
 		}
 		else if (k == 0)  
 		{ 
+			char fromIP[INET_ADDRSTRLEN];
+			inet_ntop(AF_INET, &(csin.sin_addr), fromIP, INET_ADDRSTRLEN);
 			/* child code*/
 			/* breakdown build-request request*/
 			char* token;
@@ -385,7 +387,7 @@ int main(int argc, char *argv[])
 		  	/* set port number, using htons function to use proper byte order */
 		  	dcmmay.sin_port = csin.sin_port;
 		  	/* set IP address to localhost */
-			if(inet_pton(AF_INET, inet_ntoa(csin.sin_addr), &dcmmay.sin_addr)<=0)
+			if(inet_pton(AF_INET, fromIP, &dcmmay.sin_addr)<=0)
 		    {
 		        printf("\n inet_pton error occured\n");
 		        exit(1);
@@ -412,7 +414,7 @@ int main(int argc, char *argv[])
 						printf("Child: Fail to send\n");
 						exit(1);
 					}
-					printf("3. %s  from address %s\n", inet_ntoa(ssend_sin.sin_addr), inet_ntoa(csin.sin_addr));
+					printf("3. %s  from address %s\n", inet_ntoa(ssend_sin.sin_addr), inet_ntoa(dcmmay.sin_addr));
 
 					printf("This is back from: [%s:%d] To: [%s:%d]. Timestamp: %d:%d:%d\n",inet_ntoa(ssend_sin.sin_addr),ntohs(ssend_sin.sin_port)
 							,inet_ntoa(dcmmay.sin_addr),ntohs(dcmmay.sin_port)
@@ -421,7 +423,6 @@ int main(int argc, char *argv[])
 				/* packet from previous router*/
 				if((strcmp(inet_ntoa(ssend_sin.sin_addr), inet_ntoa(csin.sin_addr)) == 0) && (ntohs(ssend_sin.sin_port) == ntohs(csin.sin_port))) 
 				{
-					printf("4. %s  from address %s\n", inet_ntoa(ssend_sin.sin_addr), inet_ntoa(csin.sin_addr));
 					if(isComplete == 0)
 					{
 						isComplete = 1;
@@ -432,7 +433,6 @@ int main(int argc, char *argv[])
 						printf("Child: Fail to send\n");
 						exit(1);
 					}
-					printf("5. %s  from address %s\n", inet_ntoa(ssend_sin.sin_addr), inet_ntoa(csin.sin_addr));
 					printf("forward From: [%s:%d] To: [%s:%d]. Timestamp: %d:%d:%d\n",inet_ntoa(csin.sin_addr),ntohs(csin.sin_port), ipForward,ntohs(forwardSin.sin_port)
 							,tm.tm_hour, tm.tm_min, tm.tm_sec);
 				}
