@@ -19,7 +19,6 @@
 
 #define CLIENT_MAX_BUF 2048
 #define MAX_BUF 4096
-
 int isComplete = 0;
 /*concate two string function*/
 char* concatString(char *s1, char *s2)
@@ -115,7 +114,6 @@ int main(int argc, char *argv[])
    	}
 
 	printf("listening ... \n");
-	
    
 
 	while(1)
@@ -384,7 +382,6 @@ int main(int argc, char *argv[])
 			memset(fromIP,'\0',INET_ADDRSTRLEN);
 			inet_ntop(AF_INET, &(csin.sin_addr), fromIP, INET_ADDRSTRLEN);
 			/************************/
-			printf("before while src-ip src-port: %s %d\n", inet_ntoa(csin.sin_addr), ntohs(csin.sin_port));
 			struct timeval start, end;
 			gettimeofday(&start, NULL);
 			while((bytesRcvd = recvfrom(overlaySock, snd_buf, sizeof(snd_buf), 0, (struct sockaddr *)&ssend_sin, &send_size)) > 0)
@@ -392,8 +389,8 @@ int main(int argc, char *argv[])
 				char tempIP[INET_ADDRSTRLEN];
 				memset(tempIP,'\0',INET_ADDRSTRLEN);
 				inet_ntop(AF_INET, &(ssend_sin.sin_addr), tempIP, INET_ADDRSTRLEN);
-				/* traffic start to flow*/
 
+				/* traffic start to flow*/
 				/* packet from forward router*/
 				if(((strcmp(tempIP,ipForward) == 0) && (ntohs(ssend_sin.sin_port) == ntohs(forwardSin.sin_port)))) 
 				{
@@ -409,7 +406,7 @@ int main(int argc, char *argv[])
 					printf("Router [%s]: [%s:%d] ---> [%s:%d].", ipRequest, tempIP,ntohs(ssend_sin.sin_port)
 							,inet_ntoa(csin.sin_addr),ntohs(csin.sin_port));	
 					gettimeofday(&end, NULL);
-			    	fprintf(stdout,"Time elapsed: %f ms\n", (end.tv_sec - start.tv_sec)*1000 + 
+			    	fprintf(stdout,"Timestamp: %f ms\n", (end.tv_sec - start.tv_sec)*1000 + 
 			              ((end.tv_usec - start.tv_usec)/1000.0));
 				}
 				/* packet from previous router*/
@@ -428,7 +425,7 @@ int main(int argc, char *argv[])
 					printf("Router [%s]: [%s:%d] ---> [%s:%d].", ipRequest, 
 							fromIP,ntohs(csin.sin_port),ipForward,ntohs(forwardSin.sin_port));
 					gettimeofday(&end, NULL);
-			    	fprintf(stdout,"Time elapsed: %f ms\n", (end.tv_sec - start.tv_sec)*1000 + 
+			    	fprintf(stdout,"Timestamp: %f ms\n", (end.tv_sec - start.tv_sec)*1000 + 
 			              ((end.tv_usec - start.tv_usec)/1000.0));
 				}
 				memset(snd_buf,'\0',MAX_BUF);
