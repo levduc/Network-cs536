@@ -411,7 +411,7 @@ int main(int argc, char *argv[])
 						exit(1);
 					}
 					printf("fr %s fw %s in %s\n", inet_ntoa(snd_in.sin_addr), ipForward, inet_ntoa(csin.sin_addr));
-					printf("This is back from: [%s:%d] To: [%s:%d]. Timestamp: %d:%d:%d\n",inet_ntoa(snd_in.sin_addr),ntohs(snd_in.sin_port),inet_ntoa(csin.sin_addr),ntohs(csin.sin_port)
+					printf("This is back from: [%s:%d] To: [%s:%d]. Timestamp: %d:%d:%d\n",inet_ntoa(snd_in.sin_addr),ntohs(snd_in.sin_port),inet_ntoa(dcmmay.sin_addr),ntohs(dcmmay.sin_port)
 							,tm.tm_hour, tm.tm_min, tm.tm_sec);	
 				}
 				/* packet from previous router*/
