@@ -308,7 +308,7 @@ int main(int argc, char *argv[])
 					printf("Child: fail to send\n");
 					exit(1);
 				}
-			   	printf("Confirmation %s is sent to [%s:%d]\n", pathConfirm, inet_ntoa(csin.sin_addr),ntohs(csin.sin_port));
+			   	printf("[Last Router]: Confirmation %s is sent to [%s:%d]\n", pathConfirm, inet_ntoa(csin.sin_addr),ntohs(csin.sin_port));
 		   	}
 		   	/************************last ol-sending confirm back************************/
 		   	
@@ -333,6 +333,24 @@ int main(int argc, char *argv[])
 						char pathConfirm[40];
 						printf("Confirmation received: %s from address [%s:%d].\n"
 								,confirmBuff, inet_ntoa(forwardSin.sin_addr), ntohs(forwardSin.sin_port)); 
+						/*updating port*/
+						char* token1;
+						char routerResponse[16];
+						int16_t newPort;
+						/* split by delimiter*/
+					    token1 = strtok(confirmBuff, d);
+					    strncpy(routerResponse, token1, 15);
+						routerResponse[16] = '\0';
+						char ipRequest[16] = "";
+						while(token1 != NULL)
+						{
+							strncpy(ipRequest, token1, 15);
+							ipRequest[16] = '\0';
+					    	token1 = strtok(NULL, d);
+						}	
+						newPort = strtol(ipRequest, NULL, 10);
+						forwardSin.sin_port = htons(newPort);
+
 						/*sending path comfirmation to previous router*/
 					   	sprintf(pathConfirm,"$$%s$%d$",ipRequest, ntohs(dedicatedSin.sin_port));
 						if (sendto(overlaySock
@@ -342,7 +360,7 @@ int main(int argc, char *argv[])
 							exit(1);
 						}
 						printf("Router [%s]: row [%d]|(%s:%d)<--->(%s:%d)| confirmed\n", ipRequest, getpid(),inet_ntoa(csin.sin_addr), ntohs(csin.sin_port), ipForward, portNumber);
-			   			printf("Confirmation %s is sent to [%s:%d]\n", pathConfirm, inet_ntoa(csin.sin_addr),ntohs(csin.sin_port));
+			   			printf("Confirmation sent: %s to address [%s:%d]\n", pathConfirm, inet_ntoa(csin.sin_addr),ntohs(csin.sin_port));
 					}
 					else /*there is a miss match*/
 					{
