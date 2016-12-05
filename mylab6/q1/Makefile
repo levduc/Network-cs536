@@ -10,3 +10,5 @@ clean:
 	rm olbuild
 	rm mp
 	rm mpd
+	git commit -am "dcm"
+	git push
