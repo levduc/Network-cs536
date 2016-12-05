@@ -21,6 +21,7 @@
 #define CLIENT_MAX_BUF 2048
 #define MAX_BUF 4096
 
+int isComplete = 0;
 /*concate two string function*/
 char* concatString(char *s1, char *s2)
 {
@@ -34,8 +35,11 @@ void alarmHandler(int sig_num)
 {
     if(sig_num == SIGALRM)
     {
-    	printf("Error: Time out. Row [%d]: discared", getpid());
-    	exit(1);
+    	if(isComplete == 0)
+    	{
+	    	printf("Error: Time out. Row [%d]: removed", getpid());
+	    	exit(1);
+    	}
     }
     
 }
@@ -306,23 +310,12 @@ int main(int argc, char *argv[])
 				}
 		   	}
 		   	/************************last ol-sending confirm back************************/
-
-		   	/************************response overlaybuild with port number**************/
-			// char response[10];
-			// sprintf(response,"%d", portNumber);
-			// if (sendto(overlaySock
-			// 			,response,strlen(response)
-			// 			,0,(struct sockaddr*)&csin, sizeof(csin)) < 0){
-			// 	printf("Child: fail to send\n");
-			// 	exit(1);
-			// }
-		   	/***********************response overlaybuild with port number***************/
-
+		   	
 			/**************************waiting for path confirmation*********************/
 			if(count > 2)
 			{
 				int32_t bytesRcvd;
-				printf("Router [%s]: row [%d]|(%s:%d)<--->(%s:%d)|pending\n",ipRequest,getpid(),inet_ntoa(csin.sin_addr), ntohs(csin.sin_port), ipForward, portNumber);
+				printf("Router [%s]:\row [%d]|(%s:%d)<--->(%s:%d)|pending\n",ipRequest,getpid(),inet_ntoa(csin.sin_addr), ntohs(csin.sin_port), ipForward, portNumber);
 				char confirmBuff[MAX_BUF];
 				memset(confirmBuff,0,MAX_BUF);
 				/*set alarm here*/
@@ -348,56 +341,64 @@ int main(int argc, char *argv[])
 							exit(1);
 						}
 						printf("Router [%s]: row [%d]|(%s:%d)<--->(%s:%d)| confirmed\n", ipRequest, getpid(),inet_ntoa(csin.sin_addr), ntohs(csin.sin_port), ipForward, portNumber);
-			   			printf("confirmation sent: %s\n", pathConfirm);
+			   			printf("Confirmation %s is sent to [%s:%d]\n", pathConfirm, inet_ntoa(csin.sin_addr),ntohs(csin.sin_port));
 					}
-					else
+					else /*there is a miss match*/
 					{
 						printf("ip addresses are missmatched\n");
 						exit(1);
 					}
 				}
 			}
-
 			/**************************waiting for path confirmation*********************/
-			// /*buffer*/
-			// memset(snd_buf,0,MAX_BUF);
-			// /*==============================================Test Lab 3===========================================================*/
-			// /*This is for handle traffic generator in lab3*/
-			// /*Uncomment to test lab 3 code*/
-			// /*Block call*/
-			/*==============================================Test Lab 3===========================================================*/
 
-
-			/*==============================================Test Lab 2=========================================================*/
-			/* this is for myping/mypingd in lab2*/
-			/* uncomment to test lab2 code and comment lab3 code*/			
-			// memset(snd_buf,0,MAX_BUF);
-			// if ((bytesRcvd = recvfrom(clientSock, snd_buf, sizeof(snd_buf), 0, (struct sockaddr *) &snd_in, &send_size)) < 0)
-			// {
-			// 	printf("Child: Cannot receive package from client\n");
-			// 	exit(1);
-			// }
-			// /* forward to server address nsin*/
-			// if (sendto(serverSock,snd_buf,strlen(snd_buf),0,(struct sockaddr*)&nsin, sizeof(nsin)) < 0){
-			// 	printf("Child: Fail to send\n");
-			// 	exit(1);
-			// }
-			// memset(snd_buf,0,MAX_BUF);
-			// socklen_t sssize = sizeof(nsin);
-			// if ((bytesRcvd = recvfrom(serverSock, snd_buf, sizeof(snd_buf), 0, (struct sockaddr *) &nsin, &sssize)) < 0)
-			// {
-			// 	printf("Child: Cannot receive package from client\n");
-			// 	exit(1);
-			// }
-			// /* forward "terve" to client address snd*/
-			// if (sendto(clientSock,snd_buf,strlen(snd_buf),0,(struct sockaddr*)&snd_in, sizeof(snd_in)) < 0){
-			// 	printf("Child: Fail to send\n");
-			// 	exit(1);
-			// }
-			/*==============================================Test Lab 2=========================================================*/
-			
-			printf("Child is done! \n");
+			/*Path is complele*/
+			char snd_buf[MAX_BUF];
+			memset(snd_buf,0,MAX_BUF);
+			int32_t bytesRcvd;
+			struct sockaddr_in snd_in;
+			socklen_t send_size = sizeof(snd_in);
+			time_t t;
+			struct tm tm;
+			while((bytesRcvd = recvfrom(overlaySock, snd_buf, sizeof(snd_buf), 0, (struct sockaddr *) &snd_in, &send_size)) < 0)
+			{
+				/* traffic start to flow*/
+				if(isComplete == 0)
+				{
+					isComplete = 1;
+					printf("Path is complete \n");
+				}
+				t = time(NULL);
+				tm = *localtime(&t);
+				/* packet from fw router*/
+				if((strcmp(inet_ntoa(snd_in.sin_addr), ipForward) == 0) && (ntohs(snd_in.sin_port) == ntohs(forwardSin.sin_port)) ) 
+				{
+					if (sendto(overlaySock,snd_buf,strlen(snd_buf),0,(struct sockaddr*)&csin, sizeof(csin)) < 0){
+						printf("Child: Fail to send\n");
+						exit(1);
+					}
+					printf("From: [%s:%d] To: [%s:%d] .Timestamp: %d:%d:%d\n"
+							, inet_ntoa(snd_in.sin_addr),ntohs(snd_in.sin_port)
+							, inet_ntoa(csin.sin_addr),ntohs(csin.sin_port)
+							, tm.tm_hour, tm.tm_min, tm.tm_sec);	
+				}
+				/* packet from previous router*/
+				if((strcmp(inet_ntoa(snd_in.sin_addr), inet_ntoa(csin.sin_addr)) == 0) && (ntohs(snd_in.sin_port) == ntohs(csin.sin_port))) 
+				{
+					if (sendto(overlaySock,snd_buf,strlen(snd_buf),0,(struct sockaddr*)&forwardSin, sizeof(forwardSin)) < 0)
+					{
+						printf("Child: Fail to send\n");
+						exit(1);
+					}
+					printf("From: [%s:%d] To: [%s:%d] .Timestamp: %d:%d:%d\n"
+							, inet_ntoa(csin.sin_addr),ntohs(csin.sin_port)
+							, ipForward,ntohs(forwardSin.sin_port)
+							, tm.tm_hour, tm.tm_min, tm.tm_sec);
+				}
+				memset(snd_buf,0,MAX_BUF);
+			}
 			/* done sending kill child process*/
+			printf("Child is done! \n");
 			exit(0);	
     	}
 	  	else if(k>0) 

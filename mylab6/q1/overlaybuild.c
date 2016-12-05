@@ -166,6 +166,24 @@ int main(int argc, char *argv[])
 		printf("Fail to receive\n");
 		exit(1);
 	}
-	printf("Response from 1st Router: %s\n", buf);
+	/* breakdown response*/
+	// printf("Response from 1st Router: %s\n", buf);
+	char* token;
+	char routerResponse[16];
+	int16_t dstPort;
+	const char d[2] = "$"; 
+	/* split by delimiter*/
+    token = strtok(buf, d);
+    strncpy(routerResponse, token, 15);
+	routerResponse[16] = '\0';
+	char ipRequest[16] = "";
+	while(token != NULL)
+	{
+		strncpy(ipRequest, token, 15);
+		ipRequest[16] = '\0';
+    	token = strtok(NULL, d);
+	}	
+	dstPort = strtol(ipRequest, NULL, 10);
+	printf("First router [%s]\nUse this port: %d\n", inet_ntoa(ssin.sin_addr),dstPort);
 	exit(0);
 }

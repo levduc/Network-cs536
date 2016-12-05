@@ -26,14 +26,14 @@ char* concatString(char *s1, char *s2)
     return result;
 }
 //this code used to generate random bytestream
-unsigned char *gen_bytestream (size_t num_bytes)
+char *gen_bytestream (size_t num_bytes)
 {
   static const char AllChar[] =
         "0123456789"
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "abcdefghijklmnopqrstuvwxyz";
   srand(time(NULL));
-  unsigned char *bytestream = malloc (num_bytes);
+  char *bytestream = malloc (num_bytes);
   size_t i;
   for (i = 0; i < num_bytes; i++)
   {
@@ -105,7 +105,8 @@ int main(int argc, char *argv[])
 	    thisSin.sin_family = AF_INET;
 	  	/* Set port number, using htons function to use proper byte order */
 	    int16_t thisPort;
-	    thisPort = strtol(argv[5],NULL,10);
+		printf("ahihi\n");
+	    thisPort = strtol(argv[4],NULL,10);
 	  	thisSin.sin_port = htons(thisPort);
 	  	/* Set IP address to localhost */
 	  	thisSin.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -117,24 +118,21 @@ int main(int argc, char *argv[])
 	        printf("Failed to create socket \n");
 	        exit(1);
 	    }	
-	    if ((bind(s, (struct sockaddr *)&thisPort, sizeof(thisPort))) < 0)
+	    if ((bind(s, (struct sockaddr *)&thisSin, sizeof(thisSin))) < 0)
 	   	{
 	   		perror("Fail to bind");
 	   		exit(1);
 	   	} 
-		// fprintf(stdout,"$");
 	    sprintf(clientRequest,"$%s$", c_secret_key);
-		// fgets(clientBuf, CLIENT_MAX_BUF, stdin);
 		len = strlen(clientRequest);
 		clientRequest[len] = '\0';
-		unsigned char *clientBuf;
+		char *clientBuf;
 		size_t ditmemayc = (size_t) (1000 - len);
 		clientBuf = gen_bytestream(ditmemayc);
 		//concatenate
 		char * IDRequest = concatString(clientRequest,clientBuf);
 		len = strlen(IDRequest);
 		IDRequest[len] = '\0';
-
 		struct timeval start, end;
 		gettimeofday(&start, NULL);
 		if (sendto(s,IDRequest,strlen(IDRequest),0, (struct sockaddr*)&sin, sizeof(sin)) < 0){
