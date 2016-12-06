@@ -35,12 +35,14 @@
 \begin{problem}{1} \ \\
 The result is similar to the result of lab4:
 \begin{itemize}
-    \item For \texttt{myping.c}: since it takes longer for udp packets to travel between overlay nodes, the ping result increases as I increase the number of overlay nodes. I used 3 overlay routers which are \texttt{sslab02, sstlab04, sslab06}. The ping results are:
+    \item For \texttt{myping.c}: since it takes longer for udp packets to travel between overlay nodes, the ping result increases as I increase the number of overlay nodes. I used 3 overlay routers which are \texttt{sslab02, sstlab04, sslab06}, and I run \texttt{mypingd.c} at \texttt{sslab01} and \texttt{myping.c} at \texttt{sslab08}. The ping results are:
     \begin{verbatim}
-       1.997 ms 
+       1.997 ms
        2.225 ms
        1.792 ms
-       2.132 ms 
+       2.132 ms
+       2.023 ms
+       1.989 ms
     \end{verbatim}
     Ping result without using overlay router is: \texttt{0.447 ms} on average.
     \item For \texttt{traffic\_send.c}: Since we test the app on multiple sslabs with pretty much bandwidth, there is no significant differences when using overlay routers. However, if there is a bottle neck node in one of the overlay node, I would expect the bandwidth to be decrease. Below is result using same overlay nodes (i.e \texttt{sslab02, sslab04, sslab06})
