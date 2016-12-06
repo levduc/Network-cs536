@@ -209,7 +209,7 @@ int main(int argc, char *argv[])
 			freeifaddrs(ifap);
 			if(isSame < 0)
 			{
-				printf(" child: ip addresses do not match. request is discarded\n");
+				printf("ip addresses do not match. request is discarded\n");
 				exit(1);
 			}
 			/****************************checking ip address*************************/
@@ -267,13 +267,13 @@ int main(int argc, char *argv[])
 		   	/* creating socket*/
 		   	if ((overlaySock = socket(AF_INET,SOCK_DGRAM,0)) < 0)
 			{
-			 	printf("Child:Fail to create socket");
+			 	printf("Fail to create socket");
 			 	exit(1);
 			}
 			/*need to bind this socket*/
 		   	while(bind(overlaySock, (struct sockaddr *) &dedicatedSin, sizeof(dedicatedSin)) < 0)
 		   	{
-		   		printf("Child: Fail to bind this port. Changing port number \n");
+		   		printf("Fail to bind this port. Changing port number \n");
 		   		portNumber +=1;
 		  		dedicatedSin.sin_port = htons(portNumber);	
 		   	}
@@ -287,7 +287,7 @@ int main(int argc, char *argv[])
 			   		       	,strlen(forwardBuildRequest),0
 			   		       	,(struct sockaddr*)&forwardSin, sizeof(forwardSin)) < 0)
 			   	{
-					printf("Child: Fail to send\n");
+					printf("Fail to send\n");
 					exit(1);
 				}
 		   	}
@@ -404,7 +404,7 @@ int main(int argc, char *argv[])
 
 					}
 					if (sendto(overlaySock,snd_buf,strlen(snd_buf),0,(struct sockaddr*) &csin, sizeof(csin)) < 0){
-						printf("Child: Fail to send\n");
+						printf("Fail to send\n");
 						exit(1);
 					}
 					printf("Router [%s]: [%s:%d] ---> [%s:%d].", ipRequest, tempIP,ntohs(ssend_sin.sin_port)
@@ -428,7 +428,7 @@ int main(int argc, char *argv[])
 					}
 					if (sendto(overlaySock,snd_buf,strlen(snd_buf),0,(struct sockaddr*)&forwardSin, sizeof(forwardSin)) < 0)
 					{
-						printf("Child: Fail to send\n");
+						printf("Fail to send\n");
 						exit(1);
 					}
 					printf("Router [%s]: [%s:%d] ---> [%s:%d].", ipRequest, 
@@ -442,7 +442,7 @@ int main(int argc, char *argv[])
 			/**************************waiting for data to go through********************/
 
 			/* done sending kill child process*/
-			printf("Child is done! \n");
+			// printf("Child is done! \n");
 			exit(0);	
     	}
 	  	else if(k>0) 
