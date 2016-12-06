@@ -1,0 +1,5 @@
+#define MAX_BUF 100000
+#define EXMAX_BUF 1000000000
+#define SK_MAX 20
+#define PAYLOAD 1000
+#define PACKSPACING 4000
