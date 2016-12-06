@@ -19,18 +19,15 @@ float packageSpacing;
 /*global udp socket*/
 int udpSocket;
 struct timespec sleepTime, remainTime;
-const char d[2] = " ";
+const char d[2] = "$";
 /*value a for method A*/
-int mode;
 /*Log Buffer*/
 char LogBuffer[EXMAX_BUF];
 /**/
 int packageCount;
-int audioBuf;
-
 /*for restranmission*/
 char **arr;
-
+int32_t payloadSize;
 /*concatString is to concatenate two string together*/
 char* concatString(char *s1, char *s2)
 {
@@ -103,8 +100,8 @@ void SIGIOHandler(int sig_num)
 				printf("No gamma\n");
 			}
 			/*parse to int*/
-			int currentBL = strtol(currentBufferLevel, NULL, 10);
-			int targetBL = strtol(targetBuf, NULL, 10);
+			int32_t currentBL = strtol(currentBufferLevel, NULL, 10);
+			int32_t targetBL = strtol(targetBuf, NULL, 10);
 			float gammaVal = strtof(gamma, NULL);
 			float lambda = 1000/packageSpacing;
 			/*for method A*/
@@ -123,86 +120,83 @@ void SIGIOHandler(int sig_num)
 	    	/*Q(t)<Q*  increase lambda*/
 	    	if(currentBL < targetBL)
 	    	{
-	    		/*increase lambda*/
-	    		switch(mode)
-	    		{
-	    			/*method A*/
-	    			case 0:
-			    		lambda = lambda + a;
-			    		packageSpacing = 1000/lambda;		
-		    			// printf("decrease packet spacing:%f\n", packageSpacing);
-			    		break;
+	    			// /*method A*/
+	    			// case 0:
+			    	// 	lambda = lambda + a;
+			    	// 	packageSpacing = 1000/lambda;		
+		    		// 	// printf("decrease packet spacing:%f\n", packageSpacing);
+			    	// 	break;
 	    			/*method B*/
-	    			case 1:
+	    			// case 1:
 		    			lambda = lambda + a;
 		    			packageSpacing = 1000/lambda;
 		    			// printf("decrease packet spacing:%f\n", packageSpacing);
-			    		break;
-	    			/*method C*/
-			    	case 2:
-		    			lambda = lambda + c*(targetBL-currentBL); 
-			    		packageSpacing = 1000/lambda;
-		    			// printf("decrease packet spacing:%f\n", packageSpacing);
-			    		break;
+			    		// break;
+	    			// /*method C*/
+			    	// case 2:
+		    		// 	lambda = lambda + c*(targetBL-currentBL); 
+			    	// 	packageSpacing = 1000/lambda;
+		    		// 	// printf("decrease packet spacing:%f\n", packageSpacing);
+			    	// 	break;
 	    			/*method D*/
-			    	case 3:
-		    			lambda = lambda + c*(targetBL-currentBL) -d*(lambda - gammaVal); 
-			    		packageSpacing = 1000/lambda;
-		    			// printf("decrease packet spacing:%f\n", packageSpacing);
-			    		break;
-			    	default:
-			    		printf("Not sure which mode\n");
-	    		}
+			    	// case 3:
+		    		// 	lambda = lambda + c*(targetBL-currentBL) -d*(lambda - gammaVal); 
+			    	// 	packageSpacing = 1000/lambda;
+		    		// 	// printf("decrease packet spacing:%f\n", packageSpacing);
+			    	// 	break;
+			    	// default:
+			    	// 	printf("Not sure which mode\n");
+	    			// }
 
 	    	}
 	    	/*Q(t)>Q*  decrease lambda*/
 	    	if(currentBL > targetBL)
 	    	{
 	    		/*decrease lambda*/
-	    		switch(mode)
-	    		{
-	    			/*method A*/
-	    			case 0:
-			    		if ((lambda - a) > 0)
-			    		{
-			    			lambda = lambda - a; 
-			    			packageSpacing = 1000/lambda;
-			    			// printf("increase packet spacing:%f\n", packageSpacing);
-			    		}
-			    		break;
-			    	case 1:
+	    		// switch(mode)
+	    		// {
+	    		// 	/*method A*/
+	    		// 	case 0:
+			    // 		if ((lambda - a) > 0)
+			    // 		{
+			    // 			lambda = lambda - a; 
+			    // 			packageSpacing = 1000/lambda;
+			    // 			// printf("increase packet spacing:%f\n", packageSpacing);
+			    // 		}
+			    // 		break;
+			    // 	case 1:
 	    				/*method B*/
-			    		if (lambda*b > 0)
-			    		{
-			    			lambda = lambda*b; 
-			    			packageSpacing = 1000/lambda;
-			    			// printf("increase packet spacing:%f\n", packageSpacing);
-			    		}
-			    		break;
-	    			/*method C*/
-			    	case 2:
-			    		if(lambda + c*(targetBL-currentBL) > 0)
-			    		{
-			    			lambda = lambda + c*(targetBL-currentBL); 
-				    		packageSpacing = 1000/lambda;
-			    			// printf("increase packet spacing:%f\n", packageSpacing);
-			    		}
-			    		break;
-	    			/*method D*/
-			    	case 3:
-			    		if(lambda + c*(targetBL-currentBL) -d*(lambda - gammaVal) > 0)
-			    		{
-			    			lambda = lambda + c*(targetBL-currentBL) -d*(lambda - gammaVal); 
-				    		packageSpacing = 1000/lambda;
-			    			// printf("decrease packet spacing:%f\n", packageSpacing);
-			    		}
-			    		break;
-			    	default:
-			    		printf("Not sure which mode\n");
+	    		if (lambda*b > 0)
+	    		{
+	    			lambda = lambda*b; 
+	    			packageSpacing = 1000/lambda;
+	    			// printf("increase packet spacing:%f\n", packageSpacing);
 	    		}
+		    	// 	break;
+    			// /*method C*/
+		    	// case 2:
+		    	// 	if(lambda + c*(targetBL-currentBL) > 0)
+		    	// 	{
+		    	// 		lambda = lambda + c*(targetBL-currentBL); 
+			    // 		packageSpacing = 1000/lambda;
+		    	// 		// printf("increase packet spacing:%f\n", packageSpacing);
+		    	// 	}
+		    	// 	break;
+    			// /*method D*/
+		    	// case 3:
+		    	// 	if(lambda + c*(targetBL-currentBL) -d*(lambda - gammaVal) > 0)
+		    	// 	{
+		    	// 		lambda = lambda + c*(targetBL-currentBL) -d*(lambda - gammaVal); 
+			    // 		packageSpacing = 1000/lambda;
+		    	// 		// printf("decrease packet spacing:%f\n", packageSpacing);
+		    	// 	}
+		    	// 	break;
+		    	// default:
+		    	// 	printf("Not sure which mode\n");
+	    		// }
 	    	}
     	} /*Query*/
-		else
+		else /*receiving negtive ACK*/
 		{
             printf("Neg ACK: %c %x%x%x%x\n", buf[0], (unsigned char)buf[2], (unsigned char)buf[3], (unsigned char) buf[4], (unsigned char) buf[5]);
             int temp =  (int)  ((unsigned char)(buf[2]) << 24 |
@@ -210,15 +204,15 @@ void SIGIOHandler(int sig_num)
                                 (unsigned char)(buf[4]) << 8 |
                                 (unsigned char)(buf[5]));
             /*if in store buffer*/
-            if (temp > packageCount - audioBuf)
+            if (temp > packageCount - WINDOWSIZE)
             {
-            	/*temp is store at arr[temp%audioBuf]*/
-	            if (sendto(udpSocket,arr[temp%audioBuf],PAYLOAD+4, 0,(struct sockaddr*)&csin, sizeof(csin)) < 0)
+            	/*temp is store at arr[temp%WINDOWSIZE]*/
+	            if (sendto(udpSocket,arr[temp%WINDOWSIZE],payloadSize+4, 0,(struct sockaddr*)&csin, sizeof(csin)) < 0)
 	            {
 	                printf("Fail to send\n");
 	                exit(1);
 	            }
-	            printf("Retransmit: %x%x%x%x\n", (unsigned char)arr[temp%audioBuf][0], (unsigned char)arr[temp%audioBuf][1], (unsigned char) arr[temp%audioBuf][2], (unsigned char) arr[temp%audioBuf][3]);
+	            printf("Retransmit: %x%x%x%x\n", (unsigned char)arr[temp%WINDOWSIZE][0], (unsigned char)arr[temp%WINDOWSIZE][1], (unsigned char) arr[temp%WINDOWSIZE][2], (unsigned char) arr[temp%WINDOWSIZE][3]);
             }
             else
             {
@@ -233,119 +227,139 @@ int main(int argc, char *argv[])
 {
     /*child count*/
   	unsigned int childCount = 0; //child count
-    /*client Buffer*/
-    char buf[MAX_BUF];
     /*Number of bytes received*/
     ssize_t numBytesRcvd;
-    /*Socket*/
-    int tcpSocket, new_s; 
     /*Port Number*/
+    int listenUdpSocket;
 	int tcpPort;
 	int udpPort;
 	/*log file name*/
 	char * logFileName;
     /*Checking user input*/
-    if(argc != 8)
+    if(argc != 5)
     {
         printf("Usage: <udp-port> <secretkey> <configfile> <lossnum>\n");
         exit(1);
     } 
-    printf("Payload Size: %d\n", PAYLOAD);
+    
+    packageSpacing = PACKETSPACING;
     /*packet Spacing*/
     /*tau*/
-    packageSpacing = PACKETSPACING;
     printf("Package Spacing: %f\n", packageSpacing);
-    /*mode*/
-    mode = strtol(argv[5],NULL,10);
-    printf("Mode used %d\n", mode);
-    /*logFile*/
-    logFileName = argv[6];
-    printf("Log File: %s\n", logFileName);
-   	
-   	/*adiobuf*/
-    audioBuf = strtol(argv[7],NULL,10);
-    arr = malloc(audioBuf*sizeof(char*));
-    printf("Audio Buffer %d\n", audioBuf);
+    
+    /*****Get and Check Server Secret Key*****/
+    char* s_secret_key;
+    if(strlen(argv[2]) < 10){
+    	printf("Secret key is too short\n");
+        exit(1);
+    }
+    if(strlen(argv[2]) > 20){
+    	printf("Secret key is too long\n");
+        exit(1);
+    }
+    s_secret_key = argv[2];
+    /*****Get and Check Server Secret Key*****/
+
+    /*************open configfile************/
+    int fdat; 
+    if ((fdat = open(argv[3],O_RDWR)) <= 0)
+    {
+    	printf("Fail to open file\n");
+    	exit(1);
+    }
+    /*create buffer to read from file*/
+    char bsize[MAX_BUF];
+    memset(bsize, 0, MAX_BUF);
+    if(read(fdat, bsize, MAX_BUF) < 0 )
+    {
+    	printf("Cannot read file\n");
+    }
+    bsize[MAX_BUF-1] = '\0';
+    close(fdat);
+    payloadSize = strtol(bsize,NULL,10);
+    printf("payload size: %d\n", payloadSize);
+    /*************open configfile************/
+
+   	/*window size*/
+    // arr = malloc(WINDOWSIZE*sizeof(char*));
+    printf("Audio Buffer %d\n", WINDOWSIZE);
 
    	/*************************udp-server***********************************/
+
   	/*server address*/
-  	struct sockaddr_in tcp_sin;
+  	struct sockaddr_in udpSin;
+  	int udpSocket;
     /*build address data structure*/
   	/*address family = Internet */
-    tcp_sin.sin_family = AF_INET;
+    udpSin.sin_family = AF_INET;
     /*server tcp-port*/
     tcpPort = strtol(argv[1],NULL,10);
-    printf("TCP-Port: %d\n", tcpPort);
+    printf("UDP-Port: %d\n", tcpPort);
     /*set port number, using htons function to use proper byte order */
-  	tcp_sin.sin_port = htons(tcpPort);
+  	udpSin.sin_port = htons(tcpPort);
   	/*set IP address to localhost */
-  	tcp_sin.sin_addr.s_addr = htonl(INADDR_ANY);
+  	udpSin.sin_addr.s_addr = htonl(INADDR_ANY);
   	/*set all bits of the padding field to 0 */
-  	memset(tcp_sin.sin_zero, '\0', sizeof tcp_sin.sin_zero);
-  	/*tcp socket*/
-   	if ((tcpSocket = socket(PF_INET,SOCK_STREAM,0)) < 0) 
+  	memset(udpSin.sin_zero, '\0', sizeof udpSin.sin_zero);
+  	/*udp socket*/
+   	if ((listenUdpSocket = socket(PF_INET,SOCK_DGRAM,0)) < 0) 
    	{
    	 	perror("Fail to create tcp socket");
    	 	exit(1);
    	} 
    	/*binding*/
-   	if ((bind(tcpSocket, (struct sockaddr *)&tcp_sin, sizeof(tcp_sin))) < 0)
+   	if ((bind(listenUdpSocket, (struct sockaddr *)&udpSin, sizeof(udpSin))) < 0)
    	{
    		perror("Fail to bind");
    		exit(1);
    	}
+
    	/*Listening to incoming request*/
-   	listen(tcpSocket,10);
 	printf("Listening ... \n");
-   	/*************************tcp-server***********************************/
+   	/*************************udp-server***********************************/
 	int status;
 	int len;
-	/*delimiter*/
     /*server udp-port*/
     udpPort = strtol(argv[2],NULL,10);
     printf("initial UDP-Port: %d\n", udpPort);
-	
+	/*client Buffer*/
+    char buf[MAX_BUF];
+
 	while(1)
 	{
 		/*clear buffer*/
 		memset(buf,0,MAX_BUF);
-		/*creating new socket*/
-		if((new_s = accept(tcpSocket, (struct sockaddr *) &tcp_sin, &len)) < 0)
+		/*Wait for request*/
+		struct sockaddr_in csin;
+    	socklen_t sendsize = sizeof(csin);
+		if((numBytesRcvd = recvfrom(listenUdpSocket, buf, sizeof(buf), 0, (struct sockaddr *) &csin, &sendsize)) < 0)
 		{
-			perror("Fail Accept");
+			printf("Fail to receive\n");
 			exit(1);
 		}
-
-		/*Wait for request*/
-    	if ((numBytesRcvd = read(new_s, buf, sizeof(buf))) < 0)
-    	{
-    		perror("read fail() failed");
-    		exit(1);
-    	}
     	/*Receive a request*/
 		printf("Receive a request from client: %s\n", buf);
 		/*Fork a child to handle client request*/
 	    pid_t k = fork();
-  		
 		// fork failed		
 		if(k < 0)
 		{
-	    	close(new_s);   
 			printf("fork() failed!\n");
 		}
 		else if (k==0) //Child Code
 		{ 
 	    	/*client request*/
 	    	buf[numBytesRcvd] = '\0';		
-		    /*break down client request*/
+		    /*Break down client request*/
 		    char *token;
+		    printf("%s\n", buf);
 		    token = strtok(buf, d); 
-			/*getting client-udp port*/
-			char clientUDPPort[SK_MAX+1];
-			strncpy(clientUDPPort, token, SK_MAX+1);
-			clientUDPPort[SK_MAX] = '\0';
+			/*Getting Secret Key*/
+			char c_secret_key[SK_MAX+1]; // client secret key
+			strncpy(c_secret_key, token, SK_MAX+1);
+			c_secret_key[SK_MAX] = '\0';
 		    token = strtok(NULL, d);
-		    /*client File Name*/
+		    /*Client File Name*/
 			char fileName[MAX_BUF+1];
 			if(token != NULL)
 			{
@@ -354,23 +368,23 @@ int main(int argc, char *argv[])
 			}
 			else
 			{
-				printf("Child: resspone KO\n");
-				exit(1);
+				fileName[MAX_BUF] = '\0';
 			}
-            
+			/*response a deny*/            
+			printf("%s\n", fileName);
 		    int fd;
 		    if ((fd = open(fileName,O_RDONLY, 0666)) < 0)
 		    {
 				printf("Child: Cannot open file. File may not exist.");
 				char * deny = "KO";
-				write(new_s, deny, strlen(deny));
-				/*close*/
-				close(new_s);
+				sendto(listenUdpSocket, deny, strlen(deny)+1,0,(struct sockaddr*)&csin, sizeof(csin));
 				exit(1);
 		    }
+
 		    /*File exists. binding udp*/
 		   	/***************************server udp**************************************/
 		    struct sockaddr_in udp_sin;
+		    int16_t udpPort = 20000;
     		udp_sin.sin_family = AF_INET;
 	  		udp_sin.sin_addr.s_addr = htonl(INADDR_ANY);
 		    udp_sin.sin_port = htons(udpPort);
@@ -390,12 +404,12 @@ int main(int argc, char *argv[])
 		   	/***************************server udp**************************************/
 		    
 		    /***************************client udp**************************************/
-		    struct sockaddr_in udp_csin;
-    		udp_csin.sin_family = AF_INET;
-	  		udp_csin.sin_addr.s_addr = tcp_sin.sin_addr.s_addr;
-	  		int clientUdpPortInt = strtol(clientUDPPort,NULL,10);
-		    udp_csin.sin_port = htons(clientUdpPortInt);
-		    printf("%d\n", clientUdpPortInt);
+		    // struct sockaddr_in udp_csin;
+    		// udp_csin.sin_family = AF_INET;
+	  		// udp_csin.sin_addr.s_addr = tcp_sin.sin_addr.s_addr;
+	  		// int clientUdpPortInt = strtol(clientUDPPort,NULL,10);
+		    // udp_csin.sin_port = htons(clientUdpPortInt);
+		    // printf("%d\n", clientUdpPortInt);
 		    /***************************client udp**************************************/
 			
 			/***************************SIGIO handler***********************************/
@@ -419,26 +433,20 @@ int main(int argc, char *argv[])
 		      printf("Unable to put client sock into non-blocking/async mode");
 			/***************************SIGIO handler***********************************/
 			
-			/*Sending confirmation*/
-			printf("Child: File exists. Sending confirmation ....\n");
-		    char confirmation[SK_MAX];
-	    	sprintf(confirmation,"OK %d", udpPort);
-	    	printf("%s\n", confirmation);
-			write(new_s, confirmation, strlen(confirmation));
-			close(new_s);
-			/********************************************************/
-
+			/*************************Sending confirmation******************************/
+			// printf("Child: File exists. Sending confirmation ....\n");
+		 	// char confirmation[SK_MAX] = "OK";
+			// sendto(udpSocket, confirmation, strlen(confirmation)+1,0,(struct sockaddr*)&csin, sizeof(csin));
+			/**************************************************************************/
+		    
 		    /*start writing*/
-		  	unsigned char writeBuf[PAYLOAD+4];
-	   		memset(writeBuf, 0,PAYLOAD);
-		 	int byteRead = 0;
-		 	int  byteWrite = 0;
-		 	/*to write to log file*/
-			struct timeval start, end;
-		 	int firstRead = 0;
-		 	memset(LogBuffer,0,EXMAX_BUF);
+		  	unsigned char writeBuf[payloadSize+4];
 		 	unsigned char bytes[4];
-		 	while((byteRead = read(fd, &writeBuf[4], PAYLOAD)) > 0)
+	   		memset(writeBuf, 0,payloadSize);
+		 	int32_t byteRead = 0;
+		 	int32_t  byteWrite = 0;
+		 	int32_t firstRead = 0;
+		 	while((byteRead = read(fd, &writeBuf[4], payloadSize)) > 0)
 		 	{
 		 		/*convert to byte*/
 				bytes[0] = (packageCount >> 24) & 0xFF;
@@ -452,20 +460,20 @@ int main(int argc, char *argv[])
 		 		writeBuf[3] = bytes[3];
 		 		if(firstRead == 0)
 		 		{
-		 	    	gettimeofday(&start, NULL);
 		 	    	firstRead = 1;
 		 		}
-		 	
-		 	    if ((byteWrite = sendto(udpSocket,writeBuf,byteRead+4,0,(struct sockaddr*)&udp_csin, sizeof(udp_csin))) < 0)
+		 		/*sending packet*/
+		 	    if ((byteWrite = sendto(udpSocket,writeBuf,byteRead+4,0,(struct sockaddr*)&csin, sizeof(csin))) < 0)
 		 	    {
 					printf("Child: Fail to send\n");
 					exit(1);
 				}
-			    arr[packageCount%audioBuf]=writeBuf;
-				packageCount++;
-		 	   	gettimeofday(&end, NULL);
-				sprintf(LogBuffer + strlen(LogBuffer),"%f", end.tv_sec-start.tv_sec+(end.tv_usec- start.tv_usec)/1000000.0);
-				sprintf(LogBuffer + strlen(LogBuffer)," %f \n", 1000/packageSpacing);
+			    /*keep for resend*/
+			    // arr[packageCount%WINDOWSIZE]=writeBuf;
+				printf("%x%x%x%x\n", writeBuf[0],writeBuf[1],writeBuf[2],writeBuf[3]);
+				// printf("%d\n", packageCount);
+				// packageCount++;
+				
 				/******************************nanosleep*******************************/
 				int tau = (int) packageSpacing*1000000;
 				if(tau < 999999999)
@@ -488,45 +496,27 @@ int main(int argc, char *argv[])
 			    }
 				/******************************nanosleep*******************************/
 				// printf("Child Num byte sent %d, packet-spacing %f\n", byteWrite, packageSpacing);
-	   			memset(writeBuf,0, PAYLOAD);
+	   			memset(writeBuf,0, payloadSize);
 		 	}
 		 	/*signal end tranmission*/
-			int i;
-			for(i =0; i<3; i++)
-			{
-			 	if ((sendto(udpSocket,"EEE",3,0,(struct sockaddr*)&udp_csin, sizeof(udp_csin))) < 0)
-		 	    {
-					printf("Child: Fail to send\n");
-					exit(1);
-				}
-			}	
+			// int i;
+			// for(i =0; i<3; i++)
+			// {
+			//  	if ((sendto(udpSocket,"EEE",3,0,(struct sockaddr*)&csin, sizeof(csin))) < 0)
+		 	// 	    {
+			// 		printf("Child: Fail to send\n");
+			// 		exit(1);
+			// 	}
+			// }	
 			/***********************/
-			//close connection
-			close(new_s);
 			close(udpSocket);
 		    close(fd);
-	        memset(fileName,0,MAX_BUF);
 	        printf("Child: Done sending\n");
-	        printf("Child: write to log file\n");
-	        
-	        int logfd;
-		    if ((logfd = open(logFileName,O_RDWR | O_CREAT|O_TRUNC, 0666)) < 0)
-		    {
-				printf("Child: Cannot create file");
-				exit(1);		    	
-		    }
-		    if(write(logfd,LogBuffer,strlen(LogBuffer)) < 0)
-		    {
-		    	printf("Child: Cannot write to file");
-				exit(1);
-		    }
-		    close(logfd);
 	    	exit(0);
     	}
 	  	else if(k>0) 
 	  	{	
 			// parent code 
-	    	close(new_s);   
     		childCount++;
 	     	//clean up zombies
 	        while (childCount)
