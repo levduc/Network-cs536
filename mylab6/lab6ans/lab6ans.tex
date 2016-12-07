@@ -73,7 +73,20 @@ The result is similar to the result of lab4:
 \end{itemize}
 \end{problem}
 
-\begin{problem}{2}
-    
+\begin{problem}{2} \ \\
+    \textit{Sliding Window Algorithm} and \textit{Negative/Cumulative Acknowledgment} are used for this problem. For each UDP packet, I used extra 4 bytes as sequence number. Similar to what discussed in lectures, each sender and receiver keep track of 3 variables. For sender, those are \textit{send window size} (SWS), \textit{Last Acknowledgment Received} (LAR), and \texttt{Last Frame Sent} (LFS). Similarly for receiver, those are \textit{largest acceptable frame} (LAF), \textit{Last Frame Receive} (LFR), and \texttt{Receiver Window Size} (LFS).
+    \\
+    When a frame arrive at receiver, the \texttt{SequenceNum} is checked if it's between \textit{LFR} and $LAF$ and is discarded if otherwise. An cumulative ACK is sent to sender when all frame in between window are received, so that sender can update its sliding window. Also, when receive detects a missing packet in between a negative ACK is sent to sender, the sender then resends the missing package and wait until receiving cumulative ACK from receiver. For simplicity, we assume there is no corrupt package since performing checksum may significantly reduce running time.
+\end{problem}
+\begin{problem}{3}\ \\
+    \textit{Greedy-TCP}: For this problem, the tcp sender can reduce package spacing by half or double/triple its sending rate every RTT to take all available bandwidth (i.e. similar to slow start discuss in class). However, to avoid self-congestion, the TCP sender only does that until its receiving the first package loss; the tcp sender will reduce it sending rate by a fraction. We can adopt the equation discussed in class as follow:
+    \begin{equation*}
+        \begin{split}
+              &\ if\ Q(t) = Q^*\ then\ \lambda(t + 1) \leftarrow \lambda(t)
+            \\&\ if\ Q(t) < Q∗\ then\ \lambda(t + 1) \leftarrow \lambda(t)\times \alpha
+            \\&\ if\ Q(t) > Q∗\ then\ \lambda(t + 1) \leftarrow  \gamma \times \lambda(t) 
+        \end{split}
+    \end{equation*}
+    Where $\alpha>1$ (i.e $\alpha = 2$) and $0<\gamma<1$ (i.e. $\gamma = .5$)
 \end{problem}
 \end{document}

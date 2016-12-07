@@ -11,33 +11,19 @@
 #include <time.h>
 #include <errno.h>
 #include <sys/time.h>
-#include "server.h"
-/*package spacing*/
-float packageSpacing;
-/*payload size*/
+#include "dropsendto.c"
+
+#define MAX_BUF 100000
+#define SK_MAX 20
 /*global udp socket*/
-int32_t udpSocket;
-struct timespec sleepTime, remainTime;
 const char d[2] = "$";
-/*value a for method A*/
-/*Log Buffer*/
-char LogBuffer[EXMAX_BUF];
-/**/
+int32_t udpSocket;
 int32_t packageCount;
 int32_t leftWindowP;
-
 /*for restranmission*/
-char **arr;
 int32_t payloadSize;
+char **arr;
 /*concatString is to concatenate two string together*/
-int32_t dropsendto(int32_t dropAt, int32_t count)
-{
-	if((count%dropAt == 0) && count!=0)
-	{
-		return 1;
-	}
-	return -1;
-}
 char* concatString(char *s1, char *s2)
 {
     char *result = malloc(strlen(s1)+strlen(s2)+1); //+1 for the zero-terminator
@@ -46,6 +32,7 @@ char* concatString(char *s1, char *s2)
     return result;
 }
 /*SIGIOhandler*/
+#define WINDOWSIZE 1000000000
 void SIGIOHandler(int sig_num) 
 {
   ssize_t numBytesRcvd;
@@ -71,15 +58,13 @@ void SIGIOHandler(int sig_num)
                                 (unsigned char)(buf[3]) << 16 |
                                 (unsigned char)(buf[4]) << 8 |
                                 (unsigned char)(buf[5]));
-            /*if in store buffer*/
-			leftWindowP = temp-1;
             if (temp > packageCount - WINDOWSIZE)
             {
             	/*temp is store at arr[temp%WINDOWSIZE]*/
 	            if (sendto(udpSocket,arr[temp%WINDOWSIZE],payloadSize+4, 0,(struct sockaddr*)&csin, sizeof(csin)) < 0)
 	            {
 	                printf("Fail to send\n");
-	                exit(1);
+	                // exit(1);
 	            }
 	            printf("Retransmit: %x%x%x%x\n", (unsigned char)arr[temp][0], (unsigned char)arr[temp][1], (unsigned char) arr[temp][2], (unsigned char) arr[temp][3]);
             }
@@ -103,6 +88,7 @@ int main(int argc, char *argv[])
   	unsigned int childCount = 0; //child count
     /*Number of bytes received*/
     ssize_t numBytesRcvd;
+    int32_t lossNum;
     /*Port Number*/
     int listenUdpSocket;
 	int udpPort;
@@ -126,6 +112,7 @@ int main(int argc, char *argv[])
     s_secret_key = argv[2];
     /*****Get and Check Server Secret Key*****/
 
+
     /*************open configfile************/
     int fdat; 
     if ((fdat = open(argv[3],O_RDWR)) <= 0)
@@ -146,6 +133,7 @@ int main(int argc, char *argv[])
     printf("payload size: %d\n", payloadSize);
     /*************open configfile************/
 
+    lossNum = strtol(argv[4],NULL,10);
    	/*window size*/
     arr = malloc(WINDOWSIZE*sizeof(char*));
 
@@ -177,7 +165,6 @@ int main(int argc, char *argv[])
    		perror("Fail to bind");
    		exit(1);
    	}
-
    	/*Listening to incoming request*/
 	printf("Listening ... \n");
    	/*************************udp-server***********************************/
@@ -313,53 +300,43 @@ int main(int argc, char *argv[])
 		 		writeBuf[1] = bytes[1];
 		 		writeBuf[2] = bytes[2];
 		 		writeBuf[3] = bytes[3];
-		 		if(firstRead == 0)
-		 		{
-		 	    	firstRead = 1;
-		 		}
+
 		 		/*sending packet*/
 				arr[packageCount%WINDOWSIZE] = malloc(sizeof(char) * strlen(writeBuf));
 		 		memset(arr[packageCount%WINDOWSIZE],'\0',payloadSize+4);
-				memcpy(arr[packageCount],writeBuf,payloadSize+4)
-;				// printf("%x%x%x%x\n", (unsigned char)arr[packageCount][0],(unsigned char)arr[packageCount][1],(unsigned char)arr[packageCount][2],(unsigned char)arr[packageCount][3]);
-
-		 		// if(dropsendto(1000,packageCount) == 1)
-		 		// {
-		 		// 	packageCount++;
-	   	// 			memset(writeBuf,0, payloadSize);
-	   	// 			continue;
-		 		// }
+				memcpy(arr[packageCount%WINDOWSIZE],writeBuf,payloadSize+4);
+				printf("%x%x%x%x\n", (unsigned char)arr[packageCount][0],(unsigned char)arr[packageCount][1],(unsigned char)arr[packageCount][2],(unsigned char)arr[packageCount][3]);
+		 		if(dropsendto(100,packageCount+lossNum) == 1)
+		 		{
+		 			packageCount++;
+	   				memset(writeBuf,0, payloadSize);
+	   				printf("drop");
+	   				continue;
+		 		}
 		 	    if ((byteWrite = sendto(udpSocket,writeBuf,byteRead+4,0,(struct sockaddr*)&csin, sizeof(csin))) < 0)
 		 	    {
 					printf("Child: Fail to send\n");
 					exit(1);
 				}
-			    /*keep for resend*/
 				packageCount++;
-
-				if(packageCount-leftWindowP >= WINDOWSIZE)
-				{
-					printf("sleeping to wait for ack\n");
-				}
-				// printf("Child Num byte sent %d, packet-spacing %f\n", byteWrite, packageSpacing);
+			    /*keep for resend*/
 	   			memset(writeBuf,0, payloadSize);
 		 	}
 		 	/*signal end tranmission*/
+		 // 	int i;
+			// for(i =0; i<3; i++)
+			// {
+			//  	if ((sendto(udpSocket,"EEE",3,0,(struct sockaddr*)&csin, sizeof(csin))) < 0)
+		 // 	    {
+			// 		printf("Child: Fail to send\n");
+			// 		exit(1);
+			// 	}
+			// }	
 			/***********************/
-			close(udpSocket);
+			// close(udpSocket);
 		    close(fd);
-		    sleep(10);
 	        printf("Child: Done sending\n");
-			int i;
-			for(i =0; i<3; i++)
-			{
-			 	if ((sendto(udpSocket,"END",4,0,(struct sockaddr*)&csin, sizeof(csin))) < 0)
-	 		    {
-					printf("Child: Fail to send\n");
-					exit(1);
-				}
-			}	
-	    	exit(0);
+	    	// exit(0);
     	}
 	  	else if(k>0) 
 	  	{	

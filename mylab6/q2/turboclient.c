@@ -169,31 +169,39 @@ int main(int argc, char *argv[])
         /*waiting for resspone from server*/
         struct sockaddr_in fromServerSin;
         socklen_t sendsize = sizeof(fromServerSin);
-        int32_t packageCount=0;
+        int32_t LAF=1000;
+        int32_t LFR=0;
         unsigned char negACK[6];
         unsigned char posACK[6];
-        while((numBytesRcvd = recvfrom(s,serverBuf,payloadSize+4,0,(struct sockaddr *)&fromServerSin,&sendsize))>= 0) // recv
+        char *arr[1000];
+        int i;
+        for(i=0;i<1000;i++)
         {
-            /*server signal an end*/
-            if(strcmp(serverBuf,"EEE")==0)
-            {
-                printf("Server is done transfering\n");
-                // break;
-            }
+            arr[i]=malloc(1004*sizeof(char)+1);
+            memset(arr[i],'\0',1004);
+        }
+        while((numBytesRcvd = recvfrom(s,serverBuf,payloadSize+4,0,(struct sockaddr *)&fromServerSin,&sendsize))>0) // recv
+        {
             /*get sequence number*/
             int temp =  (int)  ((unsigned char)(serverBuf[0]) << 24 |
                                (unsigned char)(serverBuf[1]) << 16 |
                                (unsigned char)(serverBuf[2]) << 8 |
                                (unsigned char)(serverBuf[3]));
             /*package lost sending negative ack*/
-            if(temp > packageCount)
+            if(temp > LAF)
+            {
+                continue;
+            }
+
+            if((temp > LFR) && (strlen(arr[temp%1000])==0))
             {
                 negACK[0] = 'M';
                 negACK[1] = ' ';
-                negACK[2] = ((packageCount) >> 24) & 0xFF;
-                negACK[3] = ((packageCount) >> 16) & 0xFF;
-                negACK[4] = ((packageCount) >> 8) & 0xFF;
-                negACK[5] = (packageCount) & 0xFF;
+                negACK[2] = ((LFR) >> 24) & 0xFF;
+                negACK[3] = ((LFR) >> 16) & 0xFF;
+                negACK[4] = ((LFR) >> 8) & 0xFF;
+                negACK[5] = (LFR) & 0xFF;
+                memcpy(arr[temp%1000],serverBuf,strlen(serverBuf));
                 if (sendto(s,negACK,6,0,(struct sockaddr*)&fromServerSin, sizeof(fromServerSin)) < 0)
                 {
                     printf("Fail to send\n");
@@ -202,9 +210,10 @@ int main(int argc, char *argv[])
                 printf("negACK sent: %c %x%x%x%x\n",negACK[0],negACK[2],negACK[3],negACK[4],negACK[5]);
             }
 
-            if(packageCount == temp)
+            if(LFR == temp)
             {   
-                packageCount++;
+                LFR++;
+                LAF++;
                 if(firstRead == 1)
                 {
                     /*Creating file*/
@@ -224,14 +233,24 @@ int main(int argc, char *argv[])
                 }
                 write(downFD,&serverBuf[4],numBytesRcvd-4);
                 total += numBytesRcvd;
+                while(strlen(arr[LFR%1000]) != 0)
+                {
+                    printf("printting babe\n");
+                    write(downFD,&arr[LFR+4],numBytesRcvd-4);
+                    memset(arr[LFR],'\0',1004);
+                    LFR++;
+                    LAF++;
+                    total += numBytesRcvd;
+                }
             }
             memset(serverBuf, '\0', payloadSize);
+            // if(temp==LAF)
+            // {
+            //     break;
+            // }
         }
         //End Time 
         gettimeofday(&end, NULL);
-        //numBytes = 0 implies tcp connection closed
-        fprintf(stdout,"UDP connection is closed\n");
-        //Close socket
         close(s);
         /*Printing information*/
         fprintf(stdout,"=======================================\n");
