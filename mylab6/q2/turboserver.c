@@ -316,7 +316,6 @@ int main(int argc, char *argv[])
 		 	    if ((byteWrite = sendto(udpSocket,writeBuf,byteRead+4,0,(struct sockaddr*)&csin, sizeof(csin))) < 0)
 		 	    {
 					printf("Child: Fail to send\n");
-					exit(1);
 				}
 				packageCount++;
 			    /*keep for resend*/
