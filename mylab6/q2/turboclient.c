@@ -180,6 +180,7 @@ int main(int argc, char *argv[])
             arr[i]=malloc(1004*sizeof(char)+1);
             memset(arr[i],'\0',1004);
         }
+        int lasPacket;
         while((numBytesRcvd = recvfrom(s,serverBuf,payloadSize+4,0,(struct sockaddr *)&fromServerSin,&sendsize))>0) // recv
         {
             /*get sequence number*/
@@ -201,7 +202,8 @@ int main(int argc, char *argv[])
                 negACK[3] = ((LFR) >> 16) & 0xFF;
                 negACK[4] = ((LFR) >> 8) & 0xFF;
                 negACK[5] = (LFR) & 0xFF;
-                memcpy(arr[temp%1000],serverBuf,strlen(serverBuf));
+                memcpy(arr[temp%1000],serverBuf,1004);
+                printf("%s\n",arr[temp%1000]);
                 if (sendto(s,negACK,6,0,(struct sockaddr*)&fromServerSin, sizeof(fromServerSin)) < 0)
                 {
                     printf("Fail to send\n");
@@ -209,11 +211,9 @@ int main(int argc, char *argv[])
                 }
                 printf("negACK sent: %c %x%x%x%x\n",negACK[0],negACK[2],negACK[3],negACK[4],negACK[5]);
             }
-
             if(LFR == temp)
             {   
-                LFR++;
-                LAF++;
+           
                 if(firstRead == 1)
                 {
                     /*Creating file*/
@@ -233,10 +233,11 @@ int main(int argc, char *argv[])
                 }
                 write(downFD,&serverBuf[4],numBytesRcvd-4);
                 total += numBytesRcvd;
+                LFR++;
+                LAF++;
                 while(strlen(arr[LFR%1000]) != 0)
                 {
-                    printf("printting babe\n");
-                    write(downFD,&arr[LFR+4],numBytesRcvd-4);
+                    write(downFD,&arr[LFR][4],numBytesRcvd-4);
                     memset(arr[LFR],'\0',1004);
                     LFR++;
                     LAF++;
@@ -244,10 +245,6 @@ int main(int argc, char *argv[])
                 }
             }
             memset(serverBuf, '\0', payloadSize);
-            // if(temp==LAF)
-            // {
-            //     break;
-            // }
         }
         //End Time 
         gettimeofday(&end, NULL);
