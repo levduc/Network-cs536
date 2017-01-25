@@ -1,0 +1,78 @@
+\documentclass[12pt]{article}
+ 
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\pagestyle{fancy}
+\usepackage{graphicx}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+ 
+\newenvironment{theorem}[2][Theorem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{lemma}[2][Lemma]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{exercise}[2][Exercise]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{problem}[2][Problem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{question}[2][Question]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{corollary}[2][Corollary]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+ 
+\begin{document}
+ 
+\title{Assignment 1}
+\author{Duc Viet Le\\
+ CS536}
+ 
+\maketitle
+ 
+\begin{problem}{1} \ \\
+Suppose you would like to urgently deliver 40 terabytes data from Boston to Los Angeles. You
+have available a 100 Mbps dedicated link for data transfer. Would you prefer to transmit the
+data via this link or instead use FedEx over night delivery? Explain.
+\end{problem}
+\textbf{Ans. } Convert: $100$ Mbs = $10^8$ bps and $40$ terabytes = $4 \times 8 \times 10^{13}$ bits.
+\\ By considering only the transmission time, we have: 
+$$T = \frac{4 \times 8 \times 10^{13} } {10^8} = 32 \times 10^5\ (s) \approx 37.037\ (days)$$
+Therefore, using FedEx over night delivery is a better solution. 	
+\begin{problem}{2}
+Suppose two hosts, A and B, are separated by $20,000$ kilometers and are connected by a direct
+link of $R = 2$ Mbps. Suppose the propagation speed over the link is $2.5\times 10^8$ meters/sec.
+\\
+Convert: $20,000$ km $= 2\times 10^7$ m, $R = 2\ Mbps = 2 \times 10^7\ bps$
+\begin{enumerate}
+	\item[a.] Calculate the propagation delay, $d_{prop}$. 
+	\\
+	\textbf{Ans.} Using the equation: 
+	$$d_{prop} = \frac{d}{s} = \frac{2\times 10^7\ m}{2.5 \times 10^8\ m/s} = 0.08\ s$$
+	\item[b.] Bandwidth delay product,  $R \times d_{prop}$
+	\\
+	\textbf{Ans.} 
+	$$R\times d_{prop} = 2\times 10^6 \times 0.08 = 1.6 \times 10^5\ bits$$
+	\item[c.] Consider sending a file of $800,000$ bits from Host A to Host B. Suppose the file is sent	
+	continuously as one large message. What is the maximum number of bits that will be
+	in the link at any given time?
+	\\
+	\textbf{Ans.} Since $800,000 << 1.6 \times 10^5$ and we don't mention about processing delay e.t.c, the maximum number of bits that will be in the link at any given time is $800,000$ bit
+	\item[d.]
+	Provide an interpretation of the bandwidth-delay product.
+	\\
+	\textbf{Ans.} It's the maximum number of bits that can be in the link.
+	\item[e.] What is the width (in meters) of a bit in the link? Is it longer than a football field?
+	\textbf{Ans.} Since the maximum number of bits in the link is $1.6 \times 10^5$ bits, the width of a bit in the link is:
+	$$\frac{2\times 10^7\ m}{1.6\times 10^5} = 125\ m$$
+	Yes, it is bigger than a football field (i.e 109.1 m).
+	\item[f.] Derive a general expression for the width of a bit in terms of the propagation speed $s$,
+	the transmission rate $R$, and the length of the link $m$.
+	\\
+	\textbf{Ans.} Based on what we did, the width of a bit is:
+	$$\frac{distance}{bandwidth-delay\ product} = \frac{m}{R\times d_{prop}} = \frac{m}{R \times \frac{m}{s}} =  \frac{s}{R}$$
+\end{enumerate}
+\end{problem}
+\end{document}
