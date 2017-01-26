@@ -45,7 +45,7 @@ Therefore, using FedEx over night delivery is a better solution.
 Suppose two hosts, A and B, are separated by $20,000$ kilometers and are connected by a direct
 link of $R = 2$ Mbps. Suppose the propagation speed over the link is $2.5\times 10^8$ meters/sec.
 \\
-Convert: $20,000$ km $= 2\times 10^7$ m, $R = 2\ Mbps = 2 \times 10^7\ bps$
+Convert: $20,000$ km $= 2\times 10^7$ m, $R = 2\ Mbps = 2 \times 10^6\ bps$
 \begin{enumerate}
 	\item[a.] Calculate the propagation delay, $d_{prop}$. 
 	\\
@@ -59,7 +59,7 @@ Convert: $20,000$ km $= 2\times 10^7$ m, $R = 2\ Mbps = 2 \times 10^7\ bps$
 	continuously as one large message. What is the maximum number of bits that will be
 	in the link at any given time?
 	\\
-	\textbf{Ans.} Since $800,000 << 1.6 \times 10^5$ and we don't mention about processing delay e.t.c, the maximum number of bits that will be in the link at any given time is $800,000$ bit
+	\textbf{Ans.} Since $800,000 >> 1.6 \times 10^5$ and we don't mention about processing delay e.t.c, the maximum number of bits that will be in the link at any given time is $1.6 \times 10^5$ bits
 	\item[d.]
 	Provide an interpretation of the bandwidth-delay product.
 	\\
@@ -71,7 +71,7 @@ Convert: $20,000$ km $= 2\times 10^7$ m, $R = 2\ Mbps = 2 \times 10^7\ bps$
 	\item[f.] Derive a general expression for the width of a bit in terms of the propagation speed $s$,
 	the transmission rate $R$, and the length of the link $m$.
 	\\
-	\textbf{Ans.} Based on what we did, the width of a bit is:
+	\textbf{Ans.} Based on what we did, the equation for the the width of a bit is:
 	$$\frac{distance}{bandwidth-delay\ product} = \frac{m}{R\times d_{prop}} = \frac{m}{R \times \frac{m}{s}} =  \frac{s}{R}$$
 \end{enumerate}
 \end{problem}
