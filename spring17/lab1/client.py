@@ -20,14 +20,19 @@ class modifiedHTTPReponse():
 clientSocket = socket(AF_INET,SOCK_STREAM)
 
 #checking user input
-if len(sys.argv) < 4:
+if len(sys.argv) < 3:
     print 'Usage: python client.py <hostname> <hostport> <filename>'
     exit(1)
 
 #parsing user input
 serverName = sys.argv[1]
 serverPort = int(sys.argv[2])
-fileName = sys.argv[3]
+
+if len(sys.argv) > 3:
+    fileName = sys.argv[3]
+else:
+    fileName = "/"
+
 # change "/" to "index.html"
 if fileName == "/":
     fileName = "index.html"
@@ -44,9 +49,15 @@ try:
 except Exception as e:
     clientSocket.close()
     raise e
-
+print "============================Client-Request==================================="
+print httpRequest
 #wait for response server
 firstRes= clientSocket.recv(1024)
+positionBeforeData = firstRes.find('\r\n\r\n')
+#printing response
+print "============================Server-Response=================================="
+
+print firstRes[0:positionBeforeData] + '\r\n\r\n'
 processedFirstRes = modifiedHTTPReponse(firstRes)
 httpRes = HTTPResponse(processedFirstRes)
 httpRes.begin()
@@ -54,7 +65,6 @@ if httpRes.status != 200:
     print 'Status code: '+ str(httpRes.status)+ '. Closing connection'
     clientSocket.close()
     exit(1)
-
 #try to create file
 try:
     file = open("Download/"+fileName, "wb")
@@ -68,6 +78,5 @@ followRes = clientSocket.recv(1024)
 while len(followRes) != 0:
     file.write(followRes)
     followRes = clientSocket.recv(1024)
-print('download completed.')    
 file.close()
 clientSocket.close()

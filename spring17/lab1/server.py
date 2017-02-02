@@ -1,10 +1,13 @@
 from socket import *;
 from BaseHTTPServer import BaseHTTPRequestHandler
 from StringIO import StringIO
+from wsgiref.handlers import format_date_time
+from datetime import datetime
+from time import mktime
 import sys
 import threading
 import time
-
+import os
 #parsing HTTP request class
 class HTTPRequest(BaseHTTPRequestHandler):
     def __init__(self, request_text):
@@ -32,33 +35,45 @@ class myThread(threading.Thread):
             print request.error_code
             print '[Error] Bad HTTP request. Closing connection.'
             #bad request response
-            message = "HTTP/1.0 400 Bad Request \r\nConnection: close\r\n\r\n"
+            now = datetime.now()
+            stamp = mktime(now.timetuple())
+            # print format_date_time(stamp) 
+            message = 'HTTP/1.0 400 Bad Request \r\nConnection: close\r\nDate: '+format_date_time(stamp)+'\r\n\r\n'
             self.connectionSocket.send(message)
             self.connectionSocket.close()
             exit(1)
             
         if request.command != "GET":                         # "GET"
-            print "[Error] Cannot handle " + str(request.command) + " request" 
+            print '[Error] Cannot handle ' + str(request.command) + ' request'
+            now = datetime.now()
+            stamp = mktime(now.timetuple())
+            message = 'HTTP/1.0 500 Not Implement \r\nConnection: close\r\nDate: '+format_date_time(stamp)+'\r\n\r\n'
+            self.connectionSocket.send(message)
             self.connectionSocket.close()
             exit(1)
         # time.sleep(5)
         # print request.request_version + "\r\n"             # "HTTP/1.1"
-
-        #if request.path is / then set it to '/index.html'
+        # if request.path is / then set it to '/index.html'
         if request.path == "/":
             request.path = "/index.html"
-
         #try to open file
         try:
             fileToOpen = open("Upload" + request.path, "rb")
         except Exception as e:
-            print '[Error] Fail to open. Fail may not exist or be accessable.'
-            message = 'HTTP/1.0 404 Not Found\r\nConnection: close\r\n\r\n'
+            print '[Error] Fail to open. File may not exist or be accessable.'
+            now = datetime.now()
+            stamp = mktime(now.timetuple())
+            message = 'HTTP/1.0 404 Not Found\r\nConnection: close\r\nDate: '+format_date_time(stamp)+'\r\n\r\n'
             self.connectionSocket.send(message)
             self.connectionSocket.close()
             exit(1)
         #sending file
-        byteRead = 'HTTP/1.0 200 OK\r\nConnection: close\r\n\r\n'+fileToOpen.read();
+        now = datetime.now()
+        stamp = mktime(now.timetuple())
+        #get file type
+        ext = os.path.splitext(request.path)[-1].lower()
+        byteRead = ('HTTP/1.0 200 OK\r\nConnection: close\r\nDate: '
+                    +format_date_time(stamp)+'\r\nContent-Type: '+str(ext[1:])+'\r\n'+'\r\n'+fileToOpen.read())
         self.connectionSocket.send(byteRead)
         #close file
         fileToOpen.close()
@@ -66,7 +81,7 @@ class myThread(threading.Thread):
         #closing connection Socket
         self.connectionSocket.close()
         print 'Exiting ' + str(self.threadID)
-
+        exit(0)
 def main():
     #creating the tcp socket
     serverSocket = socket(AF_INET, SOCK_STREAM)
@@ -75,7 +90,6 @@ def main():
         print 'Usage: python server.py <port-number>'
         exit(1)
     port = int(sys.argv[1])
-
     #binding socket to current address
     #try to bind address
     try:
@@ -94,54 +108,5 @@ def main():
         thread = myThread(threadID,connectionSocket)
         thread.start()
         threadID += 1
-
-        # receiving GET request
-        # recvBuffer = connectionSocket.recv(1024).decode()
-        # print "============================HTTP-Request=================================="
-        # print recvBuffer
-        # print "=========================================================================="
-        # #parse http request.
-        # request = HTTPRequest(recvBuffer)
-        # # print len(request.headers)
-        # # print request.headers.keys()
-        # # print request.headers['host']
-        # #if there is error
-        # if request.error_code is not None:                   # None  (check this first)
-        #     print request.error_code
-        #     print '[Error] Bad HTTP request. Closing connection.'
-        #     #bad request response
-        #     message = "HTTP/1.0 400 Bad Request \r\nConnection: close\r\n\r\n"
-        #     connectionSocket.send(message)
-        #     connectionSocket.close()
-        #     continue
-        
-        # #check if this is GET request
-        # if request.command != "GET":                         # "GET"
-        #     print "[Error] Cannot handle " + request.command + " request" 
-        #     connectionSocket.close()
-        #     continue        
-
-        # # print request.request_version + "\r\n"             # "HTTP/1.1"
-        # #if request.path is / then set it to '/index.html'
-        # if request.path == "/":
-        #     request.path = "/index.html"
-
-        # #try to open file
-        # try:
-        #     fileToOpen = open("Upload" + request.path, "rb")
-        # except Exception as e:
-        #     print '[Error] Fail to open. Fail may not exist or be accessable.'
-        #     message = 'HTTP/1.0 404 Not Found\r\nConnection: close\r\n\r\n'
-        #     connectionSocket.send(message)
-        #     connectionSocket.close()
-        #     continue
-        # #sending file
-        # byteRead = 'HTTP/1.0 200 OK\r\nConnection: close\r\n\r\n'+fileToOpen.read();
-        # connectionSocket.send(byteRead)
-        # #close file
-        # fileToOpen.close()
-        # print 'Done!'
-        # #closing connection Socket
-        # connectionSocket.close()
-        # #end of while loop
+#run main
 main()
