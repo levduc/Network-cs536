@@ -41,7 +41,7 @@ class myThread(threading.Thread):
             print "[Error] Cannot handle " + str(request.command) + " request" 
             self.connectionSocket.close()
             exit(1)
-        time.sleep(5)
+        # time.sleep(5)
         # print request.request_version + "\r\n"             # "HTTP/1.1"
 
         #if request.path is / then set it to '/index.html'
