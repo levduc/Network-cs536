@@ -1,0 +1,84 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\pagestyle{fancy}
+ 
+\newenvironment{theorem}[2][Theorem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{lemma}[2][Lemma]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{exercise}[2][Exercise]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{problem}[2][Problem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{question}[2][Question]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{corollary}[2][Corollary]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+ 
+\begin{document}
+\title{Assignment 3}
+\author{Duc Viet Le\\ CS536}
+ 
+\maketitle
+
+\begin{problem}{1}
+\end{problem}
+\begin{enumerate}
+	\item[a.] In the second segment sent from Host A to B:
+	\begin{itemize}
+		\item Sequence Number: $127+80=207$ 
+		\item Source-Port: 302
+		\item Destination-Port: 80
+	\end{itemize}
+	\item[b.] If the first segment arrives before the second segment, in the acknowledgment of the first arriving segment:
+	\begin{itemize}
+		\item Sequence Number: 207
+		\item Source-Port: 80
+		\item Destination-Port: 302
+	\end{itemize}
+	\item[c.] If the second segment arrive before the first segment, in the acknowledgment of the first arriving segment:
+	\begin{itemize}
+		\item Sequence Number: 127 
+	\end{itemize}
+	to tell $A$ that it has received everything up to 126.
+	\item[d.] Draw:
+	\pagebreak
+\end{enumerate}
+
+\begin{problem}{2}
+\end{problem}
+\begin{enumerate}
+	\item[a.] The intervals of the time when TCP slow start is operating is $[1,6]\cup[23,26]$
+	\item[b.] The intervals of the time when TCP congestion avoidance is operating is $[6,16]\cup [17,22]$
+	\item[c.] By a triple duplicate ACK. Otherwise, the $cwnd$ would drop to 1
+	\item[d.] By a timeout as the $cwnd$ dropped to 1
+	\item[e.] $ssthresh= 32$ because TCP congestion avoidance starts at that point
+	\item[f.] $ssthresh\approx 42/2 = 21$ since the $cwnd$ is around $24$ in the next round. 
+	\item[g.] $ssthresh \approx 28/2 = 14$ since there is a time out when $cwnd$ is around $28$.
+	\item[h.] During $7^{th}$ round. As we can see, during slow start phase (i.e. round 1-6), there are 63 segments sent. the $64-96^{th}$ segments are sent in the next round (i.e. $7^{th}$ round).
+	\item[i.] $ssthresh=4$ which is half of the current $cwnd$. And the $cwnd$ for the next round is $ssthresh+3=7$ as TCP enters the fast retransmit phase.
+	\item[j.] Suppose TCP Tahoe:
+	\begin{itemize}
+		\item $ssthresh = 42/2 = 21$
+		\item $cwnd$ = 4. Since the TCP slow-start begins at round $17^{th}$, after two round, the $cwnd$ has to be $4$.
+	\end{itemize}
+	\item[k.] Suppose TCP Tahoe
+	\begin{itemize}
+		\item Round $17^{th}$ : 1 packets
+		\item Round $18^{th}$ : 2 packets
+		\item Round $19^{th}$ : 4 packets
+		\item Round $20^{th}$ : 8 packets
+		\item Round $21^{st}$ : 16 packets
+		\item Round $22^{nd}$ : 21 packets (this is the current $ssthresh$)
+	\end{itemize}
+	Therefore, total packets sent are 52 packets.
+\end{enumerate}
+\end{document}
