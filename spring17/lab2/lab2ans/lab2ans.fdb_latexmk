@@ -1,5 +1,5 @@
 # Fdb version 3
-["pdflatex"] 1487975711 "lab2ans.tex" "lab2ans.pdf" "lab2ans" 1487975711
+["pdflatex"] 1487975711 "lab2ans.tex" "lab2ans.pdf" "lab2ans" 1487990160
   "/usr/local/texlive/2016/texmf-dist/fonts/map/fontname/texfonts.map" 1272929888 3287 e6b82fe08f5336d4d5ebc73fb1152e87 ""
   "/usr/local/texlive/2016/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1246382020 1004 54797486969f23fa377b128694d548df ""
   "/usr/local/texlive/2016/texmf-dist/fonts/tfm/public/amsfonts/symbols/msam10.tfm" 1246382020 916 f87d7c45f9c908e672703b83b72241a3 ""
@@ -63,7 +63,7 @@
   "lab2ans.tex" 1487975711 12851 d79e7dc66e0e82c4a63d1476e3e10698 ""
   (generated)
   "lab2ans.log"
-  "lab2ans.out"
   "lab2ans.pdf"
-  "lab2ans.aux"
   "-.tex"
+  "lab2ans.aux"
+  "lab2ans.out"

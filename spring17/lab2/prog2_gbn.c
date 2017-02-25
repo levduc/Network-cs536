@@ -1,4 +1,8 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <stdint.h>
 
 /* ******************************************************************
  ALTERNATING BIT AND GO-BACK-N NETWORK EMULATOR: VERSION 1.1  J.F.Kurose
@@ -20,75 +24,193 @@
 /* a "msg" is the data unit passed from layer 5 (teachers code) to layer  */
 /* 4 (students' code).  It contains the data (characters) to be delivered */
 /* to layer 5 via the students transport level protocol entities.         */
+
 struct msg {
   char data[20];
-  };
+};
 
 /* a packet is the data unit passed from layer 4 (students code) to layer */
 /* 3 (teachers code).  Note the pre-defined packet structure, which all   */
 /* students must follow. */
 struct pkt {
-   int seqnum;
-   int acknum;
-   int checksum;
-   char payload[20];
-    };
+  int seqnum;
+  int acknum;
+  int checksum;
+  char payload[20];
+};
 
 /********* STUDENTS WRITE THE NEXT SEVEN ROUTINES *********/
+//round trip time
+#define RTT 100.0 //float
+//negative ack
+#define NEGATIVE_ACK -1
 
+int waitState;
+int sendSeq;
+int rcvdSeq;
 
-
-
-/* called from layer 5, passed the data to be sent to other side */
-A_output(message)
-  struct msg message;
+/*simple checksum*/
+int csum(packet)
+  struct pkt packet; 
 {
-
+	int sum = 0;
+	//header
+	sum = packet.checksum;
+	sum += packet.seqnum;
+	sum += packet.acknum;
+	sum = (sum >> 24) + (sum & 0xff);
+	//payload
+	int i = 0;
+	for (i = 0; i < 20; i += 1) {
+		sum += packet.payload[i];
+		sum = sum & 0xff;
+	}
+	sum = (~sum) & 0xff;
+	return sum;
 }
 
-B_output(message)  /* need be completed only for extra credit */
+/* called from layer 5, passed the data to be sent to other side */
+struct pkt packetToSend;
+
+void A_output(message)
+  struct msg message;
+{
+	//if waiting for ACK, drop message.
+	if(waitState)
+	{
+		printf("A: packet in transit...\n");
+		printf("A: discard message...\n");
+		return;
+	}
+	/*parsing packet*/
+	memcpy(packetToSend.payload, message.data, sizeof(message.data));
+	//sequence num
+	packetToSend.seqnum = sendSeq;
+	//compute checksum
+	packetToSend.checksum = 0;
+	packetToSend.checksum = csum(packetToSend);
+  /*shift down to layer 3*/
+	printf("A: sending packet# %d, checksum %d, payload %s\n", 
+		    packetToSend.seqnum, packetToSend.checksum, packetToSend.payload);
+	tolayer3(0,packetToSend);
+	/*start timmer*/
+	starttimer(0,RTT);
+	/*change to waiting state*/
+	waitState = 1;
+}
+
+void B_output(message)  /* need be completed only for extra credit */
   struct msg message;
 {
 
 }
 
 /* called from layer 3, when a packet arrives for layer 4 */
-A_input(packet)
+void A_input(packet)
   struct pkt packet;
 {
-
+	/*receive something from layer 3*/
+	//stop timer
+	if(csum(packet))
+	{
+		printf("A: ACK is corrupted\n");
+		return;
+	}
+	stoptimer(0);
+	/*ACK*/
+  if(packet.acknum == sendSeq)
+  {
+    printf("A: received ACK for packet# %d\n", packetToSend.seqnum);
+  	/*alternate*/
+  	sendSeq = 1 - sendSeq;
+  	/*change state*/
+    waitState = 0;
+  }
+  /*NAK*/
+  if(packet.acknum == NEGATIVE_ACK)
+  {
+    printf("A: received NAK for packet# %d\n", packetToSend.seqnum);
+    printf("A: resending packet# %d, checksum %d, payload %s\n",
+    	      packetToSend.seqnum, packetToSend.checksum, packetToSend.payload);
+    /*shift down to layer 3*/
+  	tolayer3(0,packetToSend);
+  	/*restart timer*/
+	  starttimer(0,RTT);
+  }
 }
 
 /* called when A's timer goes off */
-A_timerinterrupt()
+void A_timerinterrupt()
 {
-
+	printf("A: time out. \n");
+  printf("A: resending packet# %d, checksum %d, payload %s\n", 
+  	    packetToSend.seqnum, packetToSend.checksum, packetToSend.payload);
+  tolayer3(0,packetToSend);
+  /*restart timer*/
+	starttimer(0,RTT);
 }  
 
 /* the following routine will be called once (only) before any other */
 /* entity A routines are called. You can use it to do any initialization */
-A_init()
+void A_init()
 {
+  sendSeq = 0;
+  waitState = 0;
 }
 
 
 /* Note that with simplex transfer from a-to-B, there is no B_output() */
 
 /* called from layer 3, when a packet arrives for layer 4 at B*/
-B_input(packet)
+void B_input(packet)
   struct pkt packet;
 {
+	/*computing checksum*/
+	printf("B: received packet# %d, checksum %d, payload %s\n", packet.seqnum, packet.checksum, packet.payload);
+	/*compute checksum*/
+	if(csum(packet))
+	{
+	  printf("B: packet is corrupted.\n");	
+		struct pkt nakPkt;
+		/*NAK num*/
+		nakPkt.acknum = NEGATIVE_ACK;
+		nakPkt.checksum = 0;
+    nakPkt.checksum = csum(nakPkt);
+	  printf("B: sending NAK.\n");	
+		tolayer3(1, nakPkt);
+		return;
+	} 
+
+	if(packet.seqnum == rcvdSeq)
+	{
+		/* remove header and pass to layer5 */
+		struct msg message;
+		memcpy(message.data, packet.payload, sizeof(packet.payload));
+		tolayer5(1, message);
+		/*sync sequence*/
+		rcvdSeq = 1 - rcvdSeq;
+	}
+  /*send an ACK*/
+  struct pkt ackPacket;
+	/*ACK num*/
+	ackPacket.acknum = packet.seqnum;
+	ackPacket.checksum = 0;
+	ackPacket.checksum = csum(ackPacket);
+  printf("B: sending ACK.\n");
+	tolayer3(1, ackPacket);
 }
 
 /* called when B's timer goes off */
-B_timerinterrupt()
+void B_timerinterrupt()
 {
+	/*no timer for alternating bit*/
 }
 
 /* the following rouytine will be called once (only) before any other */
 /* entity B routines are called. You can use it to do any initialization */
-B_init()
+void B_init()
 {
+	rcvdSeq = 0;
 }
 
 
@@ -109,13 +231,13 @@ to, and you defeinitely should not have to modify
 ******************************************************************/
 
 struct event {
-   float evtime;           /* event time */
-   int evtype;             /* event type code */
-   int eventity;           /* entity where event occurs */
-   struct pkt *pktptr;     /* ptr to packet (if any) assoc w/ this event */
-   struct event *prev;
-   struct event *next;
- };
+  float evtime;           /* event time */
+  int evtype;             /* event type code */
+  int eventity;           /* entity where event occurs */
+  struct pkt *pktptr;     /* ptr to packet (if any) assoc w/ this event */
+  struct event *prev;
+  struct event *next;
+};
 struct event *evlist = NULL;   /* the event list */
 
 /* possible events: */
@@ -283,7 +405,7 @@ generate_next_arrival()
 {
    double x,log(),ceil();
    struct event *evptr;
-    char *malloc();
+    // char *malloc();
    float ttime;
    int tempint;
 
@@ -357,7 +479,7 @@ printevlist()
 /********************** Student-callable ROUTINES ***********************/
 
 /* called by students routine to cancel a previously-started timer */
-stoptimer(AorB)
+void stoptimer(AorB)
 int AorB;  /* A or B is trying to stop timer */
 {
  struct event *q,*qold;
@@ -387,14 +509,14 @@ int AorB;  /* A or B is trying to stop timer */
 }
 
 
-starttimer(AorB,increment)
+void starttimer(AorB,increment)
 int AorB;  /* A or B is trying to stop timer */
 float increment;
 {
 
  struct event *q;
  struct event *evptr;
- char *malloc();
+ // char *malloc();
 
  if (TRACE>2)
     printf("          START TIMER: starting timer at %f\n",time);
@@ -416,13 +538,13 @@ float increment;
 
 
 /************************** TOLAYER3 ***************/
-tolayer3(AorB,packet)
+void tolayer3(AorB,packet)
 int AorB;  /* A or B is trying to stop timer */
 struct pkt packet;
 {
  struct pkt *mypktptr;
  struct event *evptr,*q;
- char *malloc();
+ // char *malloc();
  float lastime, x, jimsrand();
  int i;
 

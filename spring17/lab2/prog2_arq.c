@@ -50,10 +50,10 @@ int sendSeq;
 int rcvdSeq;
 
 /*simple checksum*/
-uint8_t csum(packet)
+int csum(packet)
   struct pkt packet; 
 {
-	uint8_t sum = 0;
+	int sum = 0;
 	//header
 	sum = packet.checksum;
 	sum += packet.seqnum;
