@@ -188,7 +188,7 @@ void B_input(packet)
   if(packet.seqnum > rcvdNextSeq)
   {
     printf("B: received out-of-order packet.\n");  
-    // printf("B: discard out-of-order packet.\n");  
+    printf("B: discard out-of-order packet.\n");  
     return;
   }
   if(packet.seqnum < rcvdNextSeq)
