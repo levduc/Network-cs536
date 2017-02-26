@@ -39,12 +39,16 @@ struct pkt {
   char payload[20];
 };
 
+/*compile on mac*/
+void stoptimer(int AorB);
+void starttimer(int AorB, float increment);
+void tolayer3(int AorB, struct pkt packet);
 /********* STUDENTS WRITE THE NEXT SEVEN ROUTINES *********/
-//round trip time
-#define RTT 100.0 //float
-//negative ack
-#define NEGATIVE_ACK -1
 
+//round trip time
+#define RTT 20.0 //float
+//negative ack
+#define NEGATIVE_ACK 99
 int waitState;
 int sendSeq;
 int rcvdSeq;
@@ -53,20 +57,20 @@ int rcvdSeq;
 int csum(packet)
   struct pkt packet; 
 {
-	int sum = 0;
-	//header
-	sum = packet.checksum;
-	sum += packet.seqnum;
-	sum += packet.acknum;
-	sum = (sum >> 24) + (sum & 0xff);
-	//payload
-	int i = 0;
-	for (i = 0; i < 20; i += 1) {
-		sum += packet.payload[i];
-		sum = sum & 0xff;
-	}
-	sum = (~sum) & 0xff;
-	return sum;
+  int sum = 0;
+  //header
+  sum = packet.checksum;
+  sum += packet.seqnum;
+  sum += packet.acknum;
+  sum = (sum >> 24) + (sum & 0xff);
+  //payload
+  int i = 0;
+  for (i = 0; i < 20; i += 1) {
+    sum += packet.payload[i];
+    sum = sum & 0xff;
+  }
+  sum = (~sum) & 0xff;
+  return sum;
 }
 
 /* called from layer 5, passed the data to be sent to other side */
@@ -75,28 +79,28 @@ struct pkt packetToSend;
 void A_output(message)
   struct msg message;
 {
-	//if waiting for ACK, drop message.
-	if(waitState)
-	{
-		printf("A: packet in transit...\n");
-		printf("A: discard message...\n");
-		return;
-	}
-	/*parsing packet*/
-	memcpy(packetToSend.payload, message.data, sizeof(message.data));
-	//sequence num
-	packetToSend.seqnum = sendSeq;
-	//compute checksum
-	packetToSend.checksum = 0;
-	packetToSend.checksum = csum(packetToSend);
+  //if waiting for ACK, drop message.
+  if(waitState)
+  {
+    printf("A: packet in transit...\n");
+    printf("A: discard message...\n");
+    return;
+  }
+  /*parsing packet*/
+  memcpy(packetToSend.payload, message.data, sizeof(message.data));
+  //sequence num
+  packetToSend.seqnum = sendSeq;
+  //compute checksum
+  packetToSend.checksum = 0;
+  packetToSend.checksum = csum(packetToSend);
   /*shift down to layer 3*/
-	printf("A: sending packet# %d, checksum %d, payload %s\n", 
-		    packetToSend.seqnum, packetToSend.checksum, packetToSend.payload);
-	tolayer3(0,packetToSend);
-	/*start timmer*/
-	starttimer(0,RTT);
-	/*change to waiting state*/
-	waitState = 1;
+  printf("A: sending packet# %d, checksum %d, payload %s\n", 
+        packetToSend.seqnum, packetToSend.checksum, packetToSend.payload);
+  tolayer3(0,packetToSend);
+  /*start timmer*/
+  starttimer(0,RTT);
+  /*change to waiting state*/
+  waitState = 1;
 }
 
 void B_output(message)  /* need be completed only for extra credit */
@@ -109,21 +113,21 @@ void B_output(message)  /* need be completed only for extra credit */
 void A_input(packet)
   struct pkt packet;
 {
-	/*receive something from layer 3*/
-	//stop timer
-	if(csum(packet))
-	{
-		printf("A: ACK is corrupted\n");
-		return;
-	}
-	stoptimer(0);
-	/*ACK*/
+  /*receive something from layer 3*/
+  //stop timer
+  if(csum(packet))
+  {
+    printf("A: ACK is corrupted\n");
+    return;
+  }
+  stoptimer(0);
+  /*ACK*/
   if(packet.acknum == sendSeq)
   {
     printf("A: received ACK for packet# %d\n", packetToSend.seqnum);
-  	/*alternate*/
-  	sendSeq = 1 - sendSeq;
-  	/*change state*/
+    /*alternate*/
+    sendSeq = 1 - sendSeq;
+    /*change state*/
     waitState = 0;
   }
   /*NAK*/
@@ -131,23 +135,23 @@ void A_input(packet)
   {
     printf("A: received NAK for packet# %d\n", packetToSend.seqnum);
     printf("A: resending packet# %d, checksum %d, payload %s\n",
-    	      packetToSend.seqnum, packetToSend.checksum, packetToSend.payload);
+            packetToSend.seqnum, packetToSend.checksum, packetToSend.payload);
     /*shift down to layer 3*/
-  	tolayer3(0,packetToSend);
-  	/*restart timer*/
-	  starttimer(0,RTT);
+    tolayer3(0,packetToSend);
+    /*restart timer*/
+    starttimer(0,RTT);
   }
 }
 
 /* called when A's timer goes off */
 void A_timerinterrupt()
 {
-	printf("A: time out. \n");
+  printf("A: time out. \n");
   printf("A: resending packet# %d, checksum %d, payload %s\n", 
-  	    packetToSend.seqnum, packetToSend.checksum, packetToSend.payload);
+        packetToSend.seqnum, packetToSend.checksum, packetToSend.payload);
   tolayer3(0,packetToSend);
   /*restart timer*/
-	starttimer(0,RTT);
+  starttimer(0,RTT);
 }  
 
 /* the following routine will be called once (only) before any other */
@@ -165,52 +169,52 @@ void A_init()
 void B_input(packet)
   struct pkt packet;
 {
-	/*computing checksum*/
-	printf("B: received packet# %d, checksum %d, payload %s\n", packet.seqnum, packet.checksum, packet.payload);
-	/*compute checksum*/
-	if(csum(packet))
-	{
-	  printf("B: packet is corrupted.\n");	
-		struct pkt nakPkt;
-		/*NAK num*/
-		nakPkt.acknum = NEGATIVE_ACK;
-		nakPkt.checksum = 0;
+  /*computing checksum*/
+  printf("B: received packet# %d, checksum %d, payload %s\n", packet.seqnum, packet.checksum, packet.payload);
+  /*compute checksum*/
+  if(csum(packet))
+  {
+    printf("B: packet is corrupted.\n");  
+    struct pkt nakPkt;
+    /*NAK num*/
+    nakPkt.acknum = NEGATIVE_ACK;
+    nakPkt.checksum = 0;
     nakPkt.checksum = csum(nakPkt);
-	  printf("B: sending NAK.\n");	
-		tolayer3(1, nakPkt);
-		return;
-	} 
+    printf("B: sending NAK.\n");  
+    tolayer3(1, nakPkt);
+    return;
+  } 
 
-	if(packet.seqnum == rcvdSeq)
-	{
-		/* remove header and pass to layer5 */
-		struct msg message;
-		memcpy(message.data, packet.payload, sizeof(packet.payload));
-		tolayer5(1, message);
-		/*sync sequence*/
-		rcvdSeq = 1 - rcvdSeq;
-	}
+  if(packet.seqnum == rcvdSeq)
+  {
+    /* remove header and pass to layer5 */
+    struct msg message;
+    memcpy(message.data, packet.payload, sizeof(packet.payload));
+    tolayer5(1, message);
+    /*sync sequence*/
+    rcvdSeq = 1 - rcvdSeq;
+  }
   /*send an ACK*/
   struct pkt ackPacket;
-	/*ACK num*/
-	ackPacket.acknum = packet.seqnum;
-	ackPacket.checksum = 0;
-	ackPacket.checksum = csum(ackPacket);
+  /*ACK num*/
+  ackPacket.acknum = packet.seqnum;
+  ackPacket.checksum = 0;
+  ackPacket.checksum = csum(ackPacket);
   printf("B: sending ACK.\n");
-	tolayer3(1, ackPacket);
+  tolayer3(1, ackPacket);
 }
 
 /* called when B's timer goes off */
 void B_timerinterrupt()
 {
-	/*no timer for alternating bit*/
+  /*no timer for alternating bit*/
 }
 
 /* the following rouytine will be called once (only) before any other */
 /* entity B routines are called. You can use it to do any initialization */
 void B_init()
 {
-	rcvdSeq = 0;
+  rcvdSeq = 0;
 }
 
 
@@ -287,16 +291,16 @@ main()
            printf("\nEVENT time: %f,",eventptr->evtime);
            printf("  type: %d",eventptr->evtype);
            if (eventptr->evtype==0)
-	       printf(", timerinterrupt  ");
+         printf(", timerinterrupt  ");
              else if (eventptr->evtype==1)
                printf(", fromlayer5 ");
              else
-	     printf(", fromlayer3 ");
+       printf(", fromlayer3 ");
            printf(" entity: %d\n",eventptr->eventity);
            }
         time = eventptr->evtime;        /* update time to next event time */
         if (nsim==nsimmax)
-	  break;                        /* all done with simulation */
+    break;                        /* all done with simulation */
         if (eventptr->evtype == FROM_LAYER5 ) {
             generate_next_arrival();   /* set up future arrival */
             /* fill in msg to give with string of same letter */    
@@ -308,7 +312,7 @@ main()
                  for (i=0; i<20; i++) 
                   printf("%c", msg2give.data[i]);
                printf("\n");
-	     }
+       }
             nsim++;
             if (eventptr->eventity == A) 
                A_output(msg2give);  
@@ -321,20 +325,20 @@ main()
             pkt2give.checksum = eventptr->pktptr->checksum;
             for (i=0; i<20; i++)  
                 pkt2give.payload[i] = eventptr->pktptr->payload[i];
-	    if (eventptr->eventity ==A)      /* deliver packet by calling */
-   	       A_input(pkt2give);            /* appropriate entity */
+      if (eventptr->eventity ==A)      /* deliver packet by calling */
+           A_input(pkt2give);            /* appropriate entity */
             else
-   	       B_input(pkt2give);
-	    free(eventptr->pktptr);          /* free the memory for packet */
+           B_input(pkt2give);
+      free(eventptr->pktptr);          /* free the memory for packet */
             }
           else if (eventptr->evtype ==  TIMER_INTERRUPT) {
             if (eventptr->eventity == A) 
-	       A_timerinterrupt();
+         A_timerinterrupt();
              else
-	       B_timerinterrupt();
+         B_timerinterrupt();
              }
           else  {
-	     printf("INTERNAL PANIC: unknown event type \n");
+       printf("INTERNAL PANIC: unknown event type \n");
              }
         free(eventptr);
         }
@@ -555,7 +559,7 @@ struct pkt packet;
  if (jimsrand() < lossprob)  {
       nlost++;
       if (TRACE>0)    
-	printf("          TOLAYER3: packet being lost\n");
+  printf("          TOLAYER3: packet being lost\n");
       return;
     }  
 
@@ -569,7 +573,7 @@ struct pkt packet;
     mypktptr->payload[i] = packet.payload[i];
  if (TRACE>2)  {
    printf("          TOLAYER3: seq: %d, ack %d, check: %d ", mypktptr->seqnum,
-	  mypktptr->acknum,  mypktptr->checksum);
+    mypktptr->acknum,  mypktptr->checksum);
     for (i=0; i<20; i++)
         printf("%c",mypktptr->payload[i]);
     printf("\n");
@@ -603,7 +607,7 @@ struct pkt packet;
       else
        mypktptr->acknum = 999999;
     if (TRACE>0)    
-	printf("          TOLAYER3: packet being corrupted\n");
+  printf("          TOLAYER3: packet being corrupted\n");
     }  
 
   if (TRACE>2)  

@@ -1,4 +1,4 @@
-PWD /home/diamondduck/Documents/Networking/spring17/lab2/lab2ans
+PWD /Users/levduc/Documents/Networking/spring17/lab2/lab2ans
 INPUT /usr/local/texlive/2016/texmf.cnf
 INPUT /usr/local/texlive/2016/texmf-dist/web2c/texmf.cnf
 INPUT /usr/local/texlive/2016/texmf-var/web2c/pdftex/pdflatex.fmt
@@ -67,8 +67,8 @@ INPUT /usr/local/texlive/2016/texmf-dist/tex/latex/graphics/color.sty
 INPUT /usr/local/texlive/2016/texmf-dist/tex/latex/graphics/color.sty
 INPUT /usr/local/texlive/2016/texmf-dist/tex/latex/graphics-cfg/color.cfg
 INPUT /usr/local/texlive/2016/texmf-dist/tex/latex/graphics-cfg/color.cfg
-INPUT /usr/local/texlive/2016/texmf-dist/tex/latex/graphics-def/pdftex.def
-INPUT /usr/local/texlive/2016/texmf-dist/tex/latex/graphics-def/pdftex.def
+INPUT /usr/local/texlive/2016/texmf-dist/tex/latex/pdftex-def/pdftex.def
+INPUT /usr/local/texlive/2016/texmf-dist/tex/latex/pdftex-def/pdftex.def
 INPUT /usr/local/texlive/2016/texmf-dist/tex/latex/lipsum/lipsum.sty
 INPUT /usr/local/texlive/2016/texmf-dist/tex/latex/lipsum/lipsum.sty
 INPUT lab2ans.aux
@@ -78,12 +78,6 @@ INPUT /usr/local/texlive/2016/texmf-dist/tex/latex/hyperref/nameref.sty
 INPUT /usr/local/texlive/2016/texmf-dist/tex/latex/hyperref/nameref.sty
 INPUT /usr/local/texlive/2016/texmf-dist/tex/generic/oberdiek/gettitlestring.sty
 INPUT /usr/local/texlive/2016/texmf-dist/tex/generic/oberdiek/gettitlestring.sty
-INPUT lab2ans.out
-INPUT lab2ans.out
-INPUT lab2ans.out
-INPUT lab2ans.out
-INPUT ./lab2ans.out
-INPUT ./lab2ans.out
 OUTPUT lab2ans.out
 OUTPUT lab2ans.pdf
 INPUT /usr/local/texlive/2016/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
