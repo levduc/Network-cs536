@@ -41,7 +41,7 @@ struct pkt {
 
 /********* STUDENTS WRITE THE NEXT SEVEN ROUTINES *********/
 //round trip time
-#define RTT 20.0 //float
+#define RTT 30.0 //float
 //negative ack
 // #define NEGATIVE_ACK -1
 #define SND_WINDOWSIZE 50
@@ -88,8 +88,7 @@ void A_output(message)
   }
   /*sending part*/
   int id;
-  /*circular incase*/
-  id = sndNextSeq-snd_base;
+  id = sndNextSeq%SND_WINDOWSIZE;
   /*sequence num*/
   packetToSend[id].seqnum = sndNextSeq;
   /*parsing packet*/
@@ -102,14 +101,13 @@ void A_output(message)
         packetToSend[id].seqnum, packetToSend[id].checksum, packetToSend[id].payload);
   tolayer3(0,packetToSend[id]);
   /*if sndbase = nextseqnum*/
-  if(id == 0)
+  if(snd_base == sndNextSeq)
   {
     /*start timmer*/
     starttimer(0,RTT);    
   }
   /*increase the sndNextSeq*/
   sndNextSeq++;
-  printf("%d\n", sndNextSeq);
 }
 
 void B_output(message)  /* need be completed only for extra credit */
@@ -132,13 +130,14 @@ void A_input(packet)
   }
   /*Cumulative ACK*/
   printf("A: received cumulative ACK for packet# %d\n", packet.seqnum);
-  snd_base = packet.acknum + 1;
-  /*inefficent shifting*/
-  int i;
-  for (i = 1; i < sndNextSeq-snd_base-1; ++i)
-  {
-    packetToSend[i-1] = packetToSend[i];
-  }
+  snd_base = packet.seqnum + 1;
+
+  /*shifting*/
+  // int i;
+  // for (i = 1; i < SND_WINDOWSIZE; i++)
+  // {
+  //   packetToSend[i-1] = packetToSend[i];
+  // }
 
   // memmove(packetToSend, packetToSend+1, sizeof packetToSend - sizeof *packetToSend);
   if(snd_base == sndNextSeq)
@@ -159,14 +158,16 @@ void A_timerinterrupt()
 {
   printf("A: time out. \n");
   /*Resend everything up to the sndNextSeq*/
-  int i;
   /*restart timer*/
   starttimer(0,RTT);
-  for(i = 0; i < sndNextSeq-snd_base-1; i++)
+  int i;
+  int id;
+  for(i = snd_base; i < sndNextSeq-1; i++)
   {
+    id = i%SND_WINDOWSIZE;
     printf("A: resending packet# %d, checksum %d, payload %s\n", 
-    packetToSend[i].seqnum, packetToSend[i].checksum, packetToSend[i].payload);
-    tolayer3(0,packetToSend[i]);
+    packetToSend[id].seqnum, packetToSend[id].checksum, packetToSend[id].payload);
+    tolayer3(0,packetToSend[id]);
   }
 }  
 
@@ -185,29 +186,38 @@ void A_init()
 void B_input(packet)
   struct pkt packet;
 {
-  printf("B: received packet# %d, checksum %d, payload %s\n", packet.seqnum, packet.checksum, packet.payload);
   /*compute checksum*/
   if(csum(packet))
   {
+    printf("======================================================================\n");
     printf("B: received a corrupted packet.\n");  
     printf("B: discard that packet.\n");  
+    printf("======================================================================\n");
     return;
   } 
   if(packet.seqnum > rcvdNextSeq)
   {
+    printf("======================================================================\n");
     printf("B: received out-of-order packet.\n");  
     printf("B: discard out-of-order packet.\n");  
+    printf("======================================================================\n");
+
     return;
   }
   if(packet.seqnum < rcvdNextSeq)
   {
+    printf("======================================================================\n");
     printf("B: received duplicate packet.\n");  
-    printf("B: discard that packet.\n");  
+    printf("B: discard that packet.\n");
+    printf("======================================================================\n");
+
     return;
   }
   /*not corrupted and in order*/
   if(packet.seqnum == rcvdNextSeq)
   {
+    printf("======================================================================\n");
+    printf("B: received packet# %d, checksum %d, payload %s\n", packet.seqnum, packet.checksum, packet.payload);
     /* remove header and pass to layer5 */
     struct msg message;
     memcpy(message.data, packet.payload, sizeof(packet.payload));
@@ -220,6 +230,7 @@ void B_input(packet)
     ackPacket.checksum = csum(ackPacket);
     printf("B: sending ACK.\n");
     tolayer3(1, ackPacket);
+    printf("======================================================================\n");
     rcvdNextSeq++;
     return;
   }
