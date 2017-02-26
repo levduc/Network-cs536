@@ -39,6 +39,9 @@ struct pkt {
   char payload[20];
 };
 
+void stoptimer(int AorB);
+void starttimer(int AorB, float increment);
+void tolayer3(int AorB, struct pkt packet);
 /********* STUDENTS WRITE THE NEXT SEVEN ROUTINES *********/
 //round trip time
 #define RTT 30.0 //float

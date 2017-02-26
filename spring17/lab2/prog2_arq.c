@@ -39,7 +39,7 @@ struct pkt {
   char payload[20];
 };
 
-/*compile on mac*/
+
 void stoptimer(int AorB);
 void starttimer(int AorB, float increment);
 void tolayer3(int AorB, struct pkt packet);
