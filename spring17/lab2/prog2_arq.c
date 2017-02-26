@@ -49,8 +49,7 @@ void tolayer3(int AorB, struct pkt packet);
 #define RTT 20.0 //float
 //negative ack
 #define NEGATIVE_ACK 99
-int successfullACKcount;
-successfullACKcount=0;
+int successfullACKcount = 0;
 int waitState;
 int sendSeq;
 int rcvdSeq;

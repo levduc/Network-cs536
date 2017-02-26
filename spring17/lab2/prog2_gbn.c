@@ -39,16 +39,18 @@ struct pkt {
   char payload[20];
 };
 
+void stoptimer(int AorB);
+void starttimer(int AorB, float increment);
+void tolayer3(int AorB, struct pkt packet);
 /********* STUDENTS WRITE THE NEXT SEVEN ROUTINES *********/
 //round trip time
-#define RTT 30.0 //float
+#define RTT 10.0 //float
 //negative ack
 // #define NEGATIVE_ACK -1
 #define SND_WINDOWSIZE 50
 
 int isBufferFull;
 int snd_base;
-
 int sndNextSeq;
 int rcvdNextSeq;
 
@@ -128,11 +130,20 @@ void A_input(packet)
   {
     printf("A: received an corrupted ACK \n");
     printf("A: discard ACK\n");
+    printf("======================================================================\n");
     return;
   }
-  /*Cumulative ACK*/
-  printf("A: received cumulative ACK for packet# %d\n", packet.seqnum);
-  snd_base = packet.seqnum + 1;
+  /*discard old*/
+  if(snd_base > packet.seqnum)
+  {
+    printf("A: wait for ACK# %d, received #%d\n", snd_base, packet.seqnum);
+    printf("Ignore duplicate ACK\n");
+    printf("======================================================================\n");
+    return;
+  }
+  /*shift base by 1*/
+  printf("A: received cumulative ACK for packet# %d, correctly sent: %d\n", packet.seqnum, snd_base);
+  snd_base = packet.seqnum+1;
   printf("======================================================================\n");
   // memmove(packetToSend, packetToSend+1, sizeof packetToSend - sizeof *packetToSend);
   if(snd_base == sndNextSeq)
@@ -154,7 +165,7 @@ void A_timerinterrupt()
 {
   printf("==============================A-Timeout===============================\n");
   printf("A: time out. \n");
-  printf("A: waits for ACK# %d\n",snd_base );
+  printf("A: is waiting for ACK# %d, last packet sent: #%d\n",snd_base,sndNextSeq-1);
   /*Resend everything up to the sndNextSeq*/
   /*restart timer*/
   starttimer(0,RTT);
@@ -187,35 +198,26 @@ void B_input(packet)
   struct pkt packet;
 {
   /*compute checksum*/
+  printf("===========================B-Input====================================\n");
   if(csum(packet))
   {
-    printf("===========================B-Input====================================\n");
     printf("B: received a corrupted packet.\n");  
-    printf("B: discard that packet.\n");  
+    printf("B: expect #%d received #%d\n",rcvdNextSeq,packet.seqnum);
+    printf("B: discard that packet.\n"); 
+    /*send a cumulative ACK*/
+    struct pkt ackPacket;
+    /*ACK num*/
+    ackPacket.seqnum = (rcvdNextSeq-1);
+    ackPacket.checksum = 0;
+    ackPacket.checksum = csum(ackPacket);
+    printf("B: resend ACK#%d.\n",(rcvdNextSeq-1));
+    tolayer3(1, ackPacket);
+    printf("======================================================================\n");
     return;
   } 
-  if(packet.seqnum > rcvdNextSeq)
-  {
-    printf("===========================B-Input====================================\n");
-    printf("B: received out-of-order packet.\n");  
-    printf("B: expect #%d received #%d\n",rcvdNextSeq,packet.seqnum);
-    printf("B: discard out-of-order packet.\n");  
-
-    return;
-  }
-  if(packet.seqnum < rcvdNextSeq)
-  {
-    printf("===========================B-Input====================================\n");
-    printf("B: received duplicate packet.\n");  
-    printf("B: expect #%d received #%d\n",rcvdNextSeq,packet.seqnum);
-    printf("B: discard that duplicate packet.\n");
-
-    return;
-  }
   /*not corrupted and in order*/
   if(packet.seqnum == rcvdNextSeq)
   {
-    printf("===========================B-Input====================================\n");
     printf("B: received packet# %d, checksum %d, payload %s\n", packet.seqnum, packet.checksum, packet.payload);
     /* remove header and pass to layer5 */
     struct msg message;
@@ -227,11 +229,48 @@ void B_input(packet)
     ackPacket.seqnum = rcvdNextSeq;
     ackPacket.checksum = 0;
     ackPacket.checksum = csum(ackPacket);
-    printf("B: sending ACK.\n");
+    printf("B: send ACK#%d.\n",rcvdNextSeq);
     tolayer3(1, ackPacket);
     rcvdNextSeq++;
+    printf("======================================================================\n");
     return;
   }
+
+  /*else resend ack*/
+  if(packet.seqnum > rcvdNextSeq)
+  {
+    printf("B: received out-of-order packet.\n");  
+    printf("B: expect #%d received #%d\n",rcvdNextSeq,packet.seqnum);
+    printf("B: discard out-of-order packet.\n");  
+    /*send a cumulative ACK*/
+    struct pkt ackPacket;
+    /*ACK num*/
+    ackPacket.seqnum = (rcvdNextSeq-1);
+    ackPacket.checksum = 0;
+    ackPacket.checksum = csum(ackPacket);
+    printf("B: resend ACK#%d.\n",(rcvdNextSeq-1));
+    tolayer3(1, ackPacket);
+    printf("======================================================================\n");
+    return;
+  }
+
+  if(packet.seqnum < rcvdNextSeq)
+  {
+    printf("B: received duplicate packet.\n");  
+    printf("B: expect #%d received #%d\n",rcvdNextSeq,packet.seqnum);
+    printf("B: discard that duplicate packet.\n");
+    /*send a cumulative ACK*/
+    struct pkt ackPacket;
+    /*ACK num*/
+    ackPacket.seqnum = (rcvdNextSeq-1);
+    ackPacket.checksum = 0;
+    ackPacket.checksum = csum(ackPacket);
+    printf("B: resend ACK#%d.\n",(rcvdNextSeq-1));
+    tolayer3(1, ackPacket);
+    printf("======================================================================\n");
+    return;
+  }
+  
 }
 
 /* called when B's timer goes off */
