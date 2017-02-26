@@ -82,6 +82,7 @@ void A_output(message)
   /*Sender's window is full. Discard the message*/
   if(sndNextSeq >= snd_base+SND_WINDOWSIZE)
   {
+    printf("===========================A:full window==============================\n");
     printf("A: sending window is full\n");
     printf("A: discard message...\n");
     return;
@@ -122,6 +123,7 @@ void A_input(packet)
 {
   /*receive something from layer 3*/
   /*check if ACK is corrupted*/
+  printf("==============================A-Input===================================\n");
   if(csum(packet))
   {
     printf("A: received an corrupted ACK \n");
@@ -131,14 +133,7 @@ void A_input(packet)
   /*Cumulative ACK*/
   printf("A: received cumulative ACK for packet# %d\n", packet.seqnum);
   snd_base = packet.seqnum + 1;
-
-  /*shifting*/
-  // int i;
-  // for (i = 1; i < SND_WINDOWSIZE; i++)
-  // {
-  //   packetToSend[i-1] = packetToSend[i];
-  // }
-
+  printf("======================================================================\n");
   // memmove(packetToSend, packetToSend+1, sizeof packetToSend - sizeof *packetToSend);
   if(snd_base == sndNextSeq)
   {
@@ -151,12 +146,15 @@ void A_input(packet)
     /*start timer for new base*/
     starttimer(0,RTT);
   }
+  
 }
 
 /* called when A's timer goes off */
 void A_timerinterrupt()
 {
+  printf("==============================A-Timeout=================================\n");
   printf("A: time out. \n");
+  printf("A: waits for ACK# %d\n",snd_base );
   /*Resend everything up to the sndNextSeq*/
   /*restart timer*/
   starttimer(0,RTT);
@@ -169,6 +167,8 @@ void A_timerinterrupt()
     packetToSend[id].seqnum, packetToSend[id].checksum, packetToSend[id].payload);
     tolayer3(0,packetToSend[id]);
   }
+  printf("======================================================================\n");
+
 }  
 
 /* the following routine will be called once (only) before any other */
@@ -189,34 +189,33 @@ void B_input(packet)
   /*compute checksum*/
   if(csum(packet))
   {
-    printf("======================================================================\n");
+    printf("===========================B-Input====================================\n");
     printf("B: received a corrupted packet.\n");  
     printf("B: discard that packet.\n");  
-    printf("======================================================================\n");
     return;
   } 
   if(packet.seqnum > rcvdNextSeq)
   {
-    printf("======================================================================\n");
+    printf("===========================B-Input====================================\n");
     printf("B: received out-of-order packet.\n");  
+    printf("B: expect #%d received #%d\n",rcvdNextSeq,packet.seqnum);
     printf("B: discard out-of-order packet.\n");  
-    printf("======================================================================\n");
 
     return;
   }
   if(packet.seqnum < rcvdNextSeq)
   {
-    printf("======================================================================\n");
+    printf("===========================B-Input====================================\n");
     printf("B: received duplicate packet.\n");  
-    printf("B: discard that packet.\n");
-    printf("======================================================================\n");
+    printf("B: expect #%d received #%d\n",rcvdNextSeq,packet.seqnum);
+    printf("B: discard that duplicate packet.\n");
 
     return;
   }
   /*not corrupted and in order*/
   if(packet.seqnum == rcvdNextSeq)
   {
-    printf("======================================================================\n");
+    printf("===========================B-Input====================================\n");
     printf("B: received packet# %d, checksum %d, payload %s\n", packet.seqnum, packet.checksum, packet.payload);
     /* remove header and pass to layer5 */
     struct msg message;
@@ -230,7 +229,6 @@ void B_input(packet)
     ackPacket.checksum = csum(ackPacket);
     printf("B: sending ACK.\n");
     tolayer3(1, ackPacket);
-    printf("======================================================================\n");
     rcvdNextSeq++;
     return;
   }
