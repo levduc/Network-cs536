@@ -39,12 +39,9 @@ struct pkt {
   char payload[20];
 };
 
-void stoptimer(int AorB);
-void starttimer(int AorB, float increment);
-void tolayer3(int AorB, struct pkt packet);
 /********* STUDENTS WRITE THE NEXT SEVEN ROUTINES *********/
 //round trip time
-#define RTT 30.0 //float
+#define RTT 20.0 //float
 //negative ack
 // #define NEGATIVE_ACK -1
 #define SND_WINDOWSIZE 50
@@ -59,20 +56,20 @@ int rcvdNextSeq;
 int csum(packet)
   struct pkt packet; 
 {
-	int sum = 0;
-	//header
-	sum = packet.checksum;
-	sum += packet.seqnum;
-	sum += packet.acknum;
-	sum = (sum >> 24) + (sum & 0xff);
-	//payload
-	int i = 0;
-	for (i = 0; i < 20; i += 1) {
-		sum += packet.payload[i];
-		sum = sum & 0xff;
-	}
-	sum = (~sum) & 0xff;
-	return sum;
+  int sum = 0;
+  //header
+  sum = packet.checksum;
+  sum += packet.seqnum;
+  sum += packet.acknum;
+  sum = (sum >> 24) + (sum & 0xff);
+  //payload
+  int i = 0;
+  for (i = 0; i < 20; i += 1) {
+    sum += packet.payload[i];
+    sum = sum & 0xff;
+  }
+  sum = (~sum) & 0xff;
+  return sum;
 }
 
 /* sender's window*/
@@ -82,34 +79,37 @@ struct pkt packetToSend[SND_WINDOWSIZE];
 void A_output(message)
   struct msg message;
 {
-	/*Sender's window is full. Discard the message*/
-	if(sndNextSeq >= snd_base+SND_WINDOWSIZE)
-	{
-		printf("A: sending window is full\n");
-		printf("A: discard message...\n");
-		return;
-	}
+  /*Sender's window is full. Discard the message*/
+  if(sndNextSeq >= snd_base+SND_WINDOWSIZE)
+  {
+    printf("A: sending window is full\n");
+    printf("A: discard message...\n");
+    return;
+  }
   /*sending part*/
   int id;
   /*circular incase*/
   id = sndNextSeq-snd_base;
-	/*sequence num*/
-	packetToSend[id].seqnum = sndNextSeq;
+  /*sequence num*/
+  packetToSend[id].seqnum = sndNextSeq;
   /*parsing packet*/
   memcpy(packetToSend[id].payload, message.data, sizeof(message.data));
-	/*compute checksum*/
-	packetToSend[id].checksum = 0;
-	packetToSend[id].checksum = csum(packetToSend[id]);
+  /*compute checksum*/
+  packetToSend[id].checksum = 0;
+  packetToSend[id].checksum = csum(packetToSend[id]);
   /*shift down to layer 3*/
-	printf("A: sending packet# %d, checksum %d, payload %s\n", 
-		    packetToSend[id].seqnum, packetToSend[id].checksum, packetToSend[id].payload);
-	tolayer3(0,packetToSend[id]);
+  printf("A: sending packet# %d, checksum %d, payload %s\n", 
+        packetToSend[id].seqnum, packetToSend[id].checksum, packetToSend[id].payload);
+  tolayer3(0,packetToSend[id]);
   /*if sndbase = nextseqnum*/
   if(id == 0)
-	  /*start timmer*/
-	  starttimer(0,RTT);
+  {
+    /*start timmer*/
+    starttimer(0,RTT);    
+  }
   /*increase the sndNextSeq*/
   sndNextSeq++;
+  printf("%d\n", sndNextSeq);
 }
 
 void B_output(message)  /* need be completed only for extra credit */
@@ -122,17 +122,25 @@ void B_output(message)  /* need be completed only for extra credit */
 void A_input(packet)
   struct pkt packet;
 {
-	/*receive something from layer 3*/
-	/*check if ACK is corrupted*/
-	if(csum(packet))
-	{
+  /*receive something from layer 3*/
+  /*check if ACK is corrupted*/
+  if(csum(packet))
+  {
     printf("A: received an corrupted ACK \n");
-		printf("A: discard ACK\n");
-		return;
-	}
+    printf("A: discard ACK\n");
+    return;
+  }
   /*Cumulative ACK*/
   printf("A: received cumulative ACK for packet# %d\n", packet.seqnum);
   snd_base = packet.acknum + 1;
+  /*inefficent shifting*/
+  int i;
+  for (i = 1; i < sndNextSeq-snd_base-1; ++i)
+  {
+    packetToSend[i-1] = packetToSend[i];
+  }
+
+  // memmove(packetToSend, packetToSend+1, sizeof packetToSend - sizeof *packetToSend);
   if(snd_base == sndNextSeq)
   {
     stoptimer(0);
@@ -149,7 +157,7 @@ void A_input(packet)
 /* called when A's timer goes off */
 void A_timerinterrupt()
 {
-	printf("A: time out. \n");
+  printf("A: time out. \n");
   /*Resend everything up to the sndNextSeq*/
   int i;
   /*restart timer*/
@@ -157,7 +165,7 @@ void A_timerinterrupt()
   for(i = 0; i < sndNextSeq-snd_base-1; i++)
   {
     printf("A: resending packet# %d, checksum %d, payload %s\n", 
-        packetToSend[i].seqnum, packetToSend[i].checksum, packetToSend[i].payload);
+    packetToSend[i].seqnum, packetToSend[i].checksum, packetToSend[i].payload);
     tolayer3(0,packetToSend[i]);
   }
 }  
@@ -177,14 +185,14 @@ void A_init()
 void B_input(packet)
   struct pkt packet;
 {
-	printf("B: received packet# %d, checksum %d, payload %s\n", packet.seqnum, packet.checksum, packet.payload);
-	/*compute checksum*/
-	if(csum(packet))
-	{
+  printf("B: received packet# %d, checksum %d, payload %s\n", packet.seqnum, packet.checksum, packet.payload);
+  /*compute checksum*/
+  if(csum(packet))
+  {
     printf("B: received a corrupted packet.\n");  
-	  printf("B: discard that packet.\n");	
-		return;
-	} 
+    printf("B: discard that packet.\n");  
+    return;
+  } 
   if(packet.seqnum > rcvdNextSeq)
   {
     printf("B: received out-of-order packet.\n");  
@@ -220,14 +228,14 @@ void B_input(packet)
 /* called when B's timer goes off */
 void B_timerinterrupt()
 {
-	/*no timer for alternating bit*/
+  /*no timer for alternating bit*/
 }
 
 /* the following rouytine will be called once (only) before any other */
 /* entity B routines are called. You can use it to do any initialization */
 void B_init()
 {
-	rcvdNextSeq = 0;
+  rcvdNextSeq = 0;
 }
 
 
@@ -304,16 +312,16 @@ main()
            printf("\nEVENT time: %f,",eventptr->evtime);
            printf("  type: %d",eventptr->evtype);
            if (eventptr->evtype==0)
-	       printf(", timerinterrupt  ");
+         printf(", timerinterrupt  ");
              else if (eventptr->evtype==1)
                printf(", fromlayer5 ");
              else
-	     printf(", fromlayer3 ");
+       printf(", fromlayer3 ");
            printf(" entity: %d\n",eventptr->eventity);
            }
         time = eventptr->evtime;        /* update time to next event time */
         if (nsim==nsimmax)
-	  break;                        /* all done with simulation */
+    break;                        /* all done with simulation */
         if (eventptr->evtype == FROM_LAYER5 ) {
             generate_next_arrival();   /* set up future arrival */
             /* fill in msg to give with string of same letter */    
@@ -325,7 +333,7 @@ main()
                  for (i=0; i<20; i++) 
                   printf("%c", msg2give.data[i]);
                printf("\n");
-	     }
+       }
             nsim++;
             if (eventptr->eventity == A) 
                A_output(msg2give);  
@@ -338,20 +346,20 @@ main()
             pkt2give.checksum = eventptr->pktptr->checksum;
             for (i=0; i<20; i++)  
                 pkt2give.payload[i] = eventptr->pktptr->payload[i];
-	    if (eventptr->eventity ==A)      /* deliver packet by calling */
-   	       A_input(pkt2give);            /* appropriate entity */
+      if (eventptr->eventity ==A)      /* deliver packet by calling */
+           A_input(pkt2give);            /* appropriate entity */
             else
-   	       B_input(pkt2give);
-	    free(eventptr->pktptr);          /* free the memory for packet */
+           B_input(pkt2give);
+      free(eventptr->pktptr);          /* free the memory for packet */
             }
           else if (eventptr->evtype ==  TIMER_INTERRUPT) {
             if (eventptr->eventity == A) 
-	       A_timerinterrupt();
+         A_timerinterrupt();
              else
-	       B_timerinterrupt();
+         B_timerinterrupt();
              }
           else  {
-	     printf("INTERNAL PANIC: unknown event type \n");
+       printf("INTERNAL PANIC: unknown event type \n");
              }
         free(eventptr);
         }
@@ -572,7 +580,7 @@ struct pkt packet;
  if (jimsrand() < lossprob)  {
       nlost++;
       if (TRACE>0)    
-	printf("          TOLAYER3: packet being lost\n");
+  printf("          TOLAYER3: packet being lost\n");
       return;
     }  
 
@@ -586,7 +594,7 @@ struct pkt packet;
     mypktptr->payload[i] = packet.payload[i];
  if (TRACE>2)  {
    printf("          TOLAYER3: seq: %d, ack %d, check: %d ", mypktptr->seqnum,
-	  mypktptr->acknum,  mypktptr->checksum);
+    mypktptr->acknum,  mypktptr->checksum);
     for (i=0; i<20; i++)
         printf("%c",mypktptr->payload[i]);
     printf("\n");
@@ -620,7 +628,7 @@ struct pkt packet;
       else
        mypktptr->acknum = 999999;
     if (TRACE>0)    
-	printf("          TOLAYER3: packet being corrupted\n");
+  printf("          TOLAYER3: packet being corrupted\n");
     }  
 
   if (TRACE>2)  
