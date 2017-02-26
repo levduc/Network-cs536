@@ -49,6 +49,8 @@ void tolayer3(int AorB, struct pkt packet);
 #define RTT 20.0 //float
 //negative ack
 #define NEGATIVE_ACK 99
+int successfullACKcount;
+successfullACKcount=0;
 int waitState;
 int sendSeq;
 int rcvdSeq;
@@ -124,7 +126,8 @@ void A_input(packet)
   /*ACK*/
   if(packet.acknum == sendSeq)
   {
-    printf("A: received ACK for packet# %d\n", packetToSend.seqnum);
+    printf("A: received ACK for packet# %d, #ACK received: %d\n", packetToSend.seqnum,successfullACKcount);
+    successfullACKcount++;
     /*alternate*/
     sendSeq = 1 - sendSeq;
     /*change state*/

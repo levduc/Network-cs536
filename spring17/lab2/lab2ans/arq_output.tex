@@ -42,9 +42,9 @@ CS536}
 \begin{Verbatim}[frame=single, rulecolor=\color{green}, label=Input] 
 -----  Stop and Wait Network Simulator Version 1.1 -------- 
 
-Enter the number of messages to simulate: 10
-Enter  packet loss probability [enter 0.0 for no loss]:0.1
-Enter packet corruption probability [0.0 for no corruption]:0.3
+Enter the number of messages to simulate: 15
+Enter  packet loss probability [enter 0.0 for no loss]:.1
+Enter packet corruption probability [0.0 for no corruption]:.3
 Enter average time between messages from sender's layer5 [ > 0.0]:1500.0
 Enter TRACE:2
 \end{Verbatim}
@@ -63,6 +63,7 @@ A: received NAK for packet# 0
 A: resending packet# 0, checksum 107, payload aaaaaaaaaaaaaaaaaaaa
 \end{Verbatim}
 \begin{verbatim}
+
 EVENT time: 2815.528320,  type: 2, fromlayer3  entity: 1
 B: received packet# 0, checksum 107, payload aaaaaaaaaaaaaaaaaaaa
 B: sending ACK.
@@ -71,21 +72,24 @@ B: sending ACK.
 EVENT time: 2819.995605,  type: 2, fromlayer3  entity: 0
 A: ACK is corrupted
 
-EVENT time: 2913.507812,  type: 0, timerinterrupt   entity: 0
+\end{verbatim}
+\begin{Verbatim}[frame=single, rulecolor=\color{blue}, label=Handle Loss] 
+EVENT time: 2833.507812,  type: 0, timerinterrupt   entity: 0
 A: time out. 
 A: resending packet# 0, checksum 107, payload aaaaaaaaaaaaaaaaaaaa
           TOLAYER3: packet being lost
-
-EVENT time: 3013.507812,  type: 0, timerinterrupt   entity: 0
+EVENT time: 2853.507812,  type: 0, timerinterrupt   entity: 0
 A: time out. 
 A: resending packet# 0, checksum 107, payload aaaaaaaaaaaaaaaaaaaa
+\end{Verbatim}
 
-EVENT time: 3022.936279,  type: 2, fromlayer3  entity: 1
+\begin{Verbatim}[frame=single, rulecolor=\color{cyan}, label=10 messages ACKed correctly]
+EVENT time: 2862.936279,  type: 2, fromlayer3  entity: 1
 B: received packet# 0, checksum 107, payload aaaaaaaaaaaaaaaaaaaa
 B: sending ACK.
 
-EVENT time: 3030.399170,  type: 2, fromlayer3  entity: 0
-A: received ACK for packet# 0
+EVENT time: 2870.399170,  type: 2, fromlayer3  entity: 0
+A: received ACK for packet# 0, #ACK received: 0
 
 EVENT time: 5268.726562,  type: 1, fromlayer5  entity: 0
 A: sending packet# 1, checksum 86, payload bbbbbbbbbbbbbbbbbbbb
@@ -98,28 +102,26 @@ B: sending ACK.
 EVENT time: 5273.823242,  type: 2, fromlayer3  entity: 0
 A: ACK is corrupted
 
-EVENT time: 5368.726562,  type: 0, timerinterrupt   entity: 0
-A: time out. 
-A: resending packet# 1, checksum 86, payload bbbbbbbbbbbbbbbbbbbb
-          TOLAYER3: packet being lost
-\end{verbatim}
-\begin{Verbatim}[frame=single, rulecolor=\color{blue}, label=Handle Loss] 
-EVENT time: 5468.726562,  type: 0, timerinterrupt   entity: 0
+EVENT time: 5288.726562,  type: 0, timerinterrupt   entity: 0
 A: time out. 
 A: resending packet# 1, checksum 86, payload bbbbbbbbbbbbbbbbbbbb
           TOLAYER3: packet being lost
 
-EVENT time: 5568.726562,  type: 0, timerinterrupt   entity: 0
+EVENT time: 5308.726562,  type: 0, timerinterrupt   entity: 0
+A: time out. 
+A: resending packet# 1, checksum 86, payload bbbbbbbbbbbbbbbbbbbb
+          TOLAYER3: packet being lost
+
+EVENT time: 5328.726562,  type: 0, timerinterrupt   entity: 0
 A: time out. 
 A: resending packet# 1, checksum 86, payload bbbbbbbbbbbbbbbbbbbb
 
-EVENT time: 5574.975586,  type: 2, fromlayer3  entity: 1
+EVENT time: 5334.975586,  type: 2, fromlayer3  entity: 1
 B: received packet# 1, checksum 86, payload bbbbbbbbbbbbbbbbbbbb
 B: sending ACK.
-\end{Verbatim}
-\begin{verbatim}
-EVENT time: 5576.456055,  type: 2, fromlayer3  entity: 0
-A: received ACK for packet# 1
+
+EVENT time: 5336.456055,  type: 2, fromlayer3  entity: 0
+A: received ACK for packet# 1, #ACK received: 1
 
 EVENT time: 6945.276367,  type: 1, fromlayer5  entity: 0
 A: sending packet# 0, checksum 67, payload cccccccccccccccccccc
@@ -129,131 +131,131 @@ B: received packet# 0, checksum 67, payload cccccccccccccccccccc
 B: sending ACK.
           TOLAYER3: packet being lost
 
+EVENT time: 6965.276367,  type: 0, timerinterrupt   entity: 0
+A: time out. 
+A: resending packet# 0, checksum 67, payload cccccccccccccccccccc
+
+EVENT time: 6966.334961,  type: 2, fromlayer3  entity: 1
+B: received packet# 0, checksum 67, payload cccccccccccccccccccc
+B: sending ACK.
+          TOLAYER3: packet being lost
+
+EVENT time: 6985.276367,  type: 0, timerinterrupt   entity: 0
+A: time out. 
+A: resending packet# 0, checksum 67, payload cccccccccccccccccccc
+
+EVENT time: 6990.550293,  type: 2, fromlayer3  entity: 1
+B: received packet# 0, checksum 67, payload cccccccccccccccccccc
+B: sending ACK.
+          TOLAYER3: packet being lost
+
+EVENT time: 7005.276367,  type: 0, timerinterrupt   entity: 0
+A: time out. 
+A: resending packet# 0, checksum 67, payload cccccccccccccccccccc
+
+EVENT time: 7014.057617,  type: 2, fromlayer3  entity: 1
+B: received packet# 0, checksum 67, payload cccccccccccccccccccc
+B: sending ACK.
+          TOLAYER3: packet being lost
+
+EVENT time: 7025.276367,  type: 0, timerinterrupt   entity: 0
+A: time out. 
+A: resending packet# 0, checksum 67, payload cccccccccccccccccccc
+          TOLAYER3: packet being lost
+
 EVENT time: 7045.276367,  type: 0, timerinterrupt   entity: 0
-A: time out. 
-A: resending packet# 0, checksum 67, payload cccccccccccccccccccc
-
-EVENT time: 7046.334961,  type: 2, fromlayer3  entity: 1
-B: received packet# 0, checksum 67, payload cccccccccccccccccccc
-B: sending ACK.
-          TOLAYER3: packet being lost
-
-EVENT time: 7145.276367,  type: 0, timerinterrupt   entity: 0
-A: time out. 
-A: resending packet# 0, checksum 67, payload cccccccccccccccccccc
-
-EVENT time: 7150.550293,  type: 2, fromlayer3  entity: 1
-B: received packet# 0, checksum 67, payload cccccccccccccccccccc
-B: sending ACK.
-          TOLAYER3: packet being lost
-
-EVENT time: 7245.276367,  type: 0, timerinterrupt   entity: 0
-A: time out. 
-A: resending packet# 0, checksum 67, payload cccccccccccccccccccc
-
-EVENT time: 7254.057617,  type: 2, fromlayer3  entity: 1
-B: received packet# 0, checksum 67, payload cccccccccccccccccccc
-B: sending ACK.
-          TOLAYER3: packet being lost
-
-EVENT time: 7345.276367,  type: 0, timerinterrupt   entity: 0
-A: time out. 
-A: resending packet# 0, checksum 67, payload cccccccccccccccccccc
-          TOLAYER3: packet being lost
-
-EVENT time: 7445.276367,  type: 0, timerinterrupt   entity: 0
 A: time out. 
 A: resending packet# 0, checksum 67, payload cccccccccccccccccccc
           TOLAYER3: packet being corrupted
 
-EVENT time: 7450.095703,  type: 2, fromlayer3  entity: 1
+EVENT time: 7050.095703,  type: 2, fromlayer3  entity: 1
 B: received packet# 0, checksum 67, payload Zccccccccccccccccccc
 B: packet is corrupted.
 B: sending NAK.
 
-EVENT time: 7453.757324,  type: 2, fromlayer3  entity: 0
+EVENT time: 7053.757324,  type: 2, fromlayer3  entity: 0
 A: received NAK for packet# 0
 A: resending packet# 0, checksum 67, payload cccccccccccccccccccc
           TOLAYER3: packet being corrupted
 
-EVENT time: 7462.667969,  type: 2, fromlayer3  entity: 1
+EVENT time: 7062.667969,  type: 2, fromlayer3  entity: 1
 B: received packet# 0, checksum 67, payload Zccccccccccccccccccc
 B: packet is corrupted.
 B: sending NAK.
           TOLAYER3: packet being corrupted
 
-EVENT time: 7468.285645,  type: 2, fromlayer3  entity: 0
+EVENT time: 7068.285645,  type: 2, fromlayer3  entity: 0
 A: ACK is corrupted
 
-EVENT time: 7553.757324,  type: 0, timerinterrupt   entity: 0
+EVENT time: 7073.757324,  type: 0, timerinterrupt   entity: 0
 A: time out. 
 A: resending packet# 0, checksum 67, payload cccccccccccccccccccc
           TOLAYER3: packet being corrupted
 
-EVENT time: 7555.789062,  type: 2, fromlayer3  entity: 1
+EVENT time: 7075.789062,  type: 2, fromlayer3  entity: 1
 B: received packet# 0, checksum 67, payload Zccccccccccccccccccc
 B: packet is corrupted.
 B: sending NAK.
           TOLAYER3: packet being corrupted
 
-EVENT time: 7563.532227,  type: 2, fromlayer3  entity: 0
+EVENT time: 7083.532227,  type: 2, fromlayer3  entity: 0
 A: ACK is corrupted
 
-EVENT time: 7653.757324,  type: 0, timerinterrupt   entity: 0
+EVENT time: 7093.757324,  type: 0, timerinterrupt   entity: 0
 A: time out. 
 A: resending packet# 0, checksum 67, payload cccccccccccccccccccc
 
-EVENT time: 7660.448730,  type: 2, fromlayer3  entity: 1
+EVENT time: 7100.448730,  type: 2, fromlayer3  entity: 1
 B: received packet# 0, checksum 67, payload cccccccccccccccccccc
 B: sending ACK.
           TOLAYER3: packet being corrupted
 
-EVENT time: 7665.921387,  type: 2, fromlayer3  entity: 0
+EVENT time: 7105.921387,  type: 2, fromlayer3  entity: 0
 A: ACK is corrupted
 
-EVENT time: 7753.757324,  type: 0, timerinterrupt   entity: 0
+EVENT time: 7113.757324,  type: 0, timerinterrupt   entity: 0
 A: time out. 
-A: resending packet# 0, checksum 67, payload cccccccccccccccccccc	
+A: resending packet# 0, checksum 67, payload cccccccccccccccccccc     
 
-EVENT time: 7759.144043,  type: 2, fromlayer3  entity: 1
+EVENT time: 7119.144043,  type: 2, fromlayer3  entity: 1
 B: received packet# 0, checksum 67, payload cccccccccccccccccccc
 B: sending ACK.
 
-EVENT time: 7760.848145,  type: 2, fromlayer3  entity: 0
-A: received ACK for packet# 0
+EVENT time: 7120.848145,  type: 2, fromlayer3  entity: 0
+A: received ACK for packet# 0, #ACK received: 2
 
 EVENT time: 8557.933594,  type: 1, fromlayer5  entity: 0
-A: sending packet# 1, checksum 46, payload dddddddddddddddddddd	
+A: sending packet# 1, checksum 46, payload dddddddddddddddddddd  
 
 EVENT time: 8565.891602,  type: 2, fromlayer3  entity: 1
 B: received packet# 1, checksum 46, payload dddddddddddddddddddd
 B: sending ACK.
 
 EVENT time: 8570.284180,  type: 2, fromlayer3  entity: 0
-A: received ACK for packet# 1
+A: received ACK for packet# 1, #ACK received: 3
 
 EVENT time: 8732.501953,  type: 1, fromlayer5  entity: 0
-A: sending packet# 0, checksum 27, payload eeeeeeeeeeeeeeeeeeee	
+A: sending packet# 0, checksum 27, payload eeeeeeeeeeeeeeeeeeee  
 
 EVENT time: 8742.349609,  type: 2, fromlayer3  entity: 1
 B: received packet# 0, checksum 27, payload eeeeeeeeeeeeeeeeeeee
 B: sending ACK.
 
 EVENT time: 8745.094727,  type: 2, fromlayer3  entity: 0
-A: received ACK for packet# 0
+A: received ACK for packet# 0, #ACK received: 4
 
 EVENT time: 9638.583008,  type: 1, fromlayer5  entity: 0
-A: sending packet# 1, checksum 6, payload ffffffffffffffffffff	
+A: sending packet# 1, checksum 6, payload ffffffffffffffffffff   
 
 EVENT time: 9645.198242,  type: 2, fromlayer3  entity: 1
 B: received packet# 1, checksum 6, payload ffffffffffffffffffff
 B: sending ACK.
 
 EVENT time: 9648.504883,  type: 2, fromlayer3  entity: 0
-A: received ACK for packet# 1
+A: received ACK for packet# 1, #ACK received: 5
 
 EVENT time: 11900.959961,  type: 1, fromlayer5  entity: 0
-A: sending packet# 0, checksum 243, payload gggggggggggggggggggg	
+A: sending packet# 0, checksum 243, payload gggggggggggggggggggg 
           TOLAYER3: packet being corrupted
 
 EVENT time: 11902.473633,  type: 2, fromlayer3  entity: 1
@@ -265,66 +267,66 @@ B: sending NAK.
 EVENT time: 11903.571289,  type: 2, fromlayer3  entity: 0
 A: ACK is corrupted
 
-EVENT time: 12000.959961,  type: 0, timerinterrupt   entity: 0
+EVENT time: 11920.959961,  type: 0, timerinterrupt   entity: 0
 A: time out. 
 A: resending packet# 0, checksum 243, payload gggggggggggggggggggg
 
 
-EVENT time: 12003.109375,  type: 2, fromlayer3  entity: 1
+EVENT time: 11923.109375,  type: 2, fromlayer3  entity: 1
 B: received packet# 0, checksum 243, payload gggggggggggggggggggg
 B: sending ACK.
           TOLAYER3: packet being corrupted
 
-EVENT time: 12004.693359,  type: 2, fromlayer3  entity: 0
+EVENT time: 11924.693359,  type: 2, fromlayer3  entity: 0
 A: ACK is corrupted
 
-EVENT time: 12100.959961,  type: 0, timerinterrupt   entity: 0
+EVENT time: 11940.959961,  type: 0, timerinterrupt   entity: 0
 A: time out. 
 A: resending packet# 0, checksum 243, payload gggggggggggggggggggg
 
 
-EVENT time: 12106.207031,  type: 2, fromlayer3  entity: 1
+EVENT time: 11946.207031,  type: 2, fromlayer3  entity: 1
 B: received packet# 0, checksum 243, payload gggggggggggggggggggg
 B: sending ACK.
           TOLAYER3: packet being corrupted
 
-EVENT time: 12115.150391,  type: 2, fromlayer3  entity: 0
+EVENT time: 11955.150391,  type: 2, fromlayer3  entity: 0
 A: ACK is corrupted
 
-EVENT time: 12200.959961,  type: 0, timerinterrupt   entity: 0
+EVENT time: 11960.959961,  type: 0, timerinterrupt   entity: 0
 A: time out. 
 A: resending packet# 0, checksum 243, payload gggggggggggggggggggg
           TOLAYER3: packet being corrupted
 
-EVENT time: 12210.282227,  type: 2, fromlayer3  entity: 1
+EVENT time: 11970.282227,  type: 2, fromlayer3  entity: 1
 B: received packet# 0, checksum 243, payload Zggggggggggggggggggg
 B: packet is corrupted.
 B: sending NAK.
           TOLAYER3: packet being corrupted
 
-EVENT time: 12213.278320,  type: 2, fromlayer3  entity: 0
+EVENT time: 11973.278320,  type: 2, fromlayer3  entity: 0
 A: ACK is corrupted
 
-EVENT time: 12300.959961,  type: 0, timerinterrupt   entity: 0
+EVENT time: 11980.959961,  type: 0, timerinterrupt   entity: 0
 A: time out. 
 A: resending packet# 0, checksum 243, payload gggggggggggggggggggg
           TOLAYER3: packet being corrupted
 
-EVENT time: 12302.109375,  type: 2, fromlayer3  entity: 1
+EVENT time: 11982.109375,  type: 2, fromlayer3  entity: 1
 B: received packet# 0, checksum 243, payload gggggggggggggggggggg
 B: packet is corrupted.
 B: sending NAK.
 
-EVENT time: 12309.677734,  type: 2, fromlayer3  entity: 0
+EVENT time: 11989.677734,  type: 2, fromlayer3  entity: 0
 A: received NAK for packet# 0
 A: resending packet# 0, checksum 243, payload gggggggggggggggggggg
 
-EVENT time: 12313.851562,  type: 2, fromlayer3  entity: 1
+EVENT time: 11993.851562,  type: 2, fromlayer3  entity: 1
 B: received packet# 0, checksum 243, payload gggggggggggggggggggg
 B: sending ACK.
 
-EVENT time: 12321.453125,  type: 2, fromlayer3  entity: 0
-A: received ACK for packet# 0
+EVENT time: 12001.453125,  type: 2, fromlayer3  entity: 0
+A: received ACK for packet# 0, #ACK received: 6
 
 EVENT time: 13654.051758,  type: 1, fromlayer5  entity: 0
 A: sending packet# 1, checksum 222, payload hhhhhhhhhhhhhhhhhhhh
@@ -334,7 +336,7 @@ B: received packet# 1, checksum 222, payload hhhhhhhhhhhhhhhhhhhh
 B: sending ACK.
 
 EVENT time: 13668.690430,  type: 2, fromlayer3  entity: 0
-A: received ACK for packet# 1
+A: received ACK for packet# 1, #ACK received: 7
 
 EVENT time: 15411.281250,  type: 1, fromlayer5  entity: 0
 A: sending packet# 0, checksum 203, payload iiiiiiiiiiiiiiiiiiii
@@ -344,24 +346,86 @@ B: received packet# 0, checksum 203, payload iiiiiiiiiiiiiiiiiiii
 B: sending ACK.
           TOLAYER3: packet being lost
 
-EVENT time: 15511.281250,  type: 0, timerinterrupt   entity: 0
+EVENT time: 15431.281250,  type: 0, timerinterrupt   entity: 0
 A: time out. 
 A: resending packet# 0, checksum 203, payload iiiiiiiiiiiiiiiiiiii
 
-EVENT time: 15518.112305,  type: 2, fromlayer3  entity: 1
+EVENT time: 15438.112305,  type: 2, fromlayer3  entity: 1
 B: received packet# 0, checksum 203, payload iiiiiiiiiiiiiiiiiiii
 B: sending ACK.
 
-EVENT time: 15527.312500,  type: 2, fromlayer3  entity: 0
-A: received ACK for packet# 0
+EVENT time: 15447.312500,  type: 2, fromlayer3  entity: 0
+A: received ACK for packet# 0, #ACK received: 8
 
 EVENT time: 16185.201172,  type: 1, fromlayer5  entity: 0
 A: sending packet# 1, checksum 182, payload jjjjjjjjjjjjjjjjjjjj
 
 EVENT time: 16191.740234,  type: 2, fromlayer3  entity: 1
- Simulator terminated at time 16191.740234
- after sending 10 msgs from layer5
+B: received packet# 1, checksum 182, payload jjjjjjjjjjjjjjjjjjjj
+B: sending ACK.
+
+EVENT time: 16195.847656,  type: 2, fromlayer3  entity: 0
+A: received ACK for packet# 1, #ACK received: 9
+
+EVENT time: 18080.335938,  type: 1, fromlayer5  entity: 0
+A: sending packet# 0, checksum 163, payload kkkkkkkkkkkkkkkkkkkk
+          TOLAYER3: packet being corrupted
+
+EVENT time: 18083.115234,  type: 2, fromlayer3  entity: 1
+B: received packet# 0, checksum 163, payload Zkkkkkkkkkkkkkkkkkkk
+B: packet is corrupted.
+B: sending NAK.
+
+EVENT time: 18090.875000,  type: 2, fromlayer3  entity: 0
+A: received NAK for packet# 0
+A: resending packet# 0, checksum 163, payload kkkkkkkkkkkkkkkkkkkk
+          TOLAYER3: packet being lost
+
+EVENT time: 18110.875000,  type: 0, timerinterrupt   entity: 0
+A: time out. 
+A: resending packet# 0, checksum 163, payload kkkkkkkkkkkkkkkkkkkk
+          TOLAYER3: packet being corrupted
+
+EVENT time: 18118.267578,  type: 2, fromlayer3  entity: 1
+B: received packet# 0, checksum 163, payload Zkkkkkkkkkkkkkkkkkkk
+B: packet is corrupted.
+B: sending NAK.
+          TOLAYER3: packet being corrupted
+
+EVENT time: 18120.685547,  type: 2, fromlayer3  entity: 0
+A: ACK is corrupted
+
+EVENT time: 18130.875000,  type: 0, timerinterrupt   entity: 0
+A: time out. 
+A: resending packet# 0, checksum 163, payload kkkkkkkkkkkkkkkkkkkk
+          TOLAYER3: packet being corrupted
+
+EVENT time: 18139.630859,  type: 2, fromlayer3  entity: 1
+B: received packet# 0, checksum 163, payload Zkkkkkkkkkkkkkkkkkkk
+B: packet is corrupted.
+B: sending NAK.
+
+EVENT time: 18142.144531,  type: 2, fromlayer3  entity: 0
+A: received NAK for packet# 0
+A: resending packet# 0, checksum 163, payload kkkkkkkkkkkkkkkkkkkk
+
+EVENT time: 18144.007812,  type: 2, fromlayer3  entity: 1
+B: received packet# 0, checksum 163, payload kkkkkkkkkkkkkkkkkkkk
+B: sending ACK.
+
+EVENT time: 18148.132812,  type: 2, fromlayer3  entity: 0
+A: received ACK for packet# 0, #ACK received: 10
+\end{Verbatim}
+\begin{verbatim}
+....
+....
+....
+
+EVENT time: 23096.050781,  type: 1, fromlayer5  entity: 0
+A: sending packet# 0, checksum 83, payload oooooooooooooooooooo
+
+EVENT time: 23104.203125,  type: 2, fromlayer3  entity: 1
+ Simulator terminated at time 23104.203125
+ after sending 15 msgs from layer5
 \end{verbatim}
-
-
 \end{document}

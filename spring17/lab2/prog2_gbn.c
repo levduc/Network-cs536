@@ -123,7 +123,7 @@ void A_input(packet)
 {
   /*receive something from layer 3*/
   /*check if ACK is corrupted*/
-  printf("==============================A-Input===================================\n");
+  printf("==============================A-Input=================================\n");
   if(csum(packet))
   {
     printf("A: received an corrupted ACK \n");
@@ -152,7 +152,7 @@ void A_input(packet)
 /* called when A's timer goes off */
 void A_timerinterrupt()
 {
-  printf("==============================A-Timeout=================================\n");
+  printf("==============================A-Timeout===============================\n");
   printf("A: time out. \n");
   printf("A: waits for ACK# %d\n",snd_base );
   /*Resend everything up to the sndNextSeq*/
