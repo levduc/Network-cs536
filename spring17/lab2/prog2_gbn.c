@@ -44,7 +44,7 @@ void starttimer(int AorB, float increment);
 void tolayer3(int AorB, struct pkt packet);
 /********* STUDENTS WRITE THE NEXT SEVEN ROUTINES *********/
 //round trip time
-#define RTT 10.0 //float
+#define RTT 20.0 //float
 //negative ack
 // #define NEGATIVE_ACK -1
 #define SND_WINDOWSIZE 50
@@ -171,11 +171,22 @@ void A_timerinterrupt()
   starttimer(0,RTT);
   int i;
   int id;
-  for(i = snd_base; i < sndNextSeq-1; i++)
+  for(i = snd_base; i < sndNextSeq; i++)
   {
     id = i%SND_WINDOWSIZE;
-    printf("A: resending packet# %d, checksum %d, payload %s\n", 
-    packetToSend[id].seqnum, packetToSend[id].checksum, packetToSend[id].payload);
+    
+    if (i == snd_base)
+    {
+      /* code */
+      printf("A: resends from packet# %d \n", packetToSend[id].seqnum);
+    }
+
+    if (i == sndNextSeq-1)
+    {
+      /* code */
+      printf("A: to packet# %d\n", packetToSend[id].seqnum);
+    }
+
     tolayer3(0,packetToSend[id]);
   }
   printf("======================================================================\n");
@@ -202,7 +213,6 @@ void B_input(packet)
   if(csum(packet))
   {
     printf("B: received a corrupted packet.\n");  
-    printf("B: expect #%d received #%d\n",rcvdNextSeq,packet.seqnum);
     printf("B: discard that packet.\n"); 
     /*send a cumulative ACK*/
     struct pkt ackPacket;

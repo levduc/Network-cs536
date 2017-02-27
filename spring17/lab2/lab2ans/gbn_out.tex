@@ -40,11 +40,2186 @@ CS536}
 \normalsize
 
 \begin{Verbatim}[frame=single, rulecolor=\color{green}, label=Input] 
+-----  Stop and Wait Network Simulator Version 1.1 -------- 
+
+Enter the number of messages to simulate: 70
+Enter  packet loss probability [enter 0.0 for no loss]:.2
+Enter packet corruption probability [0.0 for no corruption]:.2
+Enter average time between messages from sender's layer5 [ > 0.0]:10.0
+Enter TRACE:2
 \end{Verbatim}
-\begin{Verbatim}[frame=single, rulecolor=\color{red}, label=Handle Corruption] 
+\begin{verbatim}
+
+EVENT time: 18.705740,  type: 1, fromlayer5  entity: 0
+A: sending packet# 0, checksum 107, payload aaaaaaaaaaaaaaaaaaaa
+EVENT time: 24.170835,  type: 2, fromlayer3  entity: 1
+\end{verbatim}
+\begin{Verbatim}[frame=single, rulecolor=\color{blue}, label=Handle corruption] 
+===========================B-Input====================================
+B: received packet# 0, checksum 107, payload aaaaaaaaaaaaaaaaaaaa
+B: send ACK#0.
+          TOLAYER3: packet being corrupted
+======================================================================
+
+EVENT time: 29.402451,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received an corrupted ACK 
+A: discard ACK
+======================================================================
 \end{Verbatim}
-\begin{Verbatim}[frame=single, rulecolor=\color{blue}, label=Handle Loss] 
+\begin{verbatim}
+EVENT time: 35.124840,  type: 1, fromlayer5  entity: 0
+A: sending packet# 1, checksum 86, payload bbbbbbbbbbbbbbbbbbbb
+          TOLAYER3: packet being lost
+
+EVENT time: 37.680447,  type: 1, fromlayer5  entity: 0
+A: sending packet# 2, checksum 65, payload cccccccccccccccccccc
+          TOLAYER3: packet being corrupted
+
+EVENT time: 38.705742,  type: 0, timerinterrupt   entity: 0	
+\end{verbatim}
+
+\begin{Verbatim}[frame=single, rulecolor=\color{red}, label=Handle loss/timeout] 
+==============================A-Timeout===============================
+A: time out. 
+A: is waiting for ACK# 0, last packet sent: #2
+A: resends from packet# 0 
+          TOLAYER3: packet being lost
+A: to packet# 2
+======================================================================
 \end{Verbatim}
+\begin{verbatim}
+EVENT time: 42.147713,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received a corrupted packet.
+B: discard that packet.
+B: resend ACK#0.
+          TOLAYER3: packet being corrupted
+======================================================================
+
+EVENT time: 46.394402,  type: 1, fromlayer5  entity: 0
+A: sending packet# 3, checksum 44, payload dddddddddddddddddddd
+          TOLAYER3: packet being lost
+
+EVENT time: 51.166378,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received an corrupted ACK 
+A: discard ACK
+======================================================================
+
+EVENT time: 51.576138,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received packet# 1, checksum 86, payload bbbbbbbbbbbbbbbbbbbb
+B: send ACK#1.
+          TOLAYER3: packet being corrupted
+======================================================================
+
+EVENT time: 53.202408,  type: 1, fromlayer5  entity: 0
+A: sending packet# 4, checksum 23, payload eeeeeeeeeeeeeeeeeeee
+
+EVENT time: 57.152939,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received an corrupted ACK 
+A: discard ACK
+======================================================================
+
+EVENT time: 58.705742,  type: 0, timerinterrupt   entity: 0
+==============================A-Timeout===============================
+A: time out. 
+A: is waiting for ACK# 0, last packet sent: #4
+A: resends from packet# 0 
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+A: to packet# 4
+======================================================================
+
+EVENT time: 59.039051,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received packet# 2, checksum 65, payload cccccccccccccccccccc
+B: send ACK#2.
+          TOLAYER3: packet being corrupted
+======================================================================
+\end{verbatim}
+\begin{Verbatim}[frame=single, rulecolor=\color{cyan}, label=Handle out-of-order/duplicate] 
+EVENT time: 63.197636,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #3 received #4
+B: discard out-of-order packet.
+B: resend ACK#2.
+          TOLAYER3: packet being corrupted
+======================================================================
+\end{Verbatim}
+\begin{verbatim}
+EVENT time: 64.617668,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received an corrupted ACK 
+A: discard ACK
+======================================================================
+
+EVENT time: 69.035599,  type: 2, fromlayer3  entity: 1
+\end{verbatim}
+\begin{Verbatim}[frame=single, rulecolor=\color{blue}, label=Handle corruption] 
+===========================B-Input====================================
+B: received a corrupted packet.
+B: discard that packet.
+B: resend ACK#2.
+======================================================================
+\end{Verbatim}
+\begin{verbatim}
+EVENT time: 70.867607,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received an corrupted ACK 
+A: discard ACK
+======================================================================
+
+EVENT time: 70.910789,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received duplicate packet.
+B: expect #3 received #2
+B: discard that duplicate packet.
+B: resend ACK#2.
+======================================================================
+
+EVENT time: 72.217178,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #3 received #4
+B: discard out-of-order packet.
+B: resend ACK#2.
+======================================================================
+
+EVENT time: 72.839478,  type: 1, fromlayer5  entity: 0
+A: sending packet# 5, checksum 2, payload ffffffffffffffffffff
+
+EVENT time: 73.456062,  type: 1, fromlayer5  entity: 0
+A: sending packet# 6, checksum 237, payload gggggggggggggggggggg
+          TOLAYER3: packet being lost
+
+EVENT time: 75.686890,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received cumulative ACK for packet# 2, correctly sent: 0
+======================================================================
+
+EVENT time: 76.283989,  type: 1, fromlayer5  entity: 0
+A: sending packet# 7, checksum 216, payload hhhhhhhhhhhhhhhhhhhh
+          TOLAYER3: packet being lost
+
+EVENT time: 78.458145,  type: 1, fromlayer5  entity: 0
+A: sending packet# 8, checksum 195, payload iiiiiiiiiiiiiiiiiiii
+          TOLAYER3: packet being lost
+
+EVENT time: 82.230896,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #3 received #5
+B: discard out-of-order packet.
+B: resend ACK#2.
+          TOLAYER3: packet being lost
+======================================================================
+
+EVENT time: 82.674294,  type: 1, fromlayer5  entity: 0
+A: sending packet# 9, checksum 174, payload jjjjjjjjjjjjjjjjjjjj
+          TOLAYER3: packet being lost
+
+EVENT time: 85.082970,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 3, received #2
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 94.315735,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 3, received #2
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 95.686890,  type: 0, timerinterrupt   entity: 0
+==============================A-Timeout===============================
+A: time out. 
+A: is waiting for ACK# 3, last packet sent: #9
+A: resends from packet# 3 
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+A: to packet# 9
+======================================================================
+
+EVENT time: 97.658607,  type: 1, fromlayer5  entity: 0
+A: sending packet# 10, checksum 153, payload kkkkkkkkkkkkkkkkkkkk
+
+EVENT time: 98.703934,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received packet# 3, checksum 44, payload dddddddddddddddddddd
+B: send ACK#3.
+======================================================================
+
+EVENT time: 103.457993,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received packet# 4, checksum 23, payload eeeeeeeeeeeeeeeeeeee
+B: send ACK#4.
+======================================================================
+
+EVENT time: 108.551910,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received cumulative ACK for packet# 3, correctly sent: 3
+======================================================================
+
+EVENT time: 109.442093,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #5 received #6
+B: discard out-of-order packet.
+B: resend ACK#4.
+======================================================================
+
+EVENT time: 111.297150,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received cumulative ACK for packet# 4, correctly sent: 4
+======================================================================
+
+EVENT time: 113.437668,  type: 1, fromlayer5  entity: 0
+A: sending packet# 11, checksum 132, payload llllllllllllllllllll
+          TOLAYER3: packet being lost
+
+EVENT time: 117.304031,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received a corrupted packet.
+B: discard that packet.
+B: resend ACK#4.
+======================================================================
+
+EVENT time: 119.658302,  type: 1, fromlayer5  entity: 0
+A: sending packet# 12, checksum 111, payload mmmmmmmmmmmmmmmmmmmm
+          TOLAYER3: packet being lost
+
+EVENT time: 120.785332,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 5, received #4
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 125.261894,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #5 received #9
+B: discard out-of-order packet.
+B: resend ACK#4.
+          TOLAYER3: packet being lost
+======================================================================
+
+EVENT time: 129.817062,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 5, received #4
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 131.297150,  type: 0, timerinterrupt   entity: 0
+==============================A-Timeout===============================
+A: time out. 
+A: is waiting for ACK# 5, last packet sent: #12
+A: resends from packet# 5 
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being corrupted
+A: to packet# 12
+          TOLAYER3: packet being lost
+======================================================================
+
+EVENT time: 134.087799,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #5 received #10
+B: discard out-of-order packet.
+B: resend ACK#4.
+          TOLAYER3: packet being corrupted
+======================================================================
+
+EVENT time: 134.724152,  type: 1, fromlayer5  entity: 0
+A: sending packet# 13, checksum 90, payload nnnnnnnnnnnnnnnnnnnn
+
+EVENT time: 135.236832,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received an corrupted ACK 
+A: discard ACK
+======================================================================
+
+EVENT time: 139.988754,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received a corrupted packet.
+B: discard that packet.
+B: resend ACK#4.
+======================================================================
+
+EVENT time: 141.196960,  type: 1, fromlayer5  entity: 0
+A: sending packet# 14, checksum 69, payload oooooooooooooooooooo
+
+EVENT time: 147.934570,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 5, received #4
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 148.811874,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received a corrupted packet.
+B: discard that packet.
+B: resend ACK#4.
+======================================================================
+
+EVENT time: 150.395737,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received a corrupted packet.
+B: discard that packet.
+B: resend ACK#4.
+======================================================================
+
+EVENT time: 151.297150,  type: 0, timerinterrupt   entity: 0
+==============================A-Timeout===============================
+A: time out. 
+A: is waiting for ACK# 5, last packet sent: #14
+A: resends from packet# 5 
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being corrupted
+A: to packet# 14
+======================================================================
+
+EVENT time: 154.493332,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 5, received #4
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 155.642868,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #5 received #8
+B: discard out-of-order packet.
+B: resend ACK#4.
+======================================================================
+
+EVENT time: 155.868103,  type: 1, fromlayer5  entity: 0
+A: sending packet# 15, checksum 48, payload pppppppppppppppppppp
+
+EVENT time: 159.432541,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 5, received #4
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 161.850906,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 5, received #4
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 164.586609,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received a corrupted packet.
+B: discard that packet.
+B: resend ACK#4.
+          TOLAYER3: packet being corrupted
+======================================================================
+
+EVENT time: 168.051651,  type: 1, fromlayer5  entity: 0
+A: sending packet# 16, checksum 27, payload qqqqqqqqqqqqqqqqqqqq
+          TOLAYER3: packet being lost
+
+EVENT time: 171.297150,  type: 0, timerinterrupt   entity: 0
+==============================A-Timeout===============================
+A: time out. 
+A: is waiting for ACK# 5, last packet sent: #16
+A: resends from packet# 5 
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+A: to packet# 16
+          TOLAYER3: packet being corrupted
+======================================================================
+
+EVENT time: 171.772552,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received an corrupted ACK 
+A: discard ACK
+======================================================================
+
+EVENT time: 173.909058,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received a corrupted packet.
+B: discard that packet.
+B: resend ACK#4.
+          TOLAYER3: packet being lost
+======================================================================
+
+EVENT time: 174.432419,  type: 1, fromlayer5  entity: 0
+A: sending packet# 17, checksum 6, payload rrrrrrrrrrrrrrrrrrrr
+
+EVENT time: 176.905441,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #5 received #11
+B: discard out-of-order packet.
+B: resend ACK#4.
+          TOLAYER3: packet being lost
+======================================================================
+
+EVENT time: 185.905853,  type: 1, fromlayer5  entity: 0
+A: sending packet# 18, checksum 241, payload ssssssssssssssssssss
+          TOLAYER3: packet being lost
+
+EVENT time: 186.028137,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #5 received #13
+B: discard out-of-order packet.
+B: resend ACK#4.
+          TOLAYER3: packet being corrupted
+======================================================================
+
+EVENT time: 191.297150,  type: 0, timerinterrupt   entity: 0
+==============================A-Timeout===============================
+A: time out. 
+A: is waiting for ACK# 5, last packet sent: #18
+A: resends from packet# 5 
+          TOLAYER3: packet being lost
+A: to packet# 18
+======================================================================
+
+EVENT time: 192.299820,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #5 received #14
+B: discard out-of-order packet.
+B: resend ACK#4.
+          TOLAYER3: packet being lost
+======================================================================
+
+EVENT time: 193.202393,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received an corrupted ACK 
+A: discard ACK
+======================================================================
+
+EVENT time: 196.484802,  type: 1, fromlayer5  entity: 0
+A: sending packet# 19, checksum 220, payload tttttttttttttttttttt
+
+EVENT time: 199.068268,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received a corrupted packet.
+B: discard that packet.
+B: resend ACK#4.
+======================================================================
+
+EVENT time: 202.683258,  type: 1, fromlayer5  entity: 0
+A: sending packet# 20, checksum 199, payload uuuuuuuuuuuuuuuuuuuu
+          TOLAYER3: packet being lost
+
+EVENT time: 202.786484,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #5 received #7
+B: discard out-of-order packet.
+B: resend ACK#4.
+======================================================================
+
+EVENT time: 203.700790,  type: 1, fromlayer5  entity: 0
+A: sending packet# 21, checksum 178, payload vvvvvvvvvvvvvvvvvvvv
+
+EVENT time: 204.418198,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 5, received #4
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 207.658157,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #5 received #8
+B: discard out-of-order packet.
+B: resend ACK#4.
+======================================================================
+
+EVENT time: 209.190842,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 5, received #4
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 210.237701,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 5, received #4
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 211.297150,  type: 0, timerinterrupt   entity: 0
+==============================A-Timeout===============================
+A: time out. 
+A: is waiting for ACK# 5, last packet sent: #21
+A: resends from packet# 5 
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+A: to packet# 21
+          TOLAYER3: packet being corrupted
+======================================================================
+
+EVENT time: 214.197388,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #5 received #9
+B: discard out-of-order packet.
+B: resend ACK#4.
+======================================================================
+
+EVENT time: 216.203873,  type: 1, fromlayer5  entity: 0
+A: sending packet# 22, checksum 157, payload wwwwwwwwwwwwwwwwwwww
+
+EVENT time: 218.305130,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #5 received #10
+B: discard out-of-order packet.
+B: resend ACK#4.
+======================================================================
+
+EVENT time: 221.324677,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 5, received #4
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 225.586578,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received a corrupted packet.
+B: discard that packet.
+B: resend ACK#4.
+======================================================================
+
+EVENT time: 226.468292,  type: 1, fromlayer5  entity: 0
+A: sending packet# 23, checksum 136, payload xxxxxxxxxxxxxxxxxxxx
+
+EVENT time: 226.795517,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 5, received #4
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 229.870331,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 5, received #4
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 231.297150,  type: 0, timerinterrupt   entity: 0
+==============================A-Timeout===============================
+A: time out. 
+A: is waiting for ACK# 5, last packet sent: #23
+A: resends from packet# 5 
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+A: to packet# 23
+======================================================================
+
+EVENT time: 232.091965,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #5 received #12
+B: discard out-of-order packet.
+B: resend ACK#4.
+======================================================================
+
+EVENT time: 233.497589,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #5 received #13
+B: discard out-of-order packet.
+B: resend ACK#4.
+======================================================================
+
+EVENT time: 234.641922,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #5 received #14
+B: discard out-of-order packet.
+B: resend ACK#4.
+======================================================================
+
+EVENT time: 236.514069,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 5, received #4
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 242.109650,  type: 1, fromlayer5  entity: 0
+A: sending packet# 24, checksum 115, payload yyyyyyyyyyyyyyyyyyyy
+
+EVENT time: 243.239105,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 5, received #4
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 243.398117,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #5 received #15
+B: discard out-of-order packet.
+B: resend ACK#4.
+======================================================================
+
+EVENT time: 251.297150,  type: 0, timerinterrupt   entity: 0
+==============================A-Timeout===============================
+A: time out. 
+A: is waiting for ACK# 5, last packet sent: #24
+A: resends from packet# 5 
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+A: to packet# 24
+          TOLAYER3: packet being lost
+======================================================================
+
+EVENT time: 251.484589,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 5, received #4
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 251.979538,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received packet# 5, checksum 2, payload ffffffffffffffffffff
+B: send ACK#5.
+          TOLAYER3: packet being corrupted
+======================================================================
+
+EVENT time: 255.393723,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received packet# 6, checksum 237, payload gggggggggggggggggggg
+B: send ACK#6.
+          TOLAYER3: packet being lost
+======================================================================
+
+EVENT time: 258.114532,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 5, received #4
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 260.250000,  type: 1, fromlayer5  entity: 0
+A: sending packet# 25, checksum 94, payload zzzzzzzzzzzzzzzzzzzz
+
+EVENT time: 260.586517,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received a corrupted packet.
+B: discard that packet.
+B: resend ACK#6.
+======================================================================
+
+EVENT time: 265.017517,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received a corrupted packet.
+B: discard that packet.
+B: resend ACK#6.
+          TOLAYER3: packet being lost
+======================================================================
+
+EVENT time: 266.555023,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #7 received #12
+B: discard out-of-order packet.
+B: resend ACK#6.
+          TOLAYER3: packet being lost
+======================================================================
+
+EVENT time: 267.631897,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received an corrupted ACK 
+A: discard ACK
+======================================================================
+
+EVENT time: 270.963409,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received cumulative ACK for packet# 6, correctly sent: 5
+======================================================================
+
+EVENT time: 272.236328,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received a corrupted packet.
+B: discard that packet.
+B: resend ACK#6.
+======================================================================
+
+EVENT time: 273.601929,  type: 1, fromlayer5  entity: 0
+A: sending packet# 26, checksum 81, payload aaaaaaaaaaaaaaaaaaaa
+
+EVENT time: 274.083527,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received a corrupted packet.
+B: discard that packet.
+B: resend ACK#6.
+======================================================================
+
+EVENT time: 276.805389,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 7, received #6
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 279.918610,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #7 received #17
+B: discard out-of-order packet.
+B: resend ACK#6.
+          TOLAYER3: packet being corrupted
+======================================================================
+
+EVENT time: 280.093292,  type: 1, fromlayer5  entity: 0
+A: sending packet# 27, checksum 60, payload bbbbbbbbbbbbbbbbbbbb
+
+EVENT time: 282.499420,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 7, received #6
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 284.676575,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received an corrupted ACK 
+A: discard ACK
+======================================================================
+
+EVENT time: 285.714142,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received duplicate packet.
+B: expect #7 received #5
+B: discard that duplicate packet.
+B: resend ACK#6.
+======================================================================
+
+EVENT time: 288.496277,  type: 1, fromlayer5  entity: 0
+A: sending packet# 28, checksum 39, payload cccccccccccccccccccc
+          TOLAYER3: packet being lost
+
+EVENT time: 290.963409,  type: 0, timerinterrupt   entity: 0
+==============================A-Timeout===============================
+A: time out. 
+A: is waiting for ACK# 7, last packet sent: #28
+A: resends from packet# 7 
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being corrupted
+A: to packet# 28
+======================================================================
+
+EVENT time: 291.128784,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 7, received #6
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 292.333038,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received duplicate packet.
+B: expect #7 received #6
+B: discard that duplicate packet.
+B: resend ACK#6.
+======================================================================
+
+EVENT time: 296.842743,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 7, received #6
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 299.232178,  type: 1, fromlayer5  entity: 0
+A: sending packet# 29, checksum 18, payload dddddddddddddddddddd
+          TOLAYER3: packet being lost
+
+EVENT time: 299.489441,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received packet# 7, checksum 216, payload hhhhhhhhhhhhhhhhhhhh
+B: send ACK#7.
+======================================================================
+
+EVENT time: 303.665955,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received packet# 8, checksum 195, payload iiiiiiiiiiiiiiiiiiii
+B: send ACK#8.
+======================================================================
+
+EVENT time: 307.175995,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received packet# 9, checksum 174, payload jjjjjjjjjjjjjjjjjjjj
+B: send ACK#9.
+======================================================================
+
+EVENT time: 308.152374,  type: 1, fromlayer5  entity: 0
+A: sending packet# 30, checksum 253, payload eeeeeeeeeeeeeeeeeeee
+
+EVENT time: 309.068390,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received cumulative ACK for packet# 7, correctly sent: 7
+======================================================================
+
+EVENT time: 311.533234,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received packet# 10, checksum 153, payload kkkkkkkkkkkkkkkkkkkk
+B: send ACK#10.
+======================================================================
+
+EVENT time: 312.557526,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received cumulative ACK for packet# 8, correctly sent: 8
+======================================================================
+
+EVENT time: 317.600586,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received packet# 11, checksum 132, payload llllllllllllllllllll
+B: send ACK#11.
+======================================================================
+
+EVENT time: 319.503021,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received packet# 12, checksum 111, payload mmmmmmmmmmmmmmmmmmmm
+B: send ACK#12.
+          TOLAYER3: packet being corrupted
+======================================================================
+
+EVENT time: 322.387817,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received cumulative ACK for packet# 9, correctly sent: 9
+======================================================================
+
+EVENT time: 325.000824,  type: 1, fromlayer5  entity: 0
+A: sending packet# 31, checksum 232, payload ffffffffffffffffffff
+          TOLAYER3: packet being lost
+
+EVENT time: 326.165985,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received packet# 13, checksum 90, payload nnnnnnnnnnnnnnnnnnnn
+B: send ACK#13.
+          TOLAYER3: packet being lost
+======================================================================
+
+EVENT time: 328.207947,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #14 received #15
+B: discard out-of-order packet.
+B: resend ACK#13.
+======================================================================
+
+EVENT time: 329.123627,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received cumulative ACK for packet# 10, correctly sent: 10
+======================================================================
+
+EVENT time: 333.618134,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received cumulative ACK for packet# 11, correctly sent: 11
+======================================================================
+
+EVENT time: 335.045441,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #14 received #16
+B: discard out-of-order packet.
+B: resend ACK#13.
+          TOLAYER3: packet being corrupted
+======================================================================
+
+EVENT time: 338.501831,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #14 received #17
+B: discard out-of-order packet.
+B: resend ACK#13.
+======================================================================
+
+EVENT time: 342.772797,  type: 1, fromlayer5  entity: 0
+A: sending packet# 32, checksum 211, payload gggggggggggggggggggg
+
+EVENT time: 342.941315,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received an corrupted ACK 
+A: discard ACK
+======================================================================
+
+EVENT time: 347.931641,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received cumulative ACK for packet# 13, correctly sent: 12
+======================================================================
+
+EVENT time: 348.114624,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #14 received #18
+B: discard out-of-order packet.
+B: resend ACK#13.
+          TOLAYER3: packet being corrupted
+======================================================================
+
+EVENT time: 353.424194,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received an corrupted ACK 
+A: discard ACK
+======================================================================
+
+EVENT time: 357.851532,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #14 received #19
+B: discard out-of-order packet.
+B: resend ACK#13.
+          TOLAYER3: packet being corrupted
+======================================================================
+
+EVENT time: 361.929260,  type: 1, fromlayer5  entity: 0
+A: sending packet# 33, checksum 190, payload hhhhhhhhhhhhhhhhhhhh
+          TOLAYER3: packet being corrupted
+
+EVENT time: 363.337433,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 14, received #13
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 365.345184,  type: 1, fromlayer5  entity: 0
+A: sending packet# 34, checksum 169, payload iiiiiiiiiiiiiiiiiiii
+
+EVENT time: 366.991577,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #14 received #21
+B: discard out-of-order packet.
+B: resend ACK#13.
+======================================================================
+
+EVENT time: 367.931641,  type: 0, timerinterrupt   entity: 0
+==============================A-Timeout===============================
+A: time out. 
+A: is waiting for ACK# 14, last packet sent: #34
+A: resends from packet# 14 
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being corrupted
+A: to packet# 34
+          TOLAYER3: packet being corrupted
+======================================================================
+
+EVENT time: 368.246094,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received an corrupted ACK 
+A: discard ACK
+======================================================================
+
+EVENT time: 374.963867,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received duplicate packet.
+B: expect #14 received #5
+B: discard that duplicate packet.
+B: resend ACK#13.
+          TOLAYER3: packet being lost
+======================================================================
+
+EVENT time: 376.288757,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received an corrupted ACK 
+A: discard ACK
+======================================================================
+
+EVENT time: 377.423889,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received duplicate packet.
+B: expect #14 received #7
+B: discard that duplicate packet.
+B: resend ACK#13.
+======================================================================
+
+EVENT time: 379.847015,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 14, received #13
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 382.058838,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 14, received #13
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 382.991028,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received duplicate packet.
+B: expect #14 received #8
+B: discard that duplicate packet.
+B: resend ACK#13.
+          TOLAYER3: packet being corrupted
+======================================================================
+
+EVENT time: 383.138428,  type: 1, fromlayer5  entity: 0
+A: sending packet# 35, checksum 148, payload jjjjjjjjjjjjjjjjjjjj
+
+EVENT time: 387.931641,  type: 0, timerinterrupt   entity: 0
+==============================A-Timeout===============================
+A: time out. 
+A: is waiting for ACK# 14, last packet sent: #35
+A: resends from packet# 14 
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+A: to packet# 35
+======================================================================
+
+EVENT time: 388.694672,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received an corrupted ACK 
+A: discard ACK
+======================================================================
+
+EVENT time: 389.942780,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received duplicate packet.
+B: expect #14 received #9
+B: discard that duplicate packet.
+B: resend ACK#13.
+======================================================================
+
+EVENT time: 392.159607,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received duplicate packet.
+B: expect #14 received #11
+B: discard that duplicate packet.
+B: resend ACK#13.
+======================================================================
+
+EVENT time: 394.293243,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received packet# 14, checksum 69, payload oooooooooooooooooooo
+B: send ACK#14.
+======================================================================
+
+EVENT time: 399.854614,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 14, received #13
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 399.980591,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received packet# 15, checksum 48, payload pppppppppppppppppppp
+B: send ACK#15.
+======================================================================
+
+EVENT time: 401.539642,  type: 1, fromlayer5  entity: 0
+A: sending packet# 36, checksum 127, payload kkkkkkkkkkkkkkkkkkkk
+
+EVENT time: 405.390411,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 14, received #13
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 405.493683,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #16 received #17
+B: discard out-of-order packet.
+B: resend ACK#15.
+======================================================================
+
+EVENT time: 407.133362,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #16 received #18
+B: discard out-of-order packet.
+B: resend ACK#15.
+======================================================================
+
+EVENT time: 407.931641,  type: 0, timerinterrupt   entity: 0
+==============================A-Timeout===============================
+A: time out. 
+A: is waiting for ACK# 14, last packet sent: #36
+A: resends from packet# 14 
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+A: to packet# 36
+          TOLAYER3: packet being lost
+======================================================================
+
+EVENT time: 413.084808,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #16 received #19
+B: discard out-of-order packet.
+B: resend ACK#15.
+======================================================================
+
+EVENT time: 415.218323,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received cumulative ACK for packet# 14, correctly sent: 14
+======================================================================
+
+EVENT time: 418.072540,  type: 1, fromlayer5  entity: 0
+A: sending packet# 37, checksum 106, payload llllllllllllllllllll
+
+EVENT time: 420.496277,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #16 received #20
+B: discard out-of-order packet.
+B: resend ACK#15.
+          TOLAYER3: packet being corrupted
+======================================================================
+
+EVENT time: 422.395050,  type: 1, fromlayer5  entity: 0
+A: sending packet# 38, checksum 85, payload mmmmmmmmmmmmmmmmmmmm
+
+EVENT time: 422.660370,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received cumulative ACK for packet# 15, correctly sent: 15
+======================================================================
+
+EVENT time: 423.474884,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received a corrupted packet.
+B: discard that packet.
+B: resend ACK#15.
+          TOLAYER3: packet being corrupted
+======================================================================
+
+EVENT time: 426.114410,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #16 received #22
+B: discard out-of-order packet.
+B: resend ACK#15.
+======================================================================
+
+EVENT time: 426.274445,  type: 1, fromlayer5  entity: 0
+A: sending packet# 39, checksum 64, payload nnnnnnnnnnnnnnnnnnnn
+
+EVENT time: 430.901489,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 16, received #15
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 432.826202,  type: 1, fromlayer5  entity: 0
+A: sending packet# 40, checksum 43, payload oooooooooooooooooooo
+
+EVENT time: 433.420380,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #16 received #23
+B: discard out-of-order packet.
+B: resend ACK#15.
+======================================================================
+
+EVENT time: 435.600586,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received duplicate packet.
+B: expect #16 received #5
+B: discard that duplicate packet.
+B: resend ACK#15.
+          TOLAYER3: packet being corrupted
+======================================================================
+
+EVENT time: 440.183685,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 16, received #15
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 441.898468,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 16, received #15
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 442.660370,  type: 0, timerinterrupt   entity: 0
+==============================A-Timeout===============================
+A: time out. 
+A: is waiting for ACK# 16, last packet sent: #40
+A: resends from packet# 16 
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being corrupted
+A: to packet# 40
+======================================================================
+
+EVENT time: 444.743408,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received duplicate packet.
+B: expect #16 received #7
+B: discard that duplicate packet.
+B: resend ACK#15.
+======================================================================
+
+EVENT time: 447.138092,  type: 1, fromlayer5  entity: 0
+A: sending packet# 41, checksum 22, payload pppppppppppppppppppp
+
+EVENT time: 449.257019,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received an corrupted ACK 
+A: discard ACK
+======================================================================
+
+EVENT time: 451.297699,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received duplicate packet.
+B: expect #16 received #8
+B: discard that duplicate packet.
+B: resend ACK#15.
+======================================================================
+
+EVENT time: 453.323090,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received an corrupted ACK 
+A: discard ACK
+======================================================================
+
+EVENT time: 457.381409,  type: 1, fromlayer5  entity: 0
+A: sending packet# 42, checksum 1, payload qqqqqqqqqqqqqqqqqqqq
+
+EVENT time: 459.267914,  type: 1, fromlayer5  entity: 0
+A: sending packet# 43, checksum 236, payload rrrrrrrrrrrrrrrrrrrr
+          TOLAYER3: packet being corrupted
+
+EVENT time: 459.830566,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received duplicate packet.
+B: expect #16 received #9
+B: discard that duplicate packet.
+B: resend ACK#15.
+======================================================================
+
+EVENT time: 461.354706,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 16, received #15
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 462.660370,  type: 0, timerinterrupt   entity: 0
+==============================A-Timeout===============================
+A: time out. 
+A: is waiting for ACK# 16, last packet sent: #43
+A: resends from packet# 16 
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being corrupted
+A: to packet# 43
+          TOLAYER3: packet being lost
+======================================================================
+
+EVENT time: 464.789368,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received a corrupted packet.
+B: discard that packet.
+B: resend ACK#15.
+======================================================================
+
+EVENT time: 466.314819,  type: 1, fromlayer5  entity: 0
+A: sending packet# 44, checksum 215, payload ssssssssssssssssssss
+
+EVENT time: 468.092285,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received duplicate packet.
+B: expect #16 received #12
+B: discard that duplicate packet.
+B: resend ACK#15.
+          TOLAYER3: packet being corrupted
+======================================================================
+
+EVENT time: 468.703613,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 16, received #15
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 470.016205,  type: 1, fromlayer5  entity: 0
+A: sending packet# 45, checksum 194, payload tttttttttttttttttttt
+
+EVENT time: 473.658142,  type: 1, fromlayer5  entity: 0
+A: sending packet# 46, checksum 173, payload uuuuuuuuuuuuuuuuuuuu
+
+EVENT time: 474.623260,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received duplicate packet.
+B: expect #16 received #14
+B: discard that duplicate packet.
+B: resend ACK#15.
+======================================================================
+
+EVENT time: 477.997650,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received an corrupted ACK 
+A: discard ACK
+======================================================================
+
+EVENT time: 482.660370,  type: 0, timerinterrupt   entity: 0
+==============================A-Timeout===============================
+A: time out. 
+A: is waiting for ACK# 16, last packet sent: #46
+A: resends from packet# 16 
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+A: to packet# 46
+======================================================================
+
+EVENT time: 483.632812,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received duplicate packet.
+B: expect #16 received #15
+B: discard that duplicate packet.
+B: resend ACK#15.
+          TOLAYER3: packet being corrupted
+======================================================================
+
+EVENT time: 485.034821,  type: 1, fromlayer5  entity: 0
+A: sending packet# 47, checksum 152, payload vvvvvvvvvvvvvvvvvvvv
+          TOLAYER3: packet being corrupted
+
+EVENT time: 487.902069,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 16, received #15
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 489.948303,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received packet# 16, checksum 27, payload qqqqqqqqqqqqqqqqqqqq
+B: send ACK#16.
+======================================================================
+
+EVENT time: 490.526611,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 16, received #15
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 494.656555,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 16, received #15
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 497.444031,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received a corrupted packet.
+B: discard that packet.
+B: resend ACK#16.
+======================================================================
+
+EVENT time: 497.789764,  type: 1, fromlayer5  entity: 0
+A: sending packet# 48, checksum 131, payload wwwwwwwwwwwwwwwwwwww
+          TOLAYER3: packet being lost
+
+EVENT time: 499.284241,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 16, received #15
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 500.545532,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received an corrupted ACK 
+A: discard ACK
+======================================================================
+
+EVENT time: 502.660370,  type: 0, timerinterrupt   entity: 0
+==============================A-Timeout===============================
+A: time out. 
+A: is waiting for ACK# 16, last packet sent: #48
+A: resends from packet# 16 
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+A: to packet# 48
+======================================================================
+
+EVENT time: 504.564178,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 16, received #15
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 506.270996,  type: 1, fromlayer5  entity: 0
+A: sending packet# 49, checksum 110, payload xxxxxxxxxxxxxxxxxxxx
+          TOLAYER3: packet being corrupted
+
+EVENT time: 506.859955,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #17 received #20
+B: discard out-of-order packet.
+B: resend ACK#16.
+=====================================================================
+
+EVENT time: 509.008698,  type: 1, fromlayer5  entity: 0
+A: sending packet# 50, checksum 89, payload yyyyyyyyyyyyyyyyyyyy
+          TOLAYER3: packet being corrupted
+
+EVENT time: 511.770874,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received an corrupted ACK 
+A: discard ACK
+======================================================================
+
+EVENT time: 516.323242,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #17 received #23
+B: discard out-of-order packet.
+B: resend ACK#16.
+======================================================================
+
+EVENT time: 516.325928,  type: 1, fromlayer5  entity: 0
+A: sending packet# 51, checksum 68, payload zzzzzzzzzzzzzzzzzzzz
+
+EVENT time: 517.336548,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received cumulative ACK for packet# 16, correctly sent: 16
+======================================================================
+
+EVENT time: 520.923645,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #17 received #24
+B: discard out-of-order packet.
+B: resend ACK#16.
+          TOLAYER3: packet being lost
+======================================================================
+
+EVENT time: 521.726196,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 17, received #16
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 525.049744,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received a corrupted packet.
+B: discard that packet.
+B: resend ACK#16.
+======================================================================
+
+EVENT time: 527.536499,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 17, received #16
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 532.030823,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 17, received #16
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 532.655945,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received a corrupted packet.
+B: discard that packet.
+B: resend ACK#16.
+======================================================================
+
+EVENT time: 534.186157,  type: 1, fromlayer5  entity: 0
+A: sending packet# 52, checksum 55, payload aaaaaaaaaaaaaaaaaaaa
+          TOLAYER3: packet being lost
+
+EVENT time: 535.813538,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 17, received #16
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 536.192688,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received a corrupted packet.
+B: discard that packet.
+B: resend ACK#16.
+          TOLAYER3: packet being lost
+======================================================================
+
+EVENT time: 537.336548,  type: 0, timerinterrupt   entity: 0
+==============================A-Timeout===============================
+A: time out. 
+A: is waiting for ACK# 17, last packet sent: #52
+A: resends from packet# 17 
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+A: to packet# 52
+          TOLAYER3: packet being corrupted
+======================================================================
+
+EVENT time: 539.421326,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received duplicate packet.
+B: expect #17 received #10
+B: discard that duplicate packet.
+B: resend ACK#16.
+======================================================================
+
+EVENT time: 544.205933,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 17, received #16
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 545.311340,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 17, received #16
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 548.269775,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received duplicate packet.
+B: expect #17 received #12
+B: discard that duplicate packet.
+B: resend ACK#16.
+          TOLAYER3: packet being lost
+======================================================================
+
+EVENT time: 553.864380,  type: 1, fromlayer5  entity: 0
+A: sending packet# 53, checksum 34, payload bbbbbbbbbbbbbbbbbbbb
+
+EVENT time: 555.363708,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received a corrupted packet.
+B: discard that packet.
+B: resend ACK#16.
+======================================================================
+
+EVENT time: 557.336548,  type: 0, timerinterrupt   entity: 0
+==============================A-Timeout===============================
+A: time out. 
+A: is waiting for ACK# 17, last packet sent: #53
+A: resends from packet# 17 
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+A: to packet# 53
+          TOLAYER3: packet being lost
+======================================================================
+
+EVENT time: 561.760010,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 17, received #16
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 562.452820,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received a corrupted packet.
+B: discard that packet.
+B: resend ACK#16.
+======================================================================
+
+EVENT time: 567.762939,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received a corrupted packet.
+B: discard that packet.
+B: resend ACK#16.
+======================================================================
+
+EVENT time: 569.217712,  type: 1, fromlayer5  entity: 0
+A: sending packet# 54, checksum 13, payload cccccccccccccccccccc
+
+EVENT time: 571.362122,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 17, received #16
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 571.830566,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #17 received #18
+B: discard out-of-order packet.
+B: resend ACK#16.
+          TOLAYER3: packet being corrupted
+======================================================================
+
+EVENT time: 573.862854,  type: 1, fromlayer5  entity: 0
+A: sending packet# 55, checksum 248, payload dddddddddddddddddddd
+
+EVENT time: 576.820496,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #17 received #19
+B: discard out-of-order packet.
+B: resend ACK#16.
+======================================================================
+
+EVENT time: 577.336548,  type: 0, timerinterrupt   entity: 0
+==============================A-Timeout===============================
+A: time out. 
+A: is waiting for ACK# 17, last packet sent: #55
+A: resends from packet# 17 
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+A: to packet# 55
+======================================================================
+
+EVENT time: 577.620178,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 17, received #16
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 581.291077,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received an corrupted ACK 
+A: discard ACK
+======================================================================
+
+EVENT time: 582.553101,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 17, received #16
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 584.347168,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #17 received #20
+B: discard out-of-order packet.
+B: resend ACK#16.
+======================================================================
+
+EVENT time: 588.333252,  type: 1, fromlayer5  entity: 0
+A: sending packet# 56, checksum 227, payload eeeeeeeeeeeeeeeeeeee
+          TOLAYER3: packet being lost
+
+EVENT time: 589.171509,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 17, received #16
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 590.830322,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #17 received #22
+B: discard out-of-order packet.
+B: resend ACK#16.
+          TOLAYER3: packet being lost
+======================================================================
+
+EVENT time: 594.434509,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #17 received #23
+B: discard out-of-order packet.
+B: resend ACK#16.
+======================================================================
+
+EVENT time: 596.699951,  type: 1, fromlayer5  entity: 0
+A: sending packet# 57, checksum 206, payload ffffffffffffffffffff
+
+EVENT time: 597.336548,  type: 0, timerinterrupt   entity: 0
+==============================A-Timeout===============================
+A: time out. 
+A: is waiting for ACK# 17, last packet sent: #57
+A: resends from packet# 17 
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+A: to packet# 57
+======================================================================
+
+EVENT time: 598.039001,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 17, received #16
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 598.256104,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #17 received #25
+B: discard out-of-order packet.
+B: resend ACK#16.
+          TOLAYER3: packet being corrupted
+======================================================================
+
+EVENT time: 600.695618,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #17 received #26
+B: discard out-of-order packet.
+B: resend ACK#16.
+          TOLAYER3: packet being lost
+======================================================================
+
+EVENT time: 601.326294,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received an corrupted ACK 
+A: discard ACK
+======================================================================
+
+EVENT time: 604.655945,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #17 received #27
+B: discard out-of-order packet.
+B: resend ACK#16.
+          TOLAYER3: packet being lost
+======================================================================
+
+EVENT time: 611.533997,  type: 1, fromlayer5  entity: 0
+A: sending packet# 58, checksum 185, payload gggggggggggggggggggg	
+
+EVENT time: 613.308716,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received duplicate packet.
+B: expect #17 received #7
+B: discard that duplicate packet.
+B: resend ACK#16.
+          TOLAYER3: packet being lost
+======================================================================
+
+EVENT time: 615.292969,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received duplicate packet.
+B: expect #17 received #8
+B: discard that duplicate packet.
+B: resend ACK#16.
+======================================================================
+
+EVENT time: 616.822510,  type: 1, fromlayer5  entity: 0
+A: sending packet# 59, checksum 164, payload hhhhhhhhhhhhhhhhhhhh
+
+
+EVENT time: 617.336548,  type: 0, timerinterrupt   entity: 0
+==============================A-Timeout===============================
+A: time out. 
+A: is waiting for ACK# 17, last packet sent: #59
+A: resends from packet# 17 
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being corrupted
+A: to packet# 59
+          TOLAYER3: packet being lost
+======================================================================
+
+EVENT time: 618.116089,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received a corrupted packet.
+B: discard that packet.
+B: resend ACK#16.
+======================================================================
+
+EVENT time: 622.246399,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 17, received #16
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 626.461426,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received duplicate packet.
+B: expect #17 received #11
+B: discard that duplicate packet.
+B: resend ACK#16.
+======================================================================
+
+EVENT time: 630.507080,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 17, received #16
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 631.207397,  type: 1, fromlayer5  entity: 0
+A: sending packet# 60, checksum 143, payload iiiiiiiiiiiiiiiiiiii
+
+          TOLAYER3: packet being corrupted
+
+EVENT time: 633.188477,  type: 1, fromlayer5  entity: 0
+A: sending packet# 61, checksum 122, payload jjjjjjjjjjjjjjjjjjjj
+
+
+EVENT time: 634.021545,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received duplicate packet.
+B: expect #17 received #13
+B: discard that duplicate packet.
+B: resend ACK#16.
+          TOLAYER3: packet being corrupted
+======================================================================
+
+EVENT time: 637.336548,  type: 0, timerinterrupt   entity: 0
+==============================A-Timeout===============================
+A: time out. 
+A: is waiting for ACK# 17, last packet sent: #61
+A: resends from packet# 17 
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+A: to packet# 61
+======================================================================
+
+EVENT time: 638.273682,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 17, received #16
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 640.538452,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received an corrupted ACK 
+A: discard ACK
+======================================================================
+
+EVENT time: 642.758850,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received a corrupted packet.
+B: discard that packet.
+B: resend ACK#16.
+======================================================================
+
+EVENT time: 643.015320,  type: 1, fromlayer5  entity: 0
+A: sending packet# 62, checksum 101, payload kkkkkkkkkkkkkkkkkkkk
+
+EVENT time: 648.821045,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received duplicate packet.
+B: expect #17 received #15
+B: discard that duplicate packet.
+B: resend ACK#16.
+======================================================================
+
+EVENT time: 651.684631,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 17, received #16
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 655.873108,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 17, received #16
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 657.336548,  type: 0, timerinterrupt   entity: 0
+==============================A-Timeout===============================
+A: time out. 
+A: is waiting for ACK# 17, last packet sent: #62
+A: resends from packet# 17 
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+A: to packet# 62
+======================================================================
+
+EVENT time: 658.086487,  type: 1, fromlayer5  entity: 0
+A: sending packet# 63, checksum 80, payload llllllllllllllllllll
+
+EVENT time: 658.522278,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received duplicate packet.
+B: expect #17 received #16
+B: discard that duplicate packet.
+B: resend ACK#16.
+======================================================================
+
+EVENT time: 661.384583,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: wait for ACK# 17, received #16
+Ignore duplicate ACK
+======================================================================
+
+EVENT time: 664.054688,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received packet# 17, checksum 6, payload rrrrrrrrrrrrrrrrrrrr
+B: send ACK#17.
+======================================================================
+
+EVENT time: 666.063782,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received cumulative ACK for packet# 17, correctly sent: 17
+======================================================================
+
+EVENT time: 668.239868,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received packet# 18, checksum 241, payload ssssssssssssssssssss
+B: send ACK#18.
+======================================================================
+
+EVENT time: 670.626099,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received cumulative ACK for packet# 18, correctly sent: 18
+======================================================================
+
+EVENT time: 673.409302,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received packet# 19, checksum 220, payload tttttttttttttttttttt
+B: send ACK#19.
+          TOLAYER3: packet being lost
+======================================================================
+
+EVENT time: 675.700195,  type: 1, fromlayer5  entity: 0
+A: sending packet# 64, checksum 59, payload mmmmmmmmmmmmmmmmmmmm
+          TOLAYER3: packet being corrupted
+
+EVENT time: 680.401794,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received packet# 20, checksum 199, payload uuuuuuuuuuuuuuuuuuuu
+B: send ACK#20.
+          TOLAYER3: packet being corrupted
+======================================================================
+
+EVENT time: 681.190613,  type: 1, fromlayer5  entity: 0
+A: sending packet# 65, checksum 38, payload nnnnnnnnnnnnnnnnnnnn
+
+EVENT time: 687.820923,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received packet# 21, checksum 178, payload vvvvvvvvvvvvvvvvvvvv
+B: send ACK#21.
+          TOLAYER3: packet being lost
+======================================================================
+
+EVENT time: 687.981384,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received an corrupted ACK 
+A: discard ACK
+======================================================================
+
+EVENT time: 690.626099,  type: 0, timerinterrupt   entity: 0
+==============================A-Timeout===============================
+A: time out. 
+A: is waiting for ACK# 19, last packet sent: #65
+A: resends from packet# 19 
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being corrupted
+          TOLAYER3: packet being lost
+          TOLAYER3: packet being corrupted
+A: to packet# 65
+======================================================================
+
+EVENT time: 694.068359,  type: 1, fromlayer5  entity: 0
+A: sending packet# 66, checksum 17, payload oooooooooooooooooooo
+
+EVENT time: 697.106140,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received packet# 22, checksum 157, payload wwwwwwwwwwwwwwwwwwww
+B: send ACK#22.
+======================================================================
+
+EVENT time: 700.690247,  type: 1, fromlayer5  entity: 0
+A: sending packet# 67, checksum 252, payload pppppppppppppppppppp
+
+EVENT time: 703.951477,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received packet# 23, checksum 136, payload xxxxxxxxxxxxxxxxxxxx
+B: send ACK#23.
+          TOLAYER3: packet being corrupted
+======================================================================
+
+EVENT time: 706.440613,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received cumulative ACK for packet# 22, correctly sent: 19
+======================================================================
+
+EVENT time: 709.534119,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received packet# 24, checksum 115, payload yyyyyyyyyyyyyyyyyyyy
+B: send ACK#24.
+======================================================================
+
+EVENT time: 714.027344,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received an corrupted ACK 
+A: discard ACK
+======================================================================
+
+EVENT time: 717.635376,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received a corrupted packet.
+B: discard that packet.
+B: resend ACK#24.
+======================================================================
+
+EVENT time: 719.255127,  type: 1, fromlayer5  entity: 0
+A: sending packet# 68, checksum 231, payload qqqqqqqqqqqqqqqqqqqq
+
+EVENT time: 719.258118,  type: 2, fromlayer3  entity: 1
+===========================B-Input====================================
+B: received out-of-order packet.
+B: expect #25 received #26
+B: discard out-of-order packet.
+B: resend ACK#24.
+======================================================================
+
+EVENT time: 721.496704,  type: 2, fromlayer3  entity: 0
+==============================A-Input=================================
+A: received cumulative ACK for packet# 24, correctly sent: 23
+======================================================================
+
+EVENT time: 723.788330,  type: 1, fromlayer5  entity: 0
+A: sending packet# 69, checksum 210, payload rrrrrrrrrrrrrrrrrrrr
+
+EVENT time: 723.824280,  type: 1, fromlayer5  entity: 0
+ Simulator terminated at time 723.824280
+ after sending 70 msgs from layer5
+\end{verbatim}
+
 
 
 \end{document}
