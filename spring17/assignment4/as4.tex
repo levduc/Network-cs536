@@ -1,0 +1,163 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\pagestyle{fancy}
+ 
+\newenvironment{theorem}[2][Theorem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{lemma}[2][Lemma]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{exercise}[2][Exercise]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{problem}[2][Problem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{question}[2][Question]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{corollary}[2][Corollary]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+ 
+\begin{document}
+\title{Assignment 3}
+\author{Duc Viet Le\\ CS536}
+ 
+\maketitle
+
+\begin{problem}{1}
+\end{problem}
+\begin{enumerate}
+	\item All addresses must be located from 214.97.254.0/24
+	\begin{itemize}
+		\item Subnet A: \textbf{214.97.255.0/24}
+		\\Give subnet A the last 8 bit (256 addresses)
+		\\Use first 24 bit to identify A: 11010110 01100001 11111111
+		\item Subnet B: \textbf{214.97.254.128/25}
+		\\
+		Give B the  last 7 bit (128 addresses)\\
+		Use first 25 bit to identify B: 11010110 01100001 11111110 1
+		\item Subnet C: \textbf{214.97.255.128/25}
+		\\ Give C the  last 7 bit (128 addresses)\\
+		Use first 25 bit to identify C: 11010110 01100001 11111111 1
+
+		\item Subnet D: \textbf{214.97.254.0/31}
+		\\ Give D the last 1 bit (2 addresses)
+		\\ Use first 31 bit to identify D:
+		11010110 01100001 11111110 0000000
+		\item Subnet E: \textbf{214.97.254.2/31}
+		\\ Give E the last 1 bit (2 addresses)
+		\\ Use first 31 bit to identify E:
+		11010110 01100001 11111110 0000001
+		\item Subnet F: \textbf{214.97.254.6/31}
+		\\ Give F the last 1 bit (2 addresses)
+		\\ Use first 31 bit to identify F:
+		11010110 01100001 11111110 0000011
+	\end{itemize}
+	\item Forwarding tables:
+	\\ \textbf{Router 1:} \\ \\
+	\begin{tabular}{|l|c|}
+	\hline prefix match &	interface \\
+	\hline 11010110 01100001 11111111 &	Subnet A \\
+	\hline 11010110 01100001 11111110 0000011&	Subnet F \\
+	\hline 11010110 01100001 11111110 0000000&	Subnet D \\
+	\hline
+	\end{tabular}
+	\\
+	\\ \textbf{Router 2:} \\\\
+	\begin{tabular}{|l|c|}
+	\hline prefix match &	interface \\
+	\hline 11010110 01100001 11111110 0000011&	Subnet F \\
+	\hline 11010110 01100001 11111110 0000001&	Subnet E \\
+	\hline 11010110 01100001 11111111 1&	Subnet C \\
+	\hline
+	\end{tabular}
+	\\\\ 
+	\textbf{Router 3:} \\\\
+	\begin{tabular}{|l|c|}
+	\hline prefix match &	interface \\
+	\hline 11010110 01100001 11111110 0000000&	Subnet D \\
+	\hline 11010110 01100001 11111110 0000001&	Subnet E \\
+	\hline 11010110 01100001 11111110 1&	Subnet B \\
+	\hline
+	\end{tabular}
+	\\
+	
+\end{enumerate}
+\begin{problem}{2}
+\end{problem}
+\begin{itemize}
+	\item Only traffic arriving from hosts h1 and h6 should be delivered to hosts h3 or h4 (i.e., that arriving traffic from hosts h2 and h5 is blocked).
+	\\
+	\resizebox{\textwidth}{!}{
+	\begin{tabular}[\textwidth]{|l|l|l|l|l|l|l|l|l|l|l|}
+	\hline Ingess port & Mac src & Mac dst & Eth type & VLAND ID & IP Src & IP Dst & IP prot & TCPsport & TCP dport & Action \\
+	\hline * & * & * & * & * & 10.1.0.1 & 10.2.0.*& * & * & * & allow \\
+	\hline * & * & * & * & * & 10.3.0.6 & 10.2.0.*& * & * & * & allow \\
+	\hline * & * & * & * & * & 10.1.0.2 & *& * & * & * & drop \\
+	\hline * & * & * & * & * & 10.2.0.* & *& * & * & * & drop \\
+	\hline * & * & * & * & * & 10.3.0.5 & *& * & * & * & drop \\
+	\hline
+	\end{tabular}}
+	\begin{itemize}
+		\item explicitly allow all traffic from h1 and h6 to h3 or h4
+		\item block traffic that comes from h2,h3,h4,h5 just in case
+	\end{itemize}
+	\item Only TCP traffic is allowed to be delivered to host h3 or host h4 (i.e., that UDP traffic is blocked). \\
+	\resizebox{\textwidth}{!}{
+	\begin{tabular}[\textwidth]{|l|l|l|l|l|l|l|l|l|l|l|}
+	\hline Ingess port & Mac src & Mac dst & Eth type & VLAND ID & IP Src & IP Dst & IP prot & TCPsport & TCP dport & Action \\
+	\hline * & * & * & * & * & * & 10.2.0.*& TCP & * & * & allow \\
+	\hline * & * & * & * & * & * & 10.2.0.*& UDP & * & * & drop \\
+	\hline
+	\end{tabular}}
+	\begin{itemize}
+		\item allow TCP trafffic that has destination to h3 or h4
+		\\
+		Just in case:
+		\item block UDP traffic that go to h3 or h4
+	\end{itemize}
+	\item Only traffic destined to h3 is to be delivered (i.e., all traffic to h4 is blocked).\\
+	\resizebox{\textwidth}{!}{
+	\begin{tabular}[\textwidth]{|l|l|l|l|l|l|l|l|l|l|l|}
+	\hline Ingess port & Mac src & Mac dst & Eth type & VLAND ID & IP Src & IP Dst & IP prot & TCPsport & TCP dport & Action \\
+	\hline * & * & * & * & * & * & 10.2.0.3 & * & * & * & allow \\
+	\hline * & * & * & * & * & * & 10.2.0.4 & * & * & * & drop \\
+	\hline * & * & * & * & * & * & 10.1.0.* & * & * & * & drop \\
+	\hline * & * & * & * & * & * & 10.3.0.* & * & * & * & drop \\
+	\hline
+	\end{tabular}}
+	\begin{itemize}
+		\item explicitly allow traffic that comes to h3.
+		\\
+		Just in case:
+		\item block traffic to h4.
+		\item block traffic to subnet 1.
+		\item block traffic to subnet 3.
+	\end{itemize}
+	\item Only UDP traffic from h1 and destined to h3 is to be delivered. All other traffic is blocked.\\
+	\resizebox{\textwidth}{!}{
+	\begin{tabular}[\textwidth]{|l|l|l|l|l|l|l|l|l|l|l|}
+	\hline Ingess port & Mac src & Mac dst & Eth type & VLAND ID & IP Src & IP Dst & IP prot & TCPsport & TCP dport & Action \\
+	\hline * & * & * & * & * & 10.1.0.1 & 10.2.0.3& UDP & * & * & allow \\
+	\hline * & * & * & * & * & * & 10.2.0.4& * & * & * & drop \\
+	\hline * & * & * & * & * & * & *& TCP & * & * & drop \\
+	\hline * & * & * & * & * & 10.1.0.2 &*& * & * & * & drop \\
+	\hline * & * & * & * & * & 10.2.0.* & * & * & * & * & drop \\
+	\hline * & * & * & * & * & 10.3.0.* & * & * & * & * & drop \\
+	\hline
+	\end{tabular}}
+	\begin{itemize}
+		\item explicily only allow UDP traffic from h1 to h3.   
+		\\\\
+		Just in case:
+		\item block traffic to h4 
+		\item block TCP traffic
+		\item block incoming traffic from h2,h3,h4,h5,h6 
+	\end{itemize}
+\end{itemize}
+\end{document}
