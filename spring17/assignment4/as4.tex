@@ -99,13 +99,12 @@
 	\hline * & * & * & * & * & 10.1.0.1 & 10.2.0.*& * & * & * & allow \\
 	\hline * & * & * & * & * & 10.3.0.6 & 10.2.0.*& * & * & * & allow \\
 	\hline * & * & * & * & * & 10.1.0.2 & *& * & * & * & drop \\
-	\hline * & * & * & * & * & 10.2.0.* & *& * & * & * & drop \\
 	\hline * & * & * & * & * & 10.3.0.5 & *& * & * & * & drop \\
 	\hline
 	\end{tabular}}
 	\begin{itemize}
 		\item explicitly allow all traffic from h1 and h6 to h3 or h4
-		\item block traffic that comes from h2,h3,h4,h5 just in case
+		\item drop traffic that comes from h2,h5.
 	\end{itemize}
 	\item Only TCP traffic is allowed to be delivered to host h3 or host h4 (i.e., that UDP traffic is blocked). \\
 	\resizebox{\textwidth}{!}{
@@ -117,9 +116,7 @@
 	\end{tabular}}
 	\begin{itemize}
 		\item allow TCP trafffic that has destination to h3 or h4
-		\\
-		Just in case:
-		\item block UDP traffic that go to h3 or h4
+		\item drop UDP traffic that go to h3 or h4
 	\end{itemize}
 	\item Only traffic destined to h3 is to be delivered (i.e., all traffic to h4 is blocked).\\
 	\resizebox{\textwidth}{!}{
@@ -127,17 +124,11 @@
 	\hline Ingess port & Mac src & Mac dst & Eth type & VLAND ID & IP Src & IP Dst & IP prot & TCPsport & TCP dport & Action \\
 	\hline * & * & * & * & * & * & 10.2.0.3 & * & * & * & allow \\
 	\hline * & * & * & * & * & * & 10.2.0.4 & * & * & * & drop \\
-	\hline * & * & * & * & * & * & 10.1.0.* & * & * & * & drop \\
-	\hline * & * & * & * & * & * & 10.3.0.* & * & * & * & drop \\
 	\hline
 	\end{tabular}}
 	\begin{itemize}
 		\item explicitly allow traffic that comes to h3.
-		\\
-		Just in case:
-		\item block traffic to h4.
-		\item block traffic to subnet 1.
-		\item block traffic to subnet 3.
+		\item drop traffic to h4.
 	\end{itemize}
 	\item Only UDP traffic from h1 and destined to h3 is to be delivered. All other traffic is blocked.\\
 	\resizebox{\textwidth}{!}{
@@ -152,12 +143,8 @@
 	\hline
 	\end{tabular}}
 	\begin{itemize}
-		\item explicily only allow UDP traffic from h1 to h3.   
-		\\
-		Just in case:
-		\item block traffic to h4 
-		\item block TCP traffic
-		\item block incoming traffic from h2,h3,h4,h5,h6 
+		\item explicily allow UDP traffic from h1 to h3.   
+		\item drop everything else
 	\end{itemize}
 \end{itemize}
 \end{document}

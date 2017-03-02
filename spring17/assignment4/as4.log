@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  2 MAR 2017 11:07
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  2 MAR 2017 11:29
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -424,25 +424,26 @@ Underfull \hbox (badness 10000) in paragraph at lines 61--89
 [1
 
 {/usr/local/texlive/2016/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-Overfull \hbox (27.38411pt too wide) in paragraph at lines 94--106
+Overfull \hbox (27.38411pt too wide) in paragraph at lines 94--105
 [] 
  []
 
 
-Overfull \hbox (27.37604pt too wide) in paragraph at lines 110--118
+Overfull \hbox (27.37604pt too wide) in paragraph at lines 109--117
 [] 
  []
 
 
-Overfull \hbox (27.37604pt too wide) in paragraph at lines 124--134
+Overfull \hbox (27.37604pt too wide) in paragraph at lines 121--129
 [] 
  []
 
 
-Overfull \hbox (27.38411pt too wide) in paragraph at lines 142--154
+Overfull \hbox (27.38411pt too wide) in paragraph at lines 133--145
 [] 
  []
 
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 150.
 
 Package Fancyhdr Warning: \headheight is too small (12.0pt): 
  Make it at least 13.59999pt.
@@ -450,33 +451,31 @@ Package Fancyhdr Warning: \headheight is too small (12.0pt):
  This may cause the page layout to be inconsistent, however.
 
 [2]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 163.
- [3]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 163.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 150.
  (./as4.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 163.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 163.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 150.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 150.
 Package rerunfilecheck Info: File `as4.out' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 163.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 150.
  ) 
 Here is how much of TeX's memory you used:
- 6585 strings out of 493014
- 94318 string characters out of 6133351
- 207124 words of memory out of 5000000
+ 6584 strings out of 493014
+ 94312 string characters out of 6133351
+ 204124 words of memory out of 5000000
  10058 multiletter control sequences out of 15000+600000
  10793 words of font info for 41 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 29i,10n,43p,220b,464s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 30i,10n,43p,220b,417s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
 ></usr/local/texlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb><
 /usr/local/texlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></u
 sr/local/texlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr
 /local/texlive/2016/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb>
-Output written on as4.pdf (3 pages, 68240 bytes).
+Output written on as4.pdf (2 pages, 67182 bytes).
 PDF statistics:
- 43 PDF objects out of 1000 (max. 8388607)
- 32 compressed objects within 1 object stream
- 6 named destinations out of 1000 (max. 500000)
+ 39 PDF objects out of 1000 (max. 8388607)
+ 29 compressed objects within 1 object stream
+ 5 named destinations out of 1000 (max. 500000)
  1 words of extra memory for PDF output out of 10000 (max. 10000000)
 
