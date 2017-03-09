@@ -1,0 +1,65 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\pagestyle{fancy}
+ 
+\newenvironment{theorem}[2][Theorem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{lemma}[2][Lemma]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{exercise}[2][Exercise]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{problem}[2][Problem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{question}[2][Question]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{corollary}[2][Corollary]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+ 
+\begin{document}
+\title{Assignment 5}
+\author{Duc Viet Le\\ CS536}
+ 
+\maketitle
+
+\begin{problem}{1}
+\end{problem}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{|cccccccc|}
+\hline step & N  & d(t), p(t) & d(u), p(u) & d(v), p(v) & d(w), p(w)  & d(y), p(y) & d(z), p(z) \\
+\hline 	0   & x  &  $\infty$  &  $\infty$  &   \textbf{3,x}      & 6,x       &  6, x      & 8, x \\
+\hline 	1   & xv &  7,v  &  6,v       &            & \textbf{6,x}       &  6, x      & 8, x \\
+\hline 	2   & xvw&  7,v       &  6,v       &            &       & \textbf{6, x}      & 8, x \\
+\hline 	2   & xvwy&  7,v       &  \textbf{6,v}       &            &       &       & 8, x \\
+\hline 	2   & xvwyu&  \textbf{7,v}       &         &            &       &       &8, x  \\
+\hline 	2   & xvwyut&        &         &            &       &       &  \textbf{8, x}\\
+\hline 	2   & xvwyutz&         &         &            &       &       &  \\
+\hline
+\end{tabular}}
+
+\begin{problem}{2}
+\end{problem}
+\begin{itemize}
+	\item Give x's distance vector for destinations w,y, and u.
+	\\\\
+	\begin{tabular}{c c c c}
+		\hline & w & y & u \\
+		\hline x &2 & 4 & 7
+	\end{tabular}
+	\item 
+	$c(x,y) \in (0,1)$: the cost from $y$ to $u$ is 6, and the current shortest path from $x$ to $u$ is 7. In order to have new minimum cost path to $u$, $c(x,y)$ has to be in interval $(0,1)$, and the new minimum cost path will be less than 7.
+	\\
+	$c(x,w) > 6$: in order to have new minimum cost path, $c(x,w)+c(w,u)$ has to be greater than $c(x,y)+c(y,u)$.
+	\item Similarly, \\
+	$c(x,y) \geq 1$: the minimum path is still 7 as the path from x to u via y is bigger than 7 \\
+	 
+
+\end{itemize}
+\end{document}
