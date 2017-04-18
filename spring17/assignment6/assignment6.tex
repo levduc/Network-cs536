@@ -54,7 +54,7 @@
 		\item[7.] Router 2 sends frame to Router 1, frame contains E-to-B datagram
 		\item[8.] Router 1 receives frame, datagram removed, and passes up to IP layer
 		\item[9.] Router 1 forwards IP datagram with IP source 192.168.3.001 (E's IP), destination 192.168.1.003 (B's IP).
-		\item[10.] Router 1 encapsulates IP datagram inside a link-layer frame with MAC source 22-22-22-22-22-22 (Router 1's MAC address) and destination 11-11-11-11-11-11 (B's MAC address)
+		\item[10.] Router 1 encapsulates IP datagram inside a link-layer frame with MAC source 11-11-11-11-11-11 (Router 1's MAC address) and destination 22-22-22-22-22-22 (B's MAC address)
 		\item[11.] Router 1 sends frame to B, frame contains E-to-B datagram
 		\item [12.] B receives frame. The process stops at this point.
 
@@ -69,7 +69,7 @@
 	Host E has to determine the MAC address of 192.168.3.002. 
 	E broadcasts ARP packet request to ask for MAC address of 192.168.3.002. 
 	Router 2 receives the request and responses to E with an ARP response packet. 
-	The ARP is encapsulated inside an ethernet frame with Source MAC 55.55.55.55.55 and destination 77.77.77.77.77.77. 
+	The ARP is encapsulated inside an ethernet frame with Source MAC 88.88.88.88.88 and destination 77.77.77.77.77.77. 
 	At this point E knows MAC address of interface 192.168.3.002, 
 	and the following steps are identical to part (c) 
 \end{enumerate}
