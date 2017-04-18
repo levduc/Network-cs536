@@ -1,5 +1,5 @@
 # Fdb version 3
-["pdflatex"] 1492500488 "assignment6.tex" "assignment6.pdf" "assignment6" 1492500488
+["pdflatex"] 1492524257 "assignment6.tex" "assignment6.pdf" "assignment6" 1492524258
   "/usr/local/texlive/2016/texmf-dist/fonts/map/fontname/texfonts.map" 1272929888 3287 e6b82fe08f5336d4d5ebc73fb1152e87 ""
   "/usr/local/texlive/2016/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex7.tfm" 1246382020 1004 54797486969f23fa377b128694d548df ""
   "/usr/local/texlive/2016/texmf-dist/fonts/tfm/public/amsfonts/cmextra/cmex8.tfm" 1246382020 988 bdf658c3bfc2d96d3c8b02cfc1c94c20 ""
@@ -68,13 +68,13 @@
   "/usr/local/texlive/2016/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1473993222 1950515 49a2f0de8467d02420dc742360dc4a75 ""
   "/usr/local/texlive/2016/texmf-var/web2c/pdftex/pdflatex.fmt" 1473993260 3873692 aa203984f859fcdff6295d222e5e792f ""
   "/usr/local/texlive/2016/texmf.cnf" 1473993217 455 5b996dcaa0eb4ef14a83b026bc0a008c ""
-  "assignment6.aux" 1492500488 662 b2b94621371df8d9296b8bf5bec1b851 ""
-  "assignment6.out" 1492500488 0 d41d8cd98f00b204e9800998ecf8427e ""
-  "assignment6.tex" 1492500488 5603 549f4d7036b55c990fbf1a5f7b5d8aae ""
+  "assignment6.aux" 1492524258 662 b2b94621371df8d9296b8bf5bec1b851 ""
+  "assignment6.out" 1492524258 0 d41d8cd98f00b204e9800998ecf8427e ""
+  "assignment6.tex" 1492524257 5611 5c610e9871a365e518a58cb47b4ca8f4 ""
   (generated)
-  "assignment6.pdf"
   "/home/diamonduck/Documents/Networking/spring17/assignment6/assignment6.pdf"
+  "assignment6.pdf"
   "assignment6.log"
   "assignment6.aux"
-  "assignment6.out"
   "/home/diamonduck/Documents/Networking/spring17/assignment6/assignment6.log"
+  "assignment6.out"
