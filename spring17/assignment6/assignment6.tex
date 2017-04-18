@@ -36,16 +36,74 @@
 	% 192.168.1.xxx; for Subnet 2 uses addresses of the form 192.168.2.xxx; and for Subnet 3
 	% use addresses of the form 192.168.3.xxx.
 	% \item 
-	% Assign MAC addresses to all of the adapters.
+	% Assign MAC addreses to all of the adapters.
 	\item[c. ]
 	Consider sending an IP datagram from Host E to Host B. Suppose all of the ARP tables
 	are up to date. Enumerate all the steps, as done for the single-router example in class
 	(see slide “Addressing: routing to another LAN” in Chapter 6 - part 2). In your answer,
 	you need to include source and destination MAC and IP addresses for each step.
+	\\
+	\textbf{Ans:}
+	\begin{enumerate}
+		\item[1.] E creates IP datagram with IP source 192.168.3.001 (E's IP), destination 192.168.1.003 (B's IP)
+		\item[2.] E encapsulates IP datagram inside a link-layer frame with MAC source 77-77-77-77-77-77 (E's MAC address) and destination 88-88-88-88-88-88 (Router 2's MAC address)
+		\item[3.] E sends frame to Router 2, frame contains E-to-B datagram
+		\item[4.] Router 2 receives frame, datagram removed, and passes up to IP layer.
+		\item[5.] Router 2 forwards IP datagram with IP source 192.168.3.001 (E's IP), destination 192.168.1.003 (B's IP).
+		\item[6.] Router 2 encapsulates IP datagram inside a link-layer frame with MAC source 55-55-55-55-55-55 (Router 2's MAC address) and destination 33-33-33-33-33-33 (Router 1's MAC address)
+		\item[7.] Router 2 sends frame to Router 1, frame contains E-to-B datagram
+		\item[8.] Router 1 receives frame, datagram removed, and passes up to IP layer
+		\item[9.] Router 1 forwards IP datagram with IP source 192.168.3.001 (E's IP), destination 192.168.1.003 (B's IP).
+		\item[10.] Router 1 encapsulates IP datagram inside a link-layer frame with MAC source 22-22-22-22-22-22 (Router 1's MAC address) and destination 11-11-11-11-11-11 (B's MAC address)
+		\item[11.] Router 1 sends frame to B, frame contains E-to-B datagram
+		\item [12.] B receives frame. The process stops at this point.
+
+	\end{enumerate}
+	
 	\item[d. ]
 	Repeat (c), now assuming that the ARP table in the sending host is empty (and the
 	other tables are up to date).
+	\\
+	\textbf{Ans. } 
+	Since ARP table is not up to date at host E, 
+	Host E has to determine the MAC address of 192.168.3.002. 
+	E broadcasts ARP packet request to ask for MAC address of 192.168.3.002. 
+	Router 2 receives the request and responses to E with an ARP response packet. 
+	The ARP is encapsulated inside an ethernet frame with Source MAC 55.55.55.55.55 and destination 77.77.77.77.77.77. 
+	At this point E knows MAC address of interface 192.168.3.002, 
+	and the following steps are identical to part (c) 
 \end{enumerate}
 
 
+\begin{problem}{2}
+\end{problem}
+\textbf{Ans. }
+\begin{enumerate}
+	\item 
+	My computer will use DHCP to obtain an IP address. It creates an IP datagram destined to 255.255.255.255, then encapsulates as ethernet frame to broadcast in the ethernet to discover dhcp server, and obtain an ip address eventually. 
+	\item 
+	The DHCP server on the Ethernet responses with a list of first-hop routers’ IP addresses,
+	the subnet mask, and the addresses of local DNS servers.
+
+	\item 
+	Then my computer uses ARP protocol to get the the first-hop router’s MAC addresses.
+
+	\item 
+	Via local DNS servers, my computer will get the IP address of the Web page. Or if local DNS servers don't know the IP address, my computer will sends DNS request to DNS root, authorities ... to obtain IP address of the webpage via DNS response.
+
+	\item 
+	After getting the IP address of the webpage, my computer will send an HTTP request to the web server. 
+	HTTP Requests will be encapsulated to be TCP then IP packets with my computer's IP as source address, and webpage's IP as destination IP address.
+	Then IP packets become Ethernet Frames to be sent to first hop router. 
+
+	\item 
+	Router receives frames, passed it up to IP, then check with its table and finally forwards to right interface.
+
+	\item 
+	Then the IP packets will be routed through the Internet and eventually reach the correct Web server.
+
+	\item 
+	The Web page server will send back the Web page to my computer through HTTP responses, and those responses will go through similar step in 5,6,7 to get to my computer.
+	
+\end{enumerate}
 \end{document}
