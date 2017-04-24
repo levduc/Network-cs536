@@ -1,0 +1,38 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\pagestyle{fancy}
+ 
+\newenvironment{theorem}[2][Theorem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{lemma}[2][Lemma]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{exercise}[2][Exercise]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{problem}[2][Problem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{question}[2][Question]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{corollary}[2][Corollary]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+ 
+\begin{document}
+\title{Assignment 7}
+\author{Duc Viet Le\\ CS536}
+\maketitle
+\begin{problem}{1}
+\end{problem}
+\textbf{Ans. } The retionale behind is about fairness consideration. \\ 
+For example, consider 2 access points, $\mathcal{A}$ and $\mathcal{B}$, where $\mathcal{A}$ starts before $\mathcal{B}$ and has lots of frame to send (Assuming no fading, no hidden terminal).  
+When $\mathcal{B}$ has some frames to send; it first senses the channel and detects that channel is busy because $\mathcal{A}$ is sending. It will set an backoff value (i.e. step 2) to wait for $\mathcal{A}$. When $\mathcal{A}$ is done with its frame, if $\mathcal{A}$ returns to step one, it will wait for a DIFS before immediate sending its next frame. However, this will be unfair for $\mathcal{B}$ because it may be still stuck in its backoff time. Therefore, there will be high probability that $\mathcal{A}$ will take the whole channel for a long time before $\mathcal{B}$ can use it. Thus, CSMA/CA designers consider about fairness between APs.
+\begin{problem}{2}
+\end{problem}
+\textbf{Ans. } Yes. Same visisted network. If the care-of-address is the address of the foreign agent, COA address would be the same for two mobile nodes. Different addresses are encapsulated within registration request, and the foreigne agent will use these address to forward datagram accordingly.
+\end{document}
